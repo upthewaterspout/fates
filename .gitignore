@@ -1,0 +1,11 @@
+/bin/
+/.project
+/.settings
+/.classpath
+/.gradle
+/.idea
+*.swp
+/build
+setenv.sh
+integration-tests/build
+*.iml
