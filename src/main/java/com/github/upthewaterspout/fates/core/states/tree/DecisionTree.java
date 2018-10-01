@@ -8,16 +8,16 @@ import java.util.Set;
 
 /**
  * A tree data structure used to keep track of possible decisions during the execution of a test.
- *
+ * <p>
  * Each {@link DecisionTree} represents a single decision point. That decision leads to more
  * decisions, which of which is represented by a {@link DecisionTree}. To get all of the decisions
  * that lead from this state, see {@link #getSubTrees()}
- *
+ * <p>
  * This data structure is designed to be explored and populated gradually, So each {@link
  * DecisionTree} through three possible states
- *
- * {@link State#UNTESTED} -> {@link State#PARTIALLY_TESTED} -> {@link State#COMPLETELY_TESTED}
- *
+ * <p>
+ * {@link State#UNTESTED} -&gt; {@link State#PARTIALLY_TESTED} -&gt; {@link State#COMPLETELY_TESTED}
+ * <p>
  * An untested {@link DecisionTree} has never been visited, and has unknown choices. A partially
  * tested Tree knows what possible choices should be made,  but some of them may be unexplored. A
  * completely tested Tree had all subtrees explored.
@@ -51,6 +51,8 @@ public class DecisionTree<K> {
    * Set the choices that can be made at this decision point. When set, all subtrees will initially
    * be {@link State#UNTESTED}. If there are no options, then this is the end of a test
    * is there for marked as {@link State#COMPLETELY_TESTED}.
+   * @param <N> The type of options
+   * @param options The choices at this decision point
    */
   public <N> void setOptions(Set<N> options) {
     switch (getState()) {
@@ -73,21 +75,21 @@ public class DecisionTree<K> {
   }
 
   /**
-   * True if all subtrees of this tree have been completely explored
+   * @return true if all subtrees of this tree have been completely explored
    */
   public boolean isCompletelyTested() {
     return getState() == State.COMPLETELY_TESTED;
   }
 
   /**
-   * Get the choice that lead to this decision point
+   * @return The choice that lead to this decision point
    */
   public K getDecision() {
     return decision;
   }
 
   /**
-   * The state of this tree
+   * @return the state of this tree
    */
   public State getState() {
     return state;
@@ -96,6 +98,8 @@ public class DecisionTree<K> {
   /**
    * Get all decisions that follow from this one. Some of these may actually be the end
    * of the test, or completely unexplored states.
+   *
+   * @return the immediately following decisions
    */
   public Collection<DecisionTree<?>> getSubTrees() {
     return this.subTrees.values();

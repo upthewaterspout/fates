@@ -17,8 +17,10 @@ public class Trees {
    * just follows one path through the tree to a leaf and
    * assumes that the size of the tree is the product
    * of the choices at each visited node.
+   * @param tree The tree to size
+   * @return the estimated size of the tree
    */
-  public static <K> long estimateSize(DecisionTree<?> tree) {
+  public static long estimateSize(DecisionTree<?> tree) {
     if (tree.getState() == DecisionTree.State.UNTESTED) {
       return -1;
     }

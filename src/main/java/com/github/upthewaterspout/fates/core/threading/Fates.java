@@ -31,22 +31,41 @@ import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplore
 /**
  * A harness for running a callable that launches multiple threads with all possible
  * thread orderings.
- *
+ * <p>
  * This harness will take the callable and run it many times, controlling the ordering of threads
  * each time, until it has explored all possible orderings.
- *
+ * <p>
  * The harness requires that a -javaagent parameter is passed to the JVM that it is executing in.
  * For example
  * <pre>
  *   java -javaagent:/path/to/fates-all.jar ...
  * </pre>
- *
+ * <p>
  * The agent will extensively modify the bytecode being used. Although the modifications should have
  * no effect other than performance when a test is not running in this harness, it's still good
  * practice to only include it for tests that are using this harness.
+ * <p>
+ * Example:
+ *
+ * <pre>
+ *   {@code
+ *     Fates.run(() -> {
+ *       //Do some multhreaded test
+ *       //Make assertions about the outcome
+ *     });
+ *   }
+ * </pre>
+ *
  */
 public class Fates {
 
+  /**
+   * Run a multithreaded test in FATES. The test will be run many times, with all possible
+   * thread execution orders.
+   *
+   * @param runnable The test to run
+   * @throws Exception if the test fails.
+   */
   public static void run(MultiThreadedTest runnable) throws Exception {
     StateExplorer explorer = new ErrorCapturingExplorer(new DepthFirstExplorer());
 
@@ -110,6 +129,13 @@ public class Fates {
     return listener;
   }
 
+  /**
+   * A multithreaded test to run in FATES.
+   * <p>
+   *
+   * This is a separate interface and not {@link Runnable} just so that the test can throw
+   * an exception without needed special handling.
+   */
   public interface MultiThreadedTest {
     void run() throws Exception;
   }

@@ -27,6 +27,9 @@ public interface Decider {
   /**
    * User code should call this method to indicate that there is another choice to be made
    * among the possible options. The decider will pick one of the options and return it.
+   * @param <K> The type of the possible choices
+   * @param options The possible choices
+   * @return The decision
    */
   <K> K decide(Set<K> options);
 }

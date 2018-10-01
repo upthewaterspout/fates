@@ -20,17 +20,20 @@ import com.github.upthewaterspout.fates.core.states.tree.DecisionTree;
 
 /**
  * An algorithm for exploring the space of possible decisions during a test run.
- *
+ * <p>
  * The {@link StateExplorationHarness} will take this algorithm and use it as the
  * {@link Decider} when executing a test. After the test is done, the {@link StateExplorationHarness}
  * will call the done() method. The harness will then execute the test <i>again</i>, and the
  * {@link StateExplorer} is expected to make new decisions the next time around.
  *
+ * <p>
  * The harness will continue to execute the test until {@link #isCompletelyTested()} returns true.
  *
+ * <p>
  * It is helpful to implement this {@link #estimateIterations()} method to estimate the remaining
  * number of tests runs, but it is not required.
  *
+ * <p>
  * See {@link DecisionTree} for a utility for keeping track of previously made decisions.
  *
  */
@@ -45,11 +48,13 @@ public interface StateExplorer extends Decider {
   /**
    * Return true if testing should stop at this point, because all or enough states
    * have been explored.
+   * @return true if the test should stop
    */
   boolean isCompletelyTested();
 
   /**
-   * Estimate the number of remaining iterations of the test that need to be performed
+   * Estimate the number of iterations of the test that need to be performed
+   * @return estimated number of iterations
    */
   long estimateIterations();
 

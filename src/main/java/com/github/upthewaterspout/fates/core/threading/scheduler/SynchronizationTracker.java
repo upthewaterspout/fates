@@ -36,7 +36,8 @@ public class SynchronizationTracker {
 
   /**
    * Indicate that a thread is trying to get a monitor.
-   * @param sync
+   * @param sync The object we are trying to sync
+   * @param currentThread the current thread
    * @return a list of threads that are blocked now that this
    * monitor is held
    */
@@ -65,7 +66,9 @@ public class SynchronizationTracker {
 
   /**
    * Indicates we're exiting a synchronization block.
-   * Returns the list of members that can now be unblocked
+   * @param sync The object we are trying to sync
+   * @param currentThread the current thread
+   * @return the list of members that can now be unblocked
    */
   public Collection<Thread> monitorExit(Thread currentThread, final Object sync) {
     final MonitorInfo monitorInfo = getMonitorInfo(currentThread, sync);
@@ -128,6 +131,7 @@ public class SynchronizationTracker {
    * Indicate that a thread is resuming execution
    * @return a set of threads which are now blocked because the resumed
    * thread will acquire the monitor
+   * @param scheduledThread The thread that is resumed
    */
   public Collection<Thread> threadResumed(final Thread scheduledThread) {
     Object monitor = waitingToResume.remove(scheduledThread);

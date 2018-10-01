@@ -29,6 +29,9 @@ public interface RepeatedTest {
   /**
    * Execute a test, which has some possible decisions to be made during the test. The test
    * should use the passed in {@link Decider} to choose among possible options at each decision point
+   *
+   * @param decider The decider that the test should use to make choices during the test execution
+   * @throws Exception if the test fails
    */
   void doOnce(Decider decider) throws Exception;
 }
