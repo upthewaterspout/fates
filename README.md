@@ -1,6 +1,7 @@
-FATES stands for Find All Thread Execution Schedules. It is a framework for testing multi-threaded 
-Java applications. It instruments the bytecode of the program under test and takes control of thread
-scheduling. It then runs the test repeatedly until all possible scheduling orders are tested.
+FATES stands for Find All Thread Execution Schedules. It is a framework for
+testing multi-threaded Java applications. It instruments the bytecode of the
+program under test and takes control of thread scheduling. It then runs the
+test repeatedly until all possible scheduling orders are tested.
 
 This framework is in very early stages on development, and will not
 successfully run for anything but very trivial cases.
@@ -18,6 +19,14 @@ In your test code, run your code inside the FatesHarness class, like so
       //Your test code here
     });
 ```
+
+See the [javadocs](https://upthewaterspout.github.io/fates/javadoc/) for more
+information. The two useful classes from a user perspective are:
+* [Fates](https://upthewaterspout.github.io/fates/javadoc/com/github/upthewaterspout/fates/core/threading/Fates.html)
+The main harness for running multithreaded tests
+* [StateExplorationHarness](https://upthewaterspout.github.io/fates/javadoc/com/github/upthewaterspout/fates/core/states/StateExplorationHarness.html)
+A harness for running any test that has decision points repeatedly until all
+possible decisions are exercised
 
 # How it works
 
