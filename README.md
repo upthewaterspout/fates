@@ -3,7 +3,7 @@ testing multi-threaded Java applications. It instruments the bytecode of the
 program under test and takes control of thread scheduling. It then runs the
 test repeatedly until all possible scheduling orders are tested.
 
-This framework is in very early stages on development, and will not
+This framework is in very early stages of development, and will not
 successfully run for anything but very trivial cases.
 
 # How to use
@@ -13,11 +13,14 @@ successfully run for anything but very trivial cases.
 java -java-agent:fates-all.jar ...
 ```
 
-In your test code, run your code inside the FatesHarness class, like so
+In your test code, run your multithreaded test using the Fates class, like so
 ```java
-    FatesHarness.run(() -> {
-      //Your test code here
-    });
+@Test
+public void findRace() {
+  Fates.run(() -> {
+    //Your test code here
+  });
+}
 ```
 
 See the [javadocs](https://upthewaterspout.github.io/fates/javadoc/) for more
@@ -43,7 +46,7 @@ the scheduler.
 The test is run repeatedly until all possible schedules are exercised.
 
 ## Interesting classes
- * `StateExplorationHarness` and the states package - this package contains all
+ * `StateExplorationHarness` and the `states` package - this package contains all
  of the logic to execute a test multiple times and explore all of the possible
  choices a test might make. This harness may be useful in other contexts. For
  example instead of using junit's parameterized tests, a test could simply ask
@@ -57,6 +60,9 @@ The test is run repeatedly until all possible schedules are exercised.
 
  * `ExecutionEventSingleton` - this class has all of the events that the bytecode 
  instrumentation calls.
+ 
+ * `AsmTransformer` - This class builds the pipeline of `ClassVisitors` that actually
+ modify the user's bytecode
 
 
 # Caveats
