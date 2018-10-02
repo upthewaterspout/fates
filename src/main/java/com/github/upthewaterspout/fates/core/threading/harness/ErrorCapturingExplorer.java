@@ -43,6 +43,7 @@ public class ErrorCapturingExplorer implements StateExplorer {
     if (exception == null) {
       delegate.done();
     } else {
+      System.err.println(this.getTrace());
       throw new IllegalStateException("Hit error during testing", exception);
     }
 
@@ -67,10 +68,15 @@ public class ErrorCapturingExplorer implements StateExplorer {
   }
 
   @Override
-  public <K> K decide(Set<K> options) {
+  public String getTrace() {
+    return delegate.getTrace();
+  }
+
+  @Override
+  public <K> K decide(Object label, Set<K> options) {
     if (exception == null) {
       try {
-        return delegate.decide(options);
+        return delegate.decide(label, options);
       } catch (RuntimeException e) {
         this.exception = e;
       }

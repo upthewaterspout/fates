@@ -62,6 +62,11 @@ class SchedulerState {
 
   private JoinTracker joinTracker = new JoinTracker();
 
+  /**
+   * Last visited line number
+   */
+  private LineNumber lastLineNumber = new LineNumber("", "java.lang.Thread", "run", 0);
+
   public SchedulerState(Decider decider) {
     this.decider = decider;
   }
@@ -149,7 +154,7 @@ class SchedulerState {
         + Thread.currentThread().getName());
     }
 
-    ThreadID scheduledThreadID = decider.decide(unscheduledThreads);
+    ThreadID scheduledThreadID = decider.decide(lastLineNumber, unscheduledThreads);
     Thread scheduledThread = idToThread.get(scheduledThreadID);
     runningThreads.add(scheduledThread);
     unscheduledThreads.remove(scheduledThreadID);
@@ -199,5 +204,39 @@ class SchedulerState {
     threadBlocked(joiner);
     joinTracker.join(joiner, joinee);
     return getNextThread();
+  }
+
+  public void setLineNumber(Thread currentThread, String className, String methodName,
+                            int lineNumber) {
+    this.lastLineNumber = new LineNumber(currentThread.getName(), className, methodName, lineNumber);
+  }
+
+  private static class LineNumber {
+    private final String currentThread;
+    private final String className;
+    private final String methodName;
+    private final int lineNumber;
+
+    public LineNumber(String currentThread, String className, String methodName,
+                      int lineNumber) {
+      this.currentThread = currentThread;
+      this.className = className;
+      this.methodName = methodName;
+      this.lineNumber = lineNumber;
+    }
+
+    @Override
+    public String toString() {
+      return  className + "." + methodName + "(" + getShortClassName()
+          + ".java:" + lineNumber + ")(" + currentThread + ")";
+    }
+
+    private String getShortClassName() {
+      if (className.lastIndexOf(".") == -1) {
+        return className;
+      } else {
+        return className.substring(className.lastIndexOf(".") + 1, className.length());
+      }
+    }
   }
 }

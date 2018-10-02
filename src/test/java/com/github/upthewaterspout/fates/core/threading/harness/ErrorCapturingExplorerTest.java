@@ -18,6 +18,7 @@ package com.github.upthewaterspout.fates.core.threading.harness;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,12 +40,12 @@ public class ErrorCapturingExplorerTest {
     StateExplorer delegate = mock(StateExplorer.class);
     ErrorCapturingExplorer explorer = new ErrorCapturingExplorer(delegate);
 
-    when(delegate.decide(any())).thenThrow(new IllegalStateException("fail"));
+    when(delegate.decide(anyString(),  any())).thenThrow(new IllegalStateException("fail"));
 
     Set<String> options = Collections.singleton("hello");
 
     //This should not fail, it should be captured
-    assertEquals("hello", explorer.decide(options));
+    assertEquals("hello", explorer.decide("", options));
 
     expectedException.expect(IllegalStateException.class);
 

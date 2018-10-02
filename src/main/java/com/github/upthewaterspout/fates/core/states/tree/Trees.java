@@ -1,5 +1,8 @@
 package com.github.upthewaterspout.fates.core.states.tree;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -38,5 +41,38 @@ public class Trees {
     }
 
     return remainingStates;
+  }
+
+  /**
+   * Display the history of a given DecisionTree in a human readable format.
+   *
+   * This method will follow all of the parent decisions that lead to this decision
+   * and print out each place where we switched from one choice to the next.
+   * @param tree the tree to examine
+   * @return a human readable view of the history of decisions that lead to this tree
+   */
+  public static String showHistory(DecisionTree<?> tree) {
+
+    LinkedList<String> decisionChanges = new LinkedList<>();
+
+    while(tree.getParent() != null) {
+      Object decision = tree.getDecision();
+      DecisionTree<?> parent = tree.getParent();
+      if(parent == null || !decision.equals(parent.getDecision())) {
+        decisionChanges.addFirst(parent.getLabel().toString());
+        if(parent.getParent() != null) {
+          decisionChanges.addFirst(parent.getParent().getLabel().toString());
+        }
+      }
+      tree = tree.getParent();
+    }
+
+
+    return "\n========================================" +
+        "\nTest History:" +
+        "\n========================================" +
+        "\n" + String.join("\n", decisionChanges) +
+        "\n========================================";
+
   }
 }

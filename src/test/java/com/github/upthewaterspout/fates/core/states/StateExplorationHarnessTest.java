@@ -65,7 +65,12 @@ public class StateExplorationHarnessTest {
     }
 
     @Override
-    public <K> K decide(Set<K> options) {
+    public String getTrace() {
+      return null;
+    }
+
+    @Override
+    public <K> K decide(Object label, Set<K> options) {
       return null;
     }
   }

@@ -20,7 +20,7 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
 
 /**
  * A decorator for a {@link ExecutionEventListener} that allows disabling the
- * {@link #beforeGetField(String, String, int)} and {@link #beforeSetField(String, String, int)}
+ * {@link ExecutionEventListener#beforeGetField(String, String, String, int)} and {@link ExecutionEventListener#beforeSetField(String, String, String, int)}
  * calls inside of an atomic block.
  *
  * To use, call

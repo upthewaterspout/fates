@@ -37,6 +37,11 @@ public class DecisionTree<K> {
   private State state;
 
   /**
+   * A description of this decision point
+   */
+  private Object label;
+
+  /**
    * Create a new decision tree
    * @param parent The parent tree, or null if this is the very first decision to be made
    * @param decision The choice that lead to this tree, or null if this is the very first decision
@@ -52,11 +57,13 @@ public class DecisionTree<K> {
    * be {@link State#UNTESTED}. If there are no options, then this is the end of a test
    * is there for marked as {@link State#COMPLETELY_TESTED}.
    * @param <N> The type of options
+   * @param label A textual description of what this decision is, for debugging purposes
    * @param options The choices at this decision point
    */
-  public <N> void setOptions(Set<N> options) {
+  public <N> void setOptions(Object label, Set<N> options) {
     switch (getState()) {
       case UNTESTED:
+        this.label = label;
         if (options.isEmpty()) {
           done();
         } else {
@@ -67,7 +74,7 @@ public class DecisionTree<K> {
         }
         break;
       case PARTIALLY_TESTED:
-        validateOptions(options);
+        validateOptions(label, options);
         break;
       default:
         throw new IllegalStateException("Exploring a state that has already been visited" + null);
@@ -106,6 +113,17 @@ public class DecisionTree<K> {
   }
 
   /**
+   * Get the label for this tree
+   */
+  public Object getLabel() {
+    return label;
+  }
+
+  public DecisionTree<?> getParent() {
+    return parent;
+  }
+
+  /**
    * Mark this tree as completely tested. This also eagerly looks for parent decisions
    * that can be marked as completely tested and marks them as well.
    */
@@ -135,13 +153,14 @@ public class DecisionTree<K> {
   /**
    * Validate the set of options matches the set we previously had to choose between
    */
-  private void validateOptions(Set<?> options) {
+  private void validateOptions(Object label, Set<?> options) {
     if (!options.equals(this.subTrees.keySet())) {
       throw new IllegalStateException(
-          "System was not presented with the same options on the second run. " +
-              "Prevous choices: " + this.subTrees.keySet() + ", new choices " + options);
+          "System was not presented with the same options on the second run at " + label + ". " +
+              "Previous choices: " + this.subTrees.keySet() + ", new choices " + options);
     }
   }
+
 
 
   /**

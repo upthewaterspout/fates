@@ -36,8 +36,8 @@ public class DepthFirstExplorer implements StateExplorer {
   DecisionTree<?> currentState = initialState;
 
   @Override
-  public <K> K decide(Set<K> options) {
-    currentState.setOptions(options);
+  public <K> K decide(Object label, Set<K> options) {
+    currentState.setOptions(label, options);
     currentState = getUnexploredNextState();
     return (K) currentState.getDecision();
   }
@@ -51,7 +51,7 @@ public class DepthFirstExplorer implements StateExplorer {
 
   @Override
   public void done() {
-    currentState.setOptions(Collections.emptySet());
+    currentState.setOptions("", Collections.emptySet());
     currentState = initialState;
   }
 
@@ -63,5 +63,10 @@ public class DepthFirstExplorer implements StateExplorer {
   @Override
   public long estimateIterations() {
     return Trees.estimateSize(initialState);
+  }
+
+  @Override
+  public String getTrace() {
+    return Trees.showHistory(currentState);
   }
 }

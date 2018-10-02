@@ -126,6 +126,7 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
    */
   @Override
   public void beforeGetField(String className, String methodName, int lineNumber) {
+    schedulerState.setLineNumber(Thread.currentThread(), className, methodName, lineNumber);
     yield();
   }
 
@@ -134,6 +135,7 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
    */
   @Override
   public void beforeSetField(String className, String methodName, int lineNumber) {
+    schedulerState.setLineNumber(Thread.currentThread(), className, methodName, lineNumber);
     yield();
   }
 

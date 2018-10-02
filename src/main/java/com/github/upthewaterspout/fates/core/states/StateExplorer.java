@@ -58,4 +58,8 @@ public interface StateExplorer extends Decider {
    */
   long estimateIterations();
 
+  /**
+   * Get a trace of the current run, for debugging purposes
+   */
+  String getTrace();
 }

@@ -29,6 +29,7 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
   private String className;
   private String methodName;
   private int lastLineNumber;
+  private String sourceFile;
 
   public AbstractClassVisitor(ClassVisitor cv) {
     super(Opcodes.ASM5, cv);
@@ -40,6 +41,10 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
     className = name;
   }
 
+  @Override
+  public void visitSource(String source, String debug) {
+    this.sourceFile = source;
+  }
 
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature,
@@ -56,6 +61,10 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
 
   public String getMethodName() {
     return methodName;
+  }
+
+  public String getSourceFile() {
+    return this.sourceFile;
   }
 
   public int getLastLineNumber() {

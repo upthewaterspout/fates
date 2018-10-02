@@ -57,7 +57,12 @@ public class StateExplorationHarness {
   public static void explore(StateExplorer explorer, RepeatedTest test) throws Exception {
     int count = 0;
     while(!explorer.isCompletelyTested()) {
-      test.doOnce(explorer);
+      try {
+        test.doOnce(explorer);
+      } catch(Throwable e) {
+        System.err.println(explorer.getTrace());
+        throw e;
+      }
       explorer.done();
 
       long estimate = explorer.estimateIterations();

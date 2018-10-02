@@ -43,7 +43,7 @@ public class DecisionTreeJUnitTest {
   @Test
   public void initialStateMarkedDoneReturnsTrueForCompletedTested() {
     DecisionTree<String> tree = new DecisionTree<>(null, null);
-    tree.setOptions(Collections.emptySet());
+    tree.setOptions("", Collections.emptySet());
     assertTrue(tree.isCompletelyTested());
   }
 
@@ -51,10 +51,10 @@ public class DecisionTreeJUnitTest {
   public void singleChildMarkedDoneWillMarkParentAsTested() {
     DecisionTree<String> tree = new DecisionTree<>(null, null);
     Set<String> options = Collections.singleton("one");
-    tree.setOptions(options);
+    tree.setOptions("", options);
     DecisionTree subTree = tree.getSubTrees().iterator().next();
     assertEquals("one", subTree.getDecision());
-    subTree.setOptions(Collections.emptySet());
+    subTree.setOptions("", Collections.emptySet());
     assertTrue(subTree.isCompletelyTested());
     assertTrue(tree.isCompletelyTested());
   }
@@ -63,12 +63,12 @@ public class DecisionTreeJUnitTest {
   public void throwsIllegalStateExceptionWhenGivenOptionsForAtestedState() {
     DecisionTree<String> tree = new DecisionTree<>(null, null);
     Set<String> options = Collections.singleton("one");
-    tree.setOptions(options);
+    tree.setOptions("", options);
     DecisionTree subTree = tree.getSubTrees().iterator().next();
-    subTree.setOptions(Collections.emptySet());
+    subTree.setOptions("", Collections.emptySet());
     assertTrue(tree.isCompletelyTested());
     thrown.expect(IllegalStateException.class);
-    tree.setOptions(options);
+    tree.setOptions("", options);
   }
 
 
@@ -76,10 +76,10 @@ public class DecisionTreeJUnitTest {
   public void willDetectInconsistentChoices() {
     DecisionTree<String> state = new DecisionTree<>(null, null);
     Set<String> options1 = Stream.of("one", "two").collect(Collectors.toSet());
-    state.setOptions(options1);
+    state.setOptions("", options1);
     Set<String> options2 = Stream.of("threee", "four").collect(Collectors.toSet());
     thrown.expect(IllegalStateException.class);
-    state.setOptions(options2);
+    state.setOptions("", options2);
   }
 
 }

@@ -54,8 +54,8 @@ public class UnsynchronizedUpdateTest {
     expectedException.expect(AssertionError.class);
     Fates.run(() -> {
       UnsynchronizedUpdate unsynchronizedUpdate = new UnsynchronizedUpdate();
-      Thread t1 = new Thread(unsynchronizedUpdate::update);
-      Thread t2 = new Thread(unsynchronizedUpdate::update);
+      Thread t1 = new Thread(unsynchronizedUpdate::update, "t1");
+      Thread t2 = new Thread(unsynchronizedUpdate::update, "t2");
       t1.start();
       t2.start();
       t1.join();

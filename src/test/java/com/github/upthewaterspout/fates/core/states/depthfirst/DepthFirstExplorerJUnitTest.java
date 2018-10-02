@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -37,10 +38,10 @@ public class DepthFirstExplorerJUnitTest {
     options.add("one");
     options.add("two");
 
-    String choice = explorer.decide(options);
+    String choice = explorer.decide("", options);
     assertEquals("one", choice);
     explorer.done();
-    String nextChoice = explorer.decide(options);
+    String nextChoice = explorer.decide("", options);
     assertEquals("two", nextChoice);
     explorer.done();
     assertTrue(explorer.isCompletelyTested());
@@ -52,26 +53,44 @@ public class DepthFirstExplorerJUnitTest {
     Set<String> options1 = Stream.of("one", "two").collect(Collectors.toSet());
     Set<String> options2 = Stream.of("three", "four").collect(Collectors.toSet());
 
-    explorer.decide(options1);
-    explorer.decide(options2);
+    explorer.decide("", options1);
+    explorer.decide("", options2);
     explorer.done();
     assertFalse(explorer.isCompletelyTested());
 
-    explorer.decide(options1);
-    explorer.decide(options2);
+    explorer.decide("", options1);
+    explorer.decide("", options2);
     explorer.done();
     assertFalse(explorer.isCompletelyTested());
 
-    explorer.decide(options1);
-    explorer.decide(options2);
+    explorer.decide("", options1);
+    explorer.decide("", options2);
     explorer.done();
     assertFalse(explorer.isCompletelyTested());
 
-    explorer.decide(options1);
-    explorer.decide(options2);
+    explorer.decide("", options1);
+    explorer.decide("", options2);
     explorer.done();
 
     assertTrue(explorer.isCompletelyTested());
+  }
+
+  @Test
+  public void wilLGenerateADebuggingTrace() {
+    DepthFirstExplorer explorer = new DepthFirstExplorer();
+
+    explorer.decide("label1", Collections.singleton(1));
+    explorer.decide("label2", Collections.singleton(1));
+    explorer.decide("label3", Collections.singleton(1));
+    explorer.decide("label4", Collections.singleton(2));
+    explorer.decide("label5", Collections.singleton(2));
+    String trace = explorer.getTrace();
+    String expected =  "\n========================================" +
+        "\nTest History:" +
+        "\n========================================" +
+        "\n" + "label1\nlabel3\nlabel4" +
+        "\n========================================";
+    assertEquals(expected, trace);
   }
 
 }

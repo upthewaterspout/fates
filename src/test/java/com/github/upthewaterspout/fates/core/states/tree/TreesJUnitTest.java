@@ -32,9 +32,9 @@ public class TreesJUnitTest {
     DecisionTree<String> state = new DecisionTree<>(null, null);
     Set<String> options1 = Stream.of("one", "two").collect(Collectors.toSet());
     Set<String> options2 = Stream.of("three", "four").collect(Collectors.toSet());
-    state.setOptions(options1);
-    state.getSubTrees().iterator().next().setOptions(options2);
-    state.getSubTrees().iterator().next().getSubTrees().iterator().next().setOptions(Collections.emptySet());
+    state.setOptions("", options1);
+    state.getSubTrees().iterator().next().setOptions("", options2);
+    state.getSubTrees().iterator().next().getSubTrees().iterator().next().setOptions("", Collections.emptySet());
     assertEquals(4, Trees.estimateSize(state));
   }
 
