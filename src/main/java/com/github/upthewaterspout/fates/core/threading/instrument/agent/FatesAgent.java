@@ -19,9 +19,11 @@ package com.github.upthewaterspout.fates.core.threading.instrument.agent;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
+import java.net.URLClassLoader;
 
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.AsmTransformer;
+import sun.misc.Launcher;
 
 /**
  * Java agent class to initialize our bytecode manipulating agent.
@@ -32,6 +34,8 @@ public class FatesAgent {
         new AsmTransformer()), true);
     try {
       inst.retransformClasses(Thread.class);
+      inst.retransformClasses(ClassLoader.class);
+      inst.retransformClasses(URLClassLoader.class);
     } catch (UnmodifiableClassException e) {
       System.err.println("Could not transform Thread.class");
     }

@@ -23,15 +23,15 @@ import java.util.Set;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 
 /**
- * A decorate for a {@link ExecutionEventListener} that is only enabled for the current thread
+ * A decorator for a {@link ExecutionEventListener} that is only enabled for the current thread
  * and any thread spawned by the current thread.
  *
  * This listener is used to make sure that only threads under test are controlled by the
  * scheduler.
  */
 public class ThreadLocalEventListener implements ExecutionEventListener {
-  Set<Thread> enabledThreads = Collections.synchronizedSet(new HashSet<Thread>());
-  ThreadLocal<Boolean> inThreadStart = new ThreadLocal<Boolean> () {
+  private Set<Thread> enabledThreads = Collections.synchronizedSet(new HashSet<Thread>());
+  private ThreadLocal<Boolean> inThreadStart = new ThreadLocal<Boolean> () {
     @Override protected Boolean initialValue() {
       return Boolean.FALSE;
     }
@@ -63,6 +63,20 @@ public class ThreadLocalEventListener implements ExecutionEventListener {
   }
 
   @Override
+  public void beforeLoadClass() {
+    if(enabled()) {
+      delegate.beforeLoadClass();
+    }
+  }
+
+  @Override
+  public void afterLoadClass() {
+    if(enabled()) {
+      delegate.afterLoadClass();
+    }
+  }
+
+  @Override
   public void beforeThreadStart(Thread thread) {
     if(enabled()) {
       inThreadStart.set(Boolean.TRUE);
@@ -81,9 +95,9 @@ public class ThreadLocalEventListener implements ExecutionEventListener {
 
   @Override public void beforeThreadExit() {
     if(enabled()) {
+      enabledThreads.remove(Thread.currentThread());
       delegate.beforeThreadExit();
     }
-    enabledThreads.remove(Thread.currentThread());
   }
 
   @Override public void beforeSynchronization(final Object sync) {

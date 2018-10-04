@@ -47,7 +47,7 @@ public class InstrumentationTest {
 
   protected <T> Callable<T> transformAndCreate(String className)
       throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-    TransformingClassLoader loader = new TransformingClassLoader(transformer, className);
+    TransformingClassLoader loader = new TransformingClassLoader(transformer, "com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.*");
     Class<?> clazz = loader.loadClass(className);
     return (Callable) clazz.newInstance();
   }

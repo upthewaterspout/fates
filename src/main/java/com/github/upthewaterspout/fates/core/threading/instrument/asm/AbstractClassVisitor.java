@@ -43,6 +43,7 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
 
   @Override
   public void visitSource(String source, String debug) {
+    super.visitSource(source, debug);
     this.sourceFile = source;
   }
 

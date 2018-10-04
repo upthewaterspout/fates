@@ -18,15 +18,15 @@ package com.github.upthewaterspout.fates.core.threading.scheduler;
 
 import static org.mockito.Mockito.*;
 
-import com.github.upthewaterspout.fates.core.threading.harness.ExecutionEventListenerWithAtomicControl;
+import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 import org.junit.Test;
 
-public class ExecutionEventListenerWithAtomicControlTest {
+public class AtomicClassLoadingDecoratorTest {
 
   public ExecutionEventListener delegate = mock(ExecutionEventListener.class);
-  public ExecutionEventListenerWithAtomicControl
-      scheduler = new ExecutionEventListenerWithAtomicControl(delegate);
+  public AtomicClassLoadingDecorator
+      scheduler = new AtomicClassLoadingDecorator(delegate);
 
   @Test
   public void noAtomicControlShouldAllowBeforeGetFieldCall() {
@@ -35,35 +35,35 @@ public class ExecutionEventListenerWithAtomicControlTest {
   }
 
   @Test
-  public void beginAtomicShouldPreventBeforeGetFieldCall() {
-    scheduler.beginAtomic();
+  public void beforeLoadClassShouldPreventBeforeGetFieldCall() {
+    scheduler.beforeLoadClass();
     scheduler.beforeGetField("class", "method", 5);
     verify(delegate, times(0)).beforeGetField("class", "method", 5);
   }
 
   @Test
-  public void endAtomicShouldAllowBeforeGetFieldCall() {
-    scheduler.beginAtomic();
-    scheduler.endAtomic();
+  public void afterLoadClassShouldAllowBeforeGetFieldCall() {
+    scheduler.beforeLoadClass();
+    scheduler.afterLoadClass();
     scheduler.beforeGetField("class", "method", 5);
     verify(delegate).beforeGetField("class", "method", 5);
   }
 
   @Test
   public void unbalancedBeginEndShouldPreventBeforeGetField() {
-    scheduler.beginAtomic();
-    scheduler.beginAtomic();
-    scheduler.endAtomic();
+    scheduler.beforeLoadClass();
+    scheduler.beforeLoadClass();
+    scheduler.afterLoadClass();
     scheduler.beforeGetField("class", "method", 5);
     verify(delegate, times(0)).beforeGetField("class", "method", 5);
   }
 
   @Test
   public void balancedBeginEndShouldAllowBeforeGetField() {
-    scheduler.beginAtomic();
-    scheduler.beginAtomic();
-    scheduler.endAtomic();
-    scheduler.endAtomic();
+    scheduler.beforeLoadClass();
+    scheduler.beforeLoadClass();
+    scheduler.afterLoadClass();
+    scheduler.afterLoadClass();
     scheduler.beforeGetField("class", "method", 5);
     verify(delegate).beforeGetField("class", "method", 5);
   }

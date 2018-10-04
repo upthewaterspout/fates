@@ -140,5 +140,15 @@ public interface ExecutionEventListener {
    */
   void beforeSetField(String className, String methodName, int lineNumber);
 
+  /**
+   * Called when class loading starts
+   */
+  void beforeLoadClass();
+
+  /**
+   * Called when class loading finishes
+   */
+  void afterLoadClass();
+
 
 }

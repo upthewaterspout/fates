@@ -139,6 +139,16 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
     yield();
   }
 
+  @Override
+  public void beforeLoadClass() {
+    //Do nothing
+  }
+
+  @Override
+  public void afterLoadClass() {
+    //Do nothing
+  }
+
   /**
    * Potentially yield the current thread and switch to a new thread
    */

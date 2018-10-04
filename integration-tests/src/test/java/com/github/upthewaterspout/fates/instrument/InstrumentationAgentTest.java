@@ -64,6 +64,16 @@ public class InstrumentationAgentTest {
       }
 
       @Override
+      public void beforeLoadClass() {
+        //do nothing
+      }
+
+      @Override
+      public void afterLoadClass() {
+        //do nothing
+      }
+
+      @Override
       public void beforeThreadStart(Thread thread) {
         beforeThreadStarts.incrementAndGet();
 

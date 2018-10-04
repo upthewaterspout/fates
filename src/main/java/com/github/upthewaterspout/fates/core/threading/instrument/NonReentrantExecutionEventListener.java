@@ -83,6 +83,38 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override
+  public void beforeLoadClass() {
+    if(disabled.get()) {
+      return;
+    }
+    disable();
+    try {
+      delegate.beforeLoadClass();
+    } catch(RuntimeException t) {
+      t.printStackTrace();
+      lastError = t;
+    } finally {
+      enable();
+    }
+  }
+
+  @Override
+  public void afterLoadClass() {
+    if(disabled.get()) {
+      return;
+    }
+    disable();
+    try {
+      delegate.afterLoadClass();
+    } catch(RuntimeException t) {
+      t.printStackTrace();
+      lastError = t;
+    } finally {
+      enable();
+    }
+  }
+
+  @Override
   public void beforeThreadStart(Thread thread) {
     if(disabled.get()) {
       return;

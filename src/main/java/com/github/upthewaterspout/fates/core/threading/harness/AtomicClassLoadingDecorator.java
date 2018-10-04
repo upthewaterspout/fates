@@ -19,26 +19,15 @@ package com.github.upthewaterspout.fates.core.threading.harness;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 
 /**
- * A decorator for a {@link ExecutionEventListener} that allows disabling the
- * {@link ExecutionEventListener#beforeGetField(String, String, String, int)} and {@link ExecutionEventListener#beforeSetField(String, String, String, int)}
- * calls inside of an atomic block.
- *
- * To use, call
- * beginAtomic()
- * try {
- *   //Your code here
- * } finally {
- *   endAtomic();
- * }
- *
- * This class is reentrant, so the number of endAtomic calls must
- * match the number of beginAtomic calls before the scheduler will yield again.
+ * A decorator for a {@link ExecutionEventListener} that allows disabling the {@link
+ * ExecutionEventListener#beforeGetField(String, String, int)}  and {@link
+ * ExecutionEventListener#beforeSetField(String, String, int)} while class loading is happening.
  *
  * This decorator is used to suppress context switching that would normally happen from field
- * accesses within this atomic block, to reduce the number of decision points in a test.
+ * accesses within classloading, to reduce the number of decision points in a test.
  */
-public class ExecutionEventListenerWithAtomicControl
-    implements ExecutionEventListener, AtomicControl {
+public class AtomicClassLoadingDecorator
+    implements ExecutionEventListener {
   private ExecutionEventListener delegate;
 
   private ThreadLocal<EntryCount> atomicEntryCount = new ThreadLocal<EntryCount> () {
@@ -47,7 +36,7 @@ public class ExecutionEventListenerWithAtomicControl
     }
   };
 
-  public ExecutionEventListenerWithAtomicControl(final ExecutionEventListener delegate) {
+  public AtomicClassLoadingDecorator(final ExecutionEventListener delegate) {
     this.delegate = delegate;
   }
 
@@ -125,14 +114,6 @@ public class ExecutionEventListenerWithAtomicControl
     delegate.replaceJoin(defaultAction, thread, timeout, nanos);
   }
 
-  public void beginAtomic() {
-    atomicEntryCount.get().increment();
-  }
-
-  public void endAtomic() {
-    atomicEntryCount.get().decrement();
-  }
-
   @Override
   public void beforeGetField(String className, String methodName, int lineNumber) {
     if(atomicEntryCount.get().isZero()) {
@@ -148,9 +129,30 @@ public class ExecutionEventListenerWithAtomicControl
     }
   }
 
+  @Override
+  public void beforeLoadClass() {
+    beginAtomic();
+    delegate.beforeLoadClass();
+  }
+
+  @Override
+  public void afterLoadClass() {
+    delegate.afterLoadClass();
+    endAtomic();
+  }
+
   public void beforeThreadStart(final Thread thread) {
     delegate.beforeThreadStart(thread);
   }
+
+  private void beginAtomic() {
+    atomicEntryCount.get().increment();
+  }
+
+  private void endAtomic() {
+    atomicEntryCount.get().decrement();
+  }
+
 
   private static class EntryCount {
     private int count;

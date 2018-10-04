@@ -19,9 +19,8 @@ package com.github.upthewaterspout.fates.core.threading;
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.RepeatedTest;
 import com.github.upthewaterspout.fates.core.states.StateExplorer;
-import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoader;
 import com.github.upthewaterspout.fates.core.threading.harness.ErrorCapturingExplorer;
-import com.github.upthewaterspout.fates.core.threading.harness.ExecutionEventListenerWithAtomicControl;
+import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
 import com.github.upthewaterspout.fates.core.threading.harness.ThreadLocalEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulingListener;
@@ -108,23 +107,14 @@ public class Fates {
     ThreadSchedulingListener scheduler = new ThreadSchedulingListener(decider);
     scheduler.begin();
 
-    //In front of that is a listener that can skip events if we are in an "atomic" block
-    ExecutionEventListenerWithAtomicControl listenerWithAtomicControl
-        = new ExecutionEventListenerWithAtomicControl( scheduler);
+    //In front of that is a listener that can skip events if we doing class loading
+    AtomicClassLoadingDecorator listenerWithAtomicControl
+        = new AtomicClassLoadingDecorator( scheduler);
 
     //In front of that is a listener which restricts instrumentation to threads started by
     //this test
     ThreadLocalEventListener listener = new ThreadLocalEventListener(
         listenerWithAtomicControl);
-
-    //The classloader used for the test uses the atomic control to prevent thread switches during
-    //classloading. This is not ideal, but without this the test run would not be the same
-    //the second time around because the class is already loaded.
-    AtomicClassLoader classLoader = new AtomicClassLoader(Thread.currentThread().getContextClassLoader(),
-            listenerWithAtomicControl);
-
-    //Install the classloader
-    Thread.currentThread().setContextClassLoader(classLoader);
 
     return listener;
   }

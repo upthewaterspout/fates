@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.harness;
+package com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented;
 
-/**
- * Abstract interface for an object that can have some sort of atomic behavior. Callers
- * should call beginAtomic/endAtomic to indicate blocks of code that should be "atomic"
- *
- * @see ExecutionEventListenerWithAtomicControl
- */
-public interface AtomicControl {
+import java.util.concurrent.Callable;
 
-  void beginAtomic();
+public class ClassWithClassLoading implements Callable<Class> {
 
-  void endAtomic();
+  @Override
+  public Class call() throws Exception {
+    return new TestClassLoader().loadClass(LoadedClass.class.getCanonicalName());
+  }
 
+  private static class TestClassLoader extends ClassLoader {
+
+    @Override
+    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+      return super.loadClass(name, resolve);
+    }
+  }
 }

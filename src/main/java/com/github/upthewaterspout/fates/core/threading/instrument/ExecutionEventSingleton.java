@@ -149,4 +149,12 @@ public class ExecutionEventSingleton {
   public static void replaceJoin(Thread thread, final long timeout, final int nanos) throws InterruptedException {
     instance.replaceJoin(NOOP_HOOK, thread, timeout, nanos);
   }
+
+  public static void beforeLoadClass() {
+    instance.beforeLoadClass();
+  }
+
+  public static void afterLoadClass() {
+    instance.afterLoadClass();
+  }
 }

@@ -50,6 +50,7 @@ public class AsmTransformer implements ClassFileTransformer {
       transformingVisitor = new InstrumentThreadExit(transformingVisitor);
       transformingVisitor = new InstrumentJoin(transformingVisitor);
       transformingVisitor = new InstrumentFieldAccess(transformingVisitor);
+      transformingVisitor = new InstrumentClassLoading(transformingVisitor);
       ClassReader reader = new ClassReader(classfileBuffer);
       reader.accept(transformingVisitor, ClassReader.EXPAND_FRAMES);
       return outputWriter.toByteArray();
