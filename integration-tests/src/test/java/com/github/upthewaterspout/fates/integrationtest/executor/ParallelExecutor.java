@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.upthewaterspout.fates.core.threading.Fates;
 
@@ -37,18 +38,17 @@ public class ParallelExecutor<OUT> {
   }
 
   public void run() throws Exception {
-    List<OUT> results = Collections.synchronizedList(new ArrayList<>());
-    List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
+    AtomicReference<Throwable> exceptions = new AtomicReference<>();
     List<Thread> threads = new ArrayList<>();
 
     for(Callable<OUT> task : parallelTasks) {
       threads.add(new Thread(() -> {
-        try {
-          results.add(task.call());
-        } catch (Throwable t) {
-          exceptions.add(t);
-        }
-      }));
+              try {
+                task.call();
+              } catch (Throwable t) {
+                exceptions.compareAndSet(null, t);
+              }
+            }));
     };
 
     threads.forEach(Thread::start);
@@ -56,8 +56,8 @@ public class ParallelExecutor<OUT> {
       thread.join();
     }
 
-    if(!exceptions.isEmpty()) {
-      throw new Exception("Test thread failed", exceptions.get(0));
+    if(exceptions.get() != null) {
+      throw new Exception("Test thread failed", exceptions.get());
     }
 
   }

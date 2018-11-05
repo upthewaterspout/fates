@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -237,6 +238,25 @@ class SchedulerState {
       } else {
         return className.substring(className.lastIndexOf(".") + 1, className.length());
       }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      LineNumber that = (LineNumber) o;
+      return lineNumber == that.lineNumber &&
+          Objects.equals(className, that.className);
+    }
+
+    @Override
+    public int hashCode() {
+
+      return Objects.hash(className, lineNumber);
     }
   }
 }

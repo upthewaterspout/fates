@@ -41,38 +41,58 @@ public class AtomicClassLoadingDecorator
   }
 
   public void afterThreadStart(final Thread thread) {
-    delegate.afterThreadStart(thread);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.afterThreadStart(thread);
+    }
   }
 
   @Override
   public void beforeThreadExit() {
-   delegate.beforeThreadExit();
+    if(atomicEntryCount.get().isZero()) {
+      delegate.beforeThreadExit();
+    }
   }
 
   @Override
   public void replacePark(
       ExecutionEventListener defaultAction,
       Object blocker) {
-    delegate.replacePark(defaultAction, blocker);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.replacePark(defaultAction, blocker);
+    } else {
+      defaultAction.replacePark(defaultAction, blocker);
+    }
   }
 
   @Override
   public void replaceParkNanos(
       ExecutionEventListener defaultAction,
       Object blocker, long time) {
-    delegate.replaceParkNanos(defaultAction, blocker, time);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.replaceParkNanos(defaultAction, blocker, time);
+    } else {
+      defaultAction.replaceParkNanos(defaultAction,blocker,time);
+    }
   }
 
   @Override
   public void replaceParkUntil(
       ExecutionEventListener defaultAction,
       Object blocker, long time) {
-    delegate.replaceParkUntil(defaultAction, blocker, time);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.replaceParkUntil(defaultAction, blocker, time);
+    } else {
+      defaultAction.replaceParkUntil(defaultAction, blocker, time);
+    }
   }
 
   @Override
   public void replaceUnpark(ExecutionEventListener defaultAction, final Thread thread) {
-    delegate.replaceUnpark(defaultAction, thread);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.replaceUnpark(defaultAction, thread);
+    } else {
+      defaultAction.replaceUnpark(defaultAction, thread);
+    }
 
   }
 
@@ -80,7 +100,11 @@ public class AtomicClassLoadingDecorator
   public void replaceWait(
       ExecutionEventListener defaultAction,
       final Object sync, long timeout, int nanos) throws InterruptedException {
-    delegate.replaceWait(defaultAction, sync, timeout, nanos);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.replaceWait(defaultAction, sync, timeout, nanos);
+    } else {
+      defaultAction.replaceWait(defaultAction, sync, timeout, nanos);
+    }
 
   }
 
@@ -88,30 +112,46 @@ public class AtomicClassLoadingDecorator
   public void replaceNotify(
       ExecutionEventListener defaultAction,
       final Object sync) {
-    delegate.replaceNotify(defaultAction, sync);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.replaceNotify(defaultAction, sync);
+    } else {
+      defaultAction.replaceNotify(defaultAction, sync);
+    }
   }
 
   @Override
   public void replaceNotifyAll(
       ExecutionEventListener defaultAction,
       final Object sync) {
-    delegate.replaceNotifyAll(defaultAction, sync);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.replaceNotifyAll(defaultAction, sync);
+    } else {
+      defaultAction.replaceNotifyAll(defaultAction, sync);
+    }
   }
 
   @Override
   public void beforeSynchronization(final Object sync) {
-    delegate.beforeSynchronization(sync);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.beforeSynchronization(sync);
+    }
   }
 
   @Override
   public void afterSynchronization(final Object sync) {
-    delegate.afterSynchronization(sync);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.afterSynchronization(sync);
+    }
   }
 
   @Override
   public void replaceJoin(ExecutionEventListener defaultAction, Thread thread, long timeout,
                           int nanos) throws InterruptedException {
-    delegate.replaceJoin(defaultAction, thread, timeout, nanos);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.replaceJoin(defaultAction, thread, timeout, nanos);
+    } else {
+      defaultAction.replaceJoin(defaultAction, thread, timeout, nanos);
+    }
   }
 
   @Override
@@ -142,7 +182,9 @@ public class AtomicClassLoadingDecorator
   }
 
   public void beforeThreadStart(final Thread thread) {
-    delegate.beforeThreadStart(thread);
+    if(atomicEntryCount.get().isZero()) {
+      delegate.beforeThreadStart(thread);
+    }
   }
 
   private void beginAtomic() {

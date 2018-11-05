@@ -16,6 +16,7 @@
 
 package com.github.upthewaterspout.fates.instrument;
 
+import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
 import com.github.upthewaterspout.fates.core.threading.harness.ThreadLocalEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
@@ -149,7 +150,7 @@ public class InstrumentationAgentTest {
         defaultAction.replaceJoin(defaultAction, thread, timeout, nanos);
       }
     };
-    ExecutionEventSingleton.setListener(new ThreadLocalEventListener(hook));
+    ExecutionEventSingleton.setListener(new ThreadLocalEventListener(new AtomicClassLoadingDecorator(hook)));
   }
 
   @After
@@ -163,7 +164,7 @@ public class InstrumentationAgentTest {
     int initialCount = fieldAccesses.get();
     instance.call();
     int finalCount = fieldAccesses.get();
-    assertEquals(4, finalCount - initialCount);
+    assertEquals(5, finalCount - initialCount);
   }
 
   @Test

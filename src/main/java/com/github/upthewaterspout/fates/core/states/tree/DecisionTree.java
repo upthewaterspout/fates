@@ -154,10 +154,13 @@ public class DecisionTree<K> {
    * Validate the set of options matches the set we previously had to choose between
    */
   private void validateOptions(Object label, Set<?> options) {
-    if (!options.equals(this.subTrees.keySet())) {
+    if (!options.equals(this.subTrees.keySet()) || !label.equals(this.label)) {
       throw new IllegalStateException(
-          "System was not presented with the same options on the second run at " + label + ". " +
-              "Previous choices: " + this.subTrees.keySet() + ", new choices " + options);
+          "System was not presented with the same options on the second run.\n"
+              + "  Previously: at " + this.label + "\n"
+              + "  Now: at " + label + "\n"
+              + "  Previous choices: " + this.subTrees.keySet() + "\n"
+              + "  New choices " + options);
     }
   }
 
