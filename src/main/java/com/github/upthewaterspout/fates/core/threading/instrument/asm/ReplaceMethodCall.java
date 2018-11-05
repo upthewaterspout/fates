@@ -69,7 +69,7 @@ public class ReplaceMethodCall extends AbstractClassVisitor {
         return;
       }
 
-      mv.visitMethodInsn(INVOKESTATIC,
+      visitMethodInsn(INVOKESTATIC,
           newMethod.owner,
           newMethod.name,
           newMethod.desc,

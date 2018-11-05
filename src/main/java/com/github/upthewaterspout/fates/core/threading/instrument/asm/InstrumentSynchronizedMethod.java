@@ -76,14 +76,14 @@ public class InstrumentSynchronizedMethod extends AbstractClassVisitor {
     @Override
     protected void onMethodEnter() {
       pushSynchronizationObject();
-      mv.visitInsn(MONITORENTER);
-      mv.visitLabel(new Label());
+      visitInsn(MONITORENTER);
+      visitLabel(new Label());
       super.onMethodEnter();
     }
 
     private void pushSynchronizationObject() {
       if(isStatic(methodAccess)) {
-        mv.visitLdcInsn(Type.getObjectType(getClassName()));
+        visitLdcInsn(Type.getObjectType(getClassName()));
       } else {
         loadThis();
       }
@@ -93,7 +93,7 @@ public class InstrumentSynchronizedMethod extends AbstractClassVisitor {
     @Override
     protected void onMethodExit(int opcode) {
       pushSynchronizationObject();
-      mv.visitInsn(MONITOREXIT);
+      visitInsn(MONITOREXIT);
       super.onMethodExit(opcode);
     }
   }

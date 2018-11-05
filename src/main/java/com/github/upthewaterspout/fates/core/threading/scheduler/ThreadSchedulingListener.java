@@ -134,7 +134,9 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
    * Before a field write, potentially switch to a new thread
    */
   @Override
-  public void beforeSetField(String className, String methodName, int lineNumber) {
+  public void beforeSetField(Object owner, Object fieldValue, String className,
+                             String methodName,
+                             int lineNumber) {
     schedulerState.setLineNumber(Thread.currentThread(), className, methodName, lineNumber);
     yield();
   }

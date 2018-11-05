@@ -134,11 +134,14 @@ public interface ExecutionEventListener {
 
   /**
    * Called before a SETFIELD instruction
+   * @param owner
+   * @param fieldValue
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get
    */
-  void beforeSetField(String className, String methodName, int lineNumber);
+  void beforeSetField(Object owner, Object fieldValue, String className,
+                      String methodName, int lineNumber);
 
   /**
    * Called when class loading starts

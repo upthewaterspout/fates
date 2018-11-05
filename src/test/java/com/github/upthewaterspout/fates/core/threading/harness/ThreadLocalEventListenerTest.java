@@ -60,7 +60,7 @@ public class ThreadLocalEventListenerTest {
   public void shouldDisableDuringThreadStart() {
     Thread thread = new Thread();
     listener.beforeThreadStart(thread);
-    listener.beforeSetField("class", "method", 0);
+    listener.beforeSetField(null, null, "class", "method", 0);
     verify(delegate, times(0)).beforeGetField(any(), any(), anyInt());
     listener.afterThreadStart(thread);
     listener.beforeGetField("class", "method", 1);

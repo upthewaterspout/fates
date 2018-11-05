@@ -17,15 +17,18 @@
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
+import com.sun.org.apache.bcel.internal.generic.ACONST_NULL;
+import com.sun.org.apache.bcel.internal.generic.DUP2;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 
 /**
- * Adds calls to {@link ExecutionEventSingleton#beforeSetField(String, String, int)} and
- * {@link ExecutionEventSingleton#beforeSetField(String, String, int)} before all
+ * Adds calls to {@link ExecutionEventSingleton#beforeSetField(Object, Object, String, String, int)} and
+ * {@link ExecutionEventSingleton#beforeGetField(String, String, int)} before all
  * field access.
  */
 public class InstrumentFieldAccess extends AbstractClassVisitor {
@@ -36,41 +39,62 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
 
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-    return new FieldAccessHookMethodVisitor(name, super.visitMethod(access, name, desc, signature, exceptions));
+    return new FieldAccessHookMethodVisitor(super.visitMethod(access, name, desc, signature, exceptions), access, name, desc);
   }
 
   private class FieldAccessHookMethodVisitor extends HookMethodVisitor {
 
-    public FieldAccessHookMethodVisitor(String methodName, MethodVisitor mv) {
-      super(methodName, mv);
+    protected FieldAccessHookMethodVisitor(MethodVisitor mv, int access, String name,
+                                           String desc) {
+      super(mv, access, name, desc);
     }
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
       if (isFieldRead(opcode)) {
-        callBeforeGetField(this, getClassName(), getMethodName(), getLastLineNumber());
+        callBeforeGetField(getClassName(), getMethodName(), getLastLineNumber());
       } else if(isFieldUpdate(opcode)) {
-        callBeforeSetField(this, getClassName(), getMethodName(), getLastLineNumber());
+        System.err.println("Instrumenting setField " + owner + "." + name + " at " + getClassName() + ":" + getLastLineNumber());
+        callBeforeSetField(Type.getType(desc), getClassName(), getMethodName(), getLastLineNumber());
       }
       super.visitFieldInsn(opcode, owner, name, desc);
     }
 
-    protected void callBeforeGetField(MethodVisitor mv, String className, String methodName, int lineNumber) {
-      mv.visitLdcInsn(className.replace('/', '.'));
-      mv.visitLdcInsn(methodName);
-      mv.visitIntInsn(Opcodes.SIPUSH, lineNumber);
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+    protected void callBeforeGetField(String className, String methodName, int lineNumber) {
+      visitLdcInsn(className.replace('/', '.'));
+      visitLdcInsn(methodName);
+      visitIntInsn(Opcodes.SIPUSH, lineNumber);
+      visitMethodInsn(Opcodes.INVOKESTATIC,
           "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeGetField", "(Ljava/lang/String;Ljava/lang/String;I)V", false);
-      mv.visitLabel(new Label());
+      visitLabel(new Label());
     }
 
-    protected void callBeforeSetField(MethodVisitor mv, String className, String methodName, int lineNumber) {
-      mv.visitLdcInsn(className.replace('/', '.'));
-      mv.visitLdcInsn(methodName);
-      mv.visitIntInsn(Opcodes.SIPUSH, lineNumber);
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC,
-          "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeSetField", "(Ljava/lang/String;Ljava/lang/String;I)V", false);
-      mv.visitLabel(new Label());
+    protected void callBeforeSetField(Type fieldType, String className, String methodName, int lineNumber) {
+      //Store the field value into a separate variable
+      int fieldValueVar = newLocal(fieldType);
+      super.visitVarInsn(fieldType.getOpcode(ISTORE), fieldValueVar);
+
+      //Duplicate the owner onto the stack
+      visitInsn(Opcodes.DUP);
+
+      if(isPrimitive(fieldType)) {
+        //If the field is primitive, push null on the stack
+        mv.visitInsn(Opcodes.ACONST_NULL);
+      } else {
+        //Otherwise, push the field value on the stack
+        super.visitVarInsn(fieldType.getOpcode(ILOAD), fieldValueVar);
+      }
+
+      visitLdcInsn(className.replace('/', '.'));
+      visitLdcInsn(methodName);
+      visitIntInsn(Opcodes.SIPUSH, lineNumber);
+      visitMethodInsn(Opcodes.INVOKESTATIC,
+          "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeSetField", "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;I)V", false);
+
+      visitLabel(new Label());
+      //Restore the field value into the stack
+      super.visitVarInsn(fieldType.getOpcode(ILOAD), fieldValueVar);
+      visitLabel(new Label());
     }
 
     private boolean isFieldRead(int opcode) {
@@ -91,6 +115,17 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
         default:
           return false;
       }
+    }
+  }
+
+  private boolean isPrimitive(Type fieldType) {
+    switch (fieldType.getSort()) {
+      case Type.OBJECT:
+      case Type.ARRAY:
+        return false;
+      default:
+        return true;
+
     }
   }
 

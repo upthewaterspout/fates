@@ -54,15 +54,15 @@ public class InstrumentSynchronizedBlock extends AbstractClassVisitor {
     @Override
     public void visitInsn(int opcode) {
       if (Opcodes.MONITORENTER == opcode) {
-        mv.visitInsn(DUP);
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitInsn(DUP);
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeSynchronization",
           "(Ljava/lang/Object;)V", false);
         super.visitInsn(opcode);
       } else if (Opcodes.MONITOREXIT == opcode) {
-        mv.visitInsn(DUP);
+        visitInsn(DUP);
         super.visitInsn(opcode);
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "afterSynchronization",
           "(Ljava/lang/Object;)V", false);
 

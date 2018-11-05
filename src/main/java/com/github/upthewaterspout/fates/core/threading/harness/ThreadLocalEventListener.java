@@ -56,9 +56,11 @@ public class ThreadLocalEventListener implements ExecutionEventListener {
   }
 
   @Override
-  public void beforeSetField(String className, String methodName, int lineNumber) {
+  public void beforeSetField(Object owner, Object fieldValue, String className,
+                             String methodName,
+                             int lineNumber) {
     if(enabled()) {
-      delegate.beforeSetField(className, methodName, lineNumber);
+      delegate.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
     }
   }
 

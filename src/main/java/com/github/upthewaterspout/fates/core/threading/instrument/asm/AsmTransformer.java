@@ -55,6 +55,7 @@ public class AsmTransformer implements ClassFileTransformer {
       reader.accept(transformingVisitor, ClassReader.EXPAND_FRAMES);
       return outputWriter.toByteArray();
     } catch(Throwable t) {
+      System.err.println("Error transforming " + className);
       t.printStackTrace();
       throw t;
     }

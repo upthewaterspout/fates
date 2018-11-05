@@ -22,7 +22,9 @@ import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.Callable;
 
+import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithAnonymousInnerClass;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithFieldAccess;
+import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithObjectRefences;
 import org.junit.Test;
 
 public class InstrumentFieldAccessTest extends InstrumentationTest {
@@ -33,8 +35,24 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     Callable object = transformAndCreate(className);
     object.call();
     verify(hook, times(1)).beforeGetField(eq(className), eq("call"), eq(26));
-    verify(hook, times(1)).beforeSetField(eq(className), eq("call"), eq(26));
+    verify(hook, times(1)).beforeSetField(eq(object), eq(null), eq(className), eq("call"), eq(26));
     verify(hook, times(1)).beforeGetField(eq(className), eq("call"), eq(27));
+  }
+
+  @Test
+  public void fieldAccessTracksOwnerAndFieldValue() throws Exception {
+    String className = ClassWithObjectRefences.class.getCanonicalName();
+    Callable object = transformAndCreate(className);
+    Object fieldValue = object.call();
+    verify(hook, times(1)).beforeSetField(eq(object), eq(fieldValue), eq(className), eq("call"), eq(30));
+  }
+
+  @Test
+  public void anonymousClassTracksEnclosingClass() throws Exception {
+    String className = ClassWithAnonymousInnerClass.class.getCanonicalName();
+    Callable object = transformAndCreate(className);
+    Object innerClass = object.call();
+    verify(hook, times(1)).beforeSetField(eq(innerClass), eq(object), eq(className), eq("call"), eq(30));
   }
 
 }

@@ -62,24 +62,24 @@ public class InstrumentWaitNotify extends AbstractClassVisitor {
       }
 
       if(name.equals("wait") && desc.equals("()V")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton",
             "replaceWait",
             "(Ljava/lang/Object;)V", false);
       } else if(name.equals("wait") && desc.equals("(J)V")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceWait",
             "(Ljava/lang/Object;J)V", false);
       } else if(name.equals("wait") && desc.equals("(JI)V")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceWait",
             "(Ljava/lang/Object;JI)V", false);
       } else if(name.equals("notify")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceNotify",
           "(Ljava/lang/Object;)V", false);
       } else if (name.equals("notifyAll")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceNotifyAll",
           "(Ljava/lang/Object;)V", false);
       } else {

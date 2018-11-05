@@ -65,8 +65,8 @@ public class ExecutionEventSingleton {
     instance.beforeGetField(className, methodName, lineNumber);
   }
 
-  public static void beforeSetField(String className, String methodName, int lineNumber) {
-    instance.beforeSetField(className, methodName, lineNumber);
+  public static void beforeSetField(Object owner, Object fieldValue, String className, String methodName, int lineNumber) {
+    instance.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
   }
 
   public static void beforeThreadStart(Thread thread) {

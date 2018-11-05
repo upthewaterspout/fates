@@ -66,9 +66,9 @@ public class InstrumentThreadExit extends AbstractClassVisitor {
 
     @Override
     protected void onMethodEnter() {
-      mv.visitMethodInsn(INVOKESTATIC,
+      visitMethodInsn(INVOKESTATIC,
           "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeThreadExit", "()V", false);
-      mv.visitLabel(new Label());
+      visitLabel(new Label());
       super.onMethodEnter();
     }
   }

@@ -33,7 +33,9 @@ public class NoopExecutionEventListener implements ExecutionEventListener {
   }
 
   @Override
-  public void beforeSetField(String className, String methodName, int lineNumber) {
+  public void beforeSetField(Object owner, Object fieldValue, String className,
+                             String methodName,
+                             int lineNumber) {
     //do nothing
   }
 
