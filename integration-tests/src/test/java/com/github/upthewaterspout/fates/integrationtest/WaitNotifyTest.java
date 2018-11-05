@@ -19,6 +19,7 @@ package com.github.upthewaterspout.fates.integrationtest;
 import static org.junit.Assert.assertEquals;
 
 import com.github.upthewaterspout.fates.core.threading.Fates;
+import com.github.upthewaterspout.fates.integrationtest.executor.ParallelExecutor;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,13 +31,13 @@ public class WaitNotifyTest {
   @Test()
   public void shouldPassWithCorrectWaitNotify() throws Exception {
     Fates.run(() -> {
+
       WaitNotify waitNotify = new WaitNotify();
-      Thread t1 = new Thread(() -> waitNotify.doWait());
-      Thread t2 = new Thread(() -> waitNotify.doNotify());
-      t1.start();
-      t2.start();
-      t1.join();
-      t2.join();
+      new ParallelExecutor<Boolean>()
+          .inParallel(waitNotify::doWait)
+          .inParallel(waitNotify::doNotify)
+          .run();
+
       assertEquals(true, waitNotify.notified);
     });
   }

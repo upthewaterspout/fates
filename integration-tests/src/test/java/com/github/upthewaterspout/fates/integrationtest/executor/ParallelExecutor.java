@@ -17,12 +17,11 @@
 package com.github.upthewaterspout.fates.integrationtest.executor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.upthewaterspout.fates.core.threading.Fates;
+import jdk.nashorn.internal.codegen.CompilerConstants;
 
 /**
  * Some syntax sugar around {@link Fates} that makes it easier to set
@@ -31,6 +30,7 @@ import com.github.upthewaterspout.fates.core.threading.Fates;
 public class ParallelExecutor<OUT> {
 
   private final List<Callable<OUT>> parallelTasks = new ArrayList<>();
+  volatile Throwable throwable = null;
 
   public ParallelExecutor<OUT> inParallel(Callable<OUT> task) {
     this.parallelTasks.add(task);
@@ -38,26 +38,31 @@ public class ParallelExecutor<OUT> {
   }
 
   public void run() throws Exception {
-    AtomicReference<Throwable> exceptions = new AtomicReference<>();
-    List<Thread> threads = new ArrayList<>();
+    Thread[] threads = new Thread[parallelTasks.size()];
 
-    for(Callable<OUT> task : parallelTasks) {
-      threads.add(new Thread(() -> {
+    for(int i =0; i < threads.length; i++) {
+      Callable<OUT> task = parallelTasks.get(i);
+      threads[i] = new Thread(() -> {
               try {
                 task.call();
               } catch (Throwable t) {
-                exceptions.compareAndSet(null, t);
+                if(throwable != null) {
+                  throwable = t;
+                }
               }
-            }));
+            });
     };
 
-    threads.forEach(Thread::start);
-    for(Thread thread : threads) {
-      thread.join();
+    for(int i =0; i < threads.length; i++) {
+      threads[i].start();
     }
 
-    if(exceptions.get() != null) {
-      throw new Exception("Test thread failed", exceptions.get());
+    for(int i =0; i < threads.length; i++) {
+      threads[i].join();
+    }
+
+    if(throwable != null) {
+      throw new Exception("Test thread failed", throwable);
     }
 
   }

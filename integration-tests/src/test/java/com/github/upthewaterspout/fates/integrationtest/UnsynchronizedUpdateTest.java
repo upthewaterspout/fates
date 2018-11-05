@@ -34,7 +34,6 @@ public class UnsynchronizedUpdateTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test()
-  @Ignore("ParallelExecutor is currently not working, probably due to instrumentation issues")
   public void shouldFailOnUnsynchronizedUpdate() throws Exception {
     expectedException.expect(AssertionError.class);
     Fates.run(() -> {
@@ -45,23 +44,6 @@ public class UnsynchronizedUpdateTest {
           .run();
 
       assertEquals(2, updater.getValue());
-    });
-  }
-
-  @Test()
-  public void shouldFailOnUnsynchronizedUpdateNoHarness() throws Exception {
-
-    expectedException.expect(AssertionError.class);
-    Fates.run(() -> {
-      UnsynchronizedUpdate unsynchronizedUpdate = new UnsynchronizedUpdate();
-      Thread t1 = new Thread(unsynchronizedUpdate::update, "t1");
-      Thread t2 = new Thread(unsynchronizedUpdate::update, "t2");
-      t1.start();
-      t2.start();
-      t1.join();
-      t2.join();
-
-      assertEquals(2, unsynchronizedUpdate.field);
     });
   }
 
