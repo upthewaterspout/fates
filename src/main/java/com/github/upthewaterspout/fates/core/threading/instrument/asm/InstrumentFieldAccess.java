@@ -65,15 +65,14 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-      if(isFinal(owner, name)) {
-        //Don't instrument final fields.
-        return;
-      }
-
-      if (isFieldRead(opcode)) {
-        callBeforeGetField(getClassName(), getMethodName(), getLastLineNumber());
-      } else if(isFieldUpdate(opcode)) {
-        callBeforeSetField(opcode, owner, Type.getType(desc), getClassName(), getMethodName(), getLastLineNumber());
+      //Don't instrument final fields.
+      if(!isFinal(owner, name)) {
+        if (isFieldRead(opcode)) {
+          callBeforeGetField(getClassName(), getMethodName(), getLastLineNumber());
+        } else if(isFieldUpdate(opcode)) {
+          System.err.println("Instrumenting " + owner + "." + name + " at " + getClassName() + ":" + getLastLineNumber());
+          callBeforeSetField(opcode, owner, Type.getType(desc), getClassName(), getMethodName(), getLastLineNumber());
+        }
       }
       super.visitFieldInsn(opcode, owner, name, desc);
     }

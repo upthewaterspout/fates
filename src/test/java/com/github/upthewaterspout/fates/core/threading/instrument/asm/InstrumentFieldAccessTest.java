@@ -16,6 +16,7 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,8 +35,9 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
   @Test
   public void fieldAccessAddsHook() throws Exception {
     String className = ClassWithFieldAccess.class.getCanonicalName();
-    Callable object = transformAndCreate(className);
-    object.call();
+    Callable<Integer> object = transformAndCreate(className);
+    int value = object.call();
+    assertEquals(6, value);
     verify(hook, times(1)).beforeGetField(eq(className), eq("call"), eq(26));
     verify(hook, times(1)).beforeSetField(eq(object), eq(null), eq(className), eq("call"), eq(26));
     verify(hook, times(1)).beforeGetField(eq(className), eq("call"), eq(27));
@@ -44,8 +46,9 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
   @Test
   public void staticFieldAccessAddsHook() throws Exception {
     String className = ClassWithStaticFieldAccess.class.getCanonicalName();
-    Callable object = transformAndCreate(className);
-    object.call();
+    Callable<Integer> object = transformAndCreate(className);
+    int value = object.call();
+    assertEquals(6, value);
     verify(hook, times(1)).beforeGetField(eq(className), eq("call"), eq(30));
     verify(hook, times(1)).beforeSetField(eq(object.getClass()), eq(null), eq(className), eq("call"), eq(30));
     verify(hook, times(1)).beforeGetField(eq(className), eq("call"), eq(31));

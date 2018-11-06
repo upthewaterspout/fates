@@ -23,7 +23,9 @@ public class ClassWithFieldAccess implements Callable {
   int a = 5;
 
   public Object call() {
-    a = a + 1;
+    if(a == 5) {
+      a = a + 1;
+    }
     return a;
   }
 }
