@@ -33,7 +33,7 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
   private String sourceFile;
 
   public AbstractClassVisitor(ClassVisitor cv) {
-    super(Opcodes.ASM5, cv);
+    super(Opcodes.ASM7, cv);
   }
 
   public void visit(int version, int access, String name, String signature, String superName,
@@ -75,7 +75,7 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
   public class HookMethodVisitor extends AdviceAdapter {
 
     protected HookMethodVisitor(MethodVisitor mv, int access, String name, String desc) {
-      super(ASM5, mv, access, name, desc);
+      super(ASM7, mv, access, name, desc);
     }
 
     @Override

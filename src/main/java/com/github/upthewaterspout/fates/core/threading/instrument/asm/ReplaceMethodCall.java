@@ -43,7 +43,7 @@ public class ReplaceMethodCall extends AbstractClassVisitor {
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
       final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
-      return new ReplacingMethodVisitor(Opcodes.ASM5, delegate, access, name, desc);
+      return new ReplacingMethodVisitor(Opcodes.ASM7, delegate, access, name, desc);
   }
 
   private class ReplacingMethodVisitor extends AdviceAdapter {

@@ -36,7 +36,7 @@ public class InstrumentClassLoading extends AbstractClassVisitor {
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
     final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
     if(name.equals("loadClass")) {
-      return new InstrumentMethod(Opcodes.ASM5, delegate, access, name, desc);
+      return new InstrumentMethod(Opcodes.ASM7, delegate, access, name, desc);
     } else {
       return delegate;
     }

@@ -16,10 +16,12 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
-import com.sun.org.apache.bcel.internal.generic.ACONST_NULL;
-import com.sun.org.apache.bcel.internal.generic.DUP2;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -33,6 +35,8 @@ import org.objectweb.asm.Type;
  */
 public class InstrumentFieldAccess extends AbstractClassVisitor {
 
+  public Set<String> finalFields = new HashSet<String>();
+
   public InstrumentFieldAccess(ClassVisitor cv) {
     super(cv);
   }
@@ -40,6 +44,16 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
     return new FieldAccessHookMethodVisitor(super.visitMethod(access, name, desc, signature, exceptions), access, name, desc);
+  }
+
+  @Override
+  public FieldVisitor visitField(int access, String name, String desc, String signature,
+                                 Object value) {
+    if((access & Opcodes.ACC_FINAL) != 0) {
+      finalFields.add(name);
+    }
+
+    return super.visitField(access, name, desc, signature, value);
   }
 
   private class FieldAccessHookMethodVisitor extends HookMethodVisitor {
@@ -51,11 +65,15 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+      if(isFinal(owner, name)) {
+        //Don't instrument final fields.
+        return;
+      }
+
       if (isFieldRead(opcode)) {
         callBeforeGetField(getClassName(), getMethodName(), getLastLineNumber());
       } else if(isFieldUpdate(opcode)) {
-        System.err.println("Instrumenting setField " + owner + "." + name + " at " + getClassName() + ":" + getLastLineNumber());
-        callBeforeSetField(Type.getType(desc), getClassName(), getMethodName(), getLastLineNumber());
+        callBeforeSetField(opcode, owner, Type.getType(desc), getClassName(), getMethodName(), getLastLineNumber());
       }
       super.visitFieldInsn(opcode, owner, name, desc);
     }
@@ -69,13 +87,18 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
       visitLabel(new Label());
     }
 
-    protected void callBeforeSetField(Type fieldType, String className, String methodName, int lineNumber) {
+    protected void callBeforeSetField(int opcode, String owner, Type fieldType, String className,
+                                      String methodName, int lineNumber) {
       //Store the field value into a separate variable
       int fieldValueVar = newLocal(fieldType);
       super.visitVarInsn(fieldType.getOpcode(ISTORE), fieldValueVar);
 
-      //Duplicate the owner onto the stack
-      visitInsn(Opcodes.DUP);
+      if(opcode == Opcodes.PUTFIELD) {
+        //Duplicate the owner onto the stack
+        visitInsn(Opcodes.DUP);
+      } else {
+        visitLdcInsn(Type.getObjectType(owner));
+      }
 
       if(isPrimitive(fieldType)) {
         //If the field is primitive, push null on the stack
@@ -116,6 +139,10 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
           return false;
       }
     }
+  }
+
+  private boolean isFinal(String owner, String name) {
+    return this.finalFields.contains(name) && owner.equals(this.getClassName());
   }
 
   private boolean isPrimitive(Type fieldType) {

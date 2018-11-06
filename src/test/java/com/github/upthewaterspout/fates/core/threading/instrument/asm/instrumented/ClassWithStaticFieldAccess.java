@@ -18,23 +18,16 @@ package com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumen
 
 import java.util.concurrent.Callable;
 
+import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 
-public class ClassWithObjectRefences implements Callable {
-  Object ref;
-  int[] intArray;
-  Object[] objectArray;
+
+public class ClassWithStaticFieldAccess implements Callable {
+  static int a = 5;
 
   public Object call() {
-    Class1 class1 = new Class1();
 
-    ref = class1;
-    intArray = new int[] {3, 4};
-    objectArray = new Object[] {3, 4};
-
-    return class1;
-
-  }
-
-  private static class Class1 {
+    ExecutionEventSingleton.beforeSetField(ClassWithStaticFieldAccess.class, null, "string", "String", 33);
+    a = a + 1;
+    return a;
   }
 }

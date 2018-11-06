@@ -37,8 +37,8 @@ allprojects {
 }
 
 dependencies {
-    compile 'org.ow2.asm:asm:6.0'
-    compile 'org.ow2.asm:asm-commons:6.0'
+    compile 'org.ow2.asm:asm:7.0'
+    compile 'org.ow2.asm:asm-commons:7.0'
 
     testCompile 'commons-io:commons-io:2.4'
 }

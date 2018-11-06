@@ -36,7 +36,7 @@ public class InstrumentSynchronizedBlock extends AbstractClassVisitor {
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
     final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
-    return new InstrumentSynchronization(Opcodes.ASM5, delegate, access, name, desc);
+    return new InstrumentSynchronization(Opcodes.ASM7, delegate, access, name, desc);
   }
 
   private class InstrumentSynchronization extends AdviceAdapter {

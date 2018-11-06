@@ -39,7 +39,7 @@ public class InstrumentSynchronizedMethod extends AbstractClassVisitor {
     if(isSynchronized(access)) {
       access ^= Opcodes.ACC_SYNCHRONIZED;
       final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
-      return new InstrumentSynchronized(Opcodes.ASM5, delegate, access, name, desc);
+      return new InstrumentSynchronized(Opcodes.ASM7, delegate, access, name, desc);
     }
 
     return super.visitMethod(access, name, desc, signature, exceptions);
@@ -58,7 +58,7 @@ public class InstrumentSynchronizedMethod extends AbstractClassVisitor {
     /**
      * Creates a new {@link AdviceAdapter}.
      * @param api the ASM API version implemented by this visitor. Must be one
-     * of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     * of {@link Opcodes#ASM4} or {@link Opcodes#ASM7}.
      * @param mv the method visitor to which this adapter delegates calls.
      * @param access the method's access flags (see {@link Opcodes}).
      * @param name the method's name.
