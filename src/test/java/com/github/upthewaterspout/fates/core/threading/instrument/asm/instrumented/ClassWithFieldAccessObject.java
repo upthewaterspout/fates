@@ -19,11 +19,11 @@ package com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumen
 import java.util.concurrent.Callable;
 
 
-public class ClassWithStaticFieldAccess implements Callable {
-  static int a = 5;
+public class ClassWithFieldAccessObject implements Callable {
+  Object a = "hello";
 
   public Object call() {
-    a = a + 1;
+    a = "world";
     return a;
   }
 }

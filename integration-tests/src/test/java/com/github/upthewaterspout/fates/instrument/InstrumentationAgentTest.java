@@ -166,7 +166,7 @@ public class InstrumentationAgentTest {
     int initialCount = fieldAccesses.get();
     instance.call();
     int finalCount = fieldAccesses.get();
-    assertEquals(5, finalCount - initialCount);
+    assertEquals(4, finalCount - initialCount);
   }
 
   @Test
