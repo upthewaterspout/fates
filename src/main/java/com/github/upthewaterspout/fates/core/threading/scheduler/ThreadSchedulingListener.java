@@ -255,6 +255,11 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
   }
 
   @Override
+  public void afterNew(final Object object) {
+    //do nothing
+  }
+
+  @Override
   public void replaceWait(
       ExecutionEventListener defaultAction,
       final Object sync, final long timeout, int nanos) {

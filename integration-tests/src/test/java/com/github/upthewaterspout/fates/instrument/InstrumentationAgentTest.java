@@ -77,6 +77,11 @@ public class InstrumentationAgentTest {
       }
 
       @Override
+      public void afterNew(Object object) {
+        //do nothing
+      }
+
+      @Override
       public void beforeThreadStart(Thread thread) {
         beforeThreadStarts.incrementAndGet();
 

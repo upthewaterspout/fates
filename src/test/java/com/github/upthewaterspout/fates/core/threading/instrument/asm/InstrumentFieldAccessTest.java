@@ -17,6 +17,7 @@
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -111,6 +112,7 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     String className = ClassWithAnonymousInnerClass.class.getCanonicalName();
     Callable object = transformAndCreate(className);
     Object innerClass = object.call();
+    verify(hook, times(2)).afterNew(any());
     verifyNoMoreInteractions(hook);
   }
 

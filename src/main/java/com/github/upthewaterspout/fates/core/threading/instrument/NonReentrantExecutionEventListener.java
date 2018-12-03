@@ -336,6 +336,21 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   }
 
+  @Override
+  public void afterNew(final Object object) {
+    if(disabled.get()) {
+      return;
+    }
+    disable();
+    try {
+      delegate.afterNew(object);
+    } catch(RuntimeException t) {
+      t.printStackTrace();
+      lastError = t;
+    } finally {
+      enable();
+    }
+  }
 
   public void disable() {
     disabled.set(Boolean.TRUE);

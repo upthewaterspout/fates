@@ -192,4 +192,11 @@ public class ThreadLocalEventListener implements ExecutionEventListener {
       defaultAction.replaceJoin(defaultAction, thread, timeout, nanos);
     }
   }
+
+  @Override
+  public void afterNew(Object object) {
+    if (enabled()) {
+      delegate.afterNew(object);
+    }
+  }
 }

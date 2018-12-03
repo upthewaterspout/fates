@@ -172,6 +172,13 @@ public class AtomicClassLoadingDecorator
   }
 
   @Override
+  public void afterNew(Object object) {
+    if(atomicEntryCount.get().isZero()) {
+      delegate.afterNew(object);
+    }
+  }
+
+  @Override
   public void beforeLoadClass() {
     beginAtomic();
     delegate.beforeLoadClass();

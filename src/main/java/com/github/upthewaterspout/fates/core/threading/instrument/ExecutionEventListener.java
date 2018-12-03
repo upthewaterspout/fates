@@ -154,4 +154,9 @@ public interface ExecutionEventListener {
   void afterLoadClass();
 
 
+  /**
+   * Called after a new object is created in the current thread
+   * (but before the constructor!)
+   */
+  void afterNew(Object object);
 }

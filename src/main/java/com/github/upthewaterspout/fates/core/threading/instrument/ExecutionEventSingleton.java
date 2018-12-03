@@ -157,4 +157,8 @@ public class ExecutionEventSingleton {
   public static void afterLoadClass() {
     instance.afterLoadClass();
   }
+
+  public static void afterNew(Object object) {
+    instance.afterNew(object);
+  }
 }

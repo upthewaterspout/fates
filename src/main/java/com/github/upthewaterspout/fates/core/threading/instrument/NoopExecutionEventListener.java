@@ -120,4 +120,9 @@ public class NoopExecutionEventListener implements ExecutionEventListener {
   public void replaceParkUntil(ExecutionEventListener defaultAction, Object blocker, long deadline) {
     LockSupport.parkUntil(blocker, deadline);
   }
+
+  @Override
+  public void afterNew(Object object) {
+
+  }
 }
