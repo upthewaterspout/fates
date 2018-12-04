@@ -30,7 +30,7 @@ import sun.misc.Launcher;
  */
 public class FatesAgent {
   public static void premain(String agentArgs, Instrumentation inst) {
-    inst.addTransformer(new FilterTransformer("com.github.upthewaterspout.fates.core.*", ".*",
+    inst.addTransformer(new FilterTransformer("com.github.upthewaterspout.fates.core.*|com.intellij.*", ".*",
         new AsmTransformer()), true);
     try {
       inst.retransformClasses(Thread.class);
