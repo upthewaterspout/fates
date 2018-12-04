@@ -19,9 +19,11 @@ package com.github.upthewaterspout.fates.core.threading;
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.RepeatedTest;
 import com.github.upthewaterspout.fates.core.states.StateExplorer;
+import com.github.upthewaterspout.fates.core.threading.confinement.ThreadConfinementListener;
 import com.github.upthewaterspout.fates.core.threading.harness.ErrorCapturingExplorer;
 import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
 import com.github.upthewaterspout.fates.core.threading.harness.ThreadLocalEventListener;
+import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulingListener;
 import com.github.upthewaterspout.fates.core.states.StateExplorationHarness;
@@ -84,7 +86,7 @@ public class Fates {
   private static RepeatedTest instrumentTest(MultiThreadedTest runnable) {
     return decider -> {
 
-      ThreadLocalEventListener listener = createExecutionEventPipeline(decider);
+      ExecutionEventListener listener = createExecutionEventPipeline(decider);
 
       ExecutionEventSingleton.setListener(listener);
       try {
@@ -101,20 +103,21 @@ public class Fates {
    *
    * @param decider The decider used to choose which thread to allow to proceed for this test
    */
-  private static ThreadLocalEventListener createExecutionEventPipeline(Decider decider) {
+  private static ExecutionEventListener createExecutionEventPipeline(Decider decider) {
 
     //At the end of the pipeline is the actual thread scheduler
     ThreadSchedulingListener scheduler = new ThreadSchedulingListener(decider);
     scheduler.begin();
 
     //In front of that is a listener that can skip events if we doing class loading
-    AtomicClassLoadingDecorator listenerWithAtomicControl
+    ExecutionEventListener listener
         = new AtomicClassLoadingDecorator( scheduler);
+
+    listener = new ThreadConfinementListener(listener);
 
     //In front of that is a listener which restricts instrumentation to threads started by
     //this test
-    ThreadLocalEventListener listener = new ThreadLocalEventListener(
-        listenerWithAtomicControl);
+    listener = new ThreadLocalEventListener(listener);
 
     return listener;
   }
@@ -129,4 +132,5 @@ public class Fates {
   public interface MultiThreadedTest {
     void run() throws Exception;
   }
+
 }
