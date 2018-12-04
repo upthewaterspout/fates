@@ -126,11 +126,12 @@ public interface ExecutionEventListener {
 
   /**
    * Called before a GETFIELD instruction
+   * @param owner
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get
    */
-  void beforeGetField(String className, String methodName, int lineNumber);
+  void beforeGetField(Object owner, String className, String methodName, int lineNumber);
 
   /**
    * Called before a SETFIELD instruction

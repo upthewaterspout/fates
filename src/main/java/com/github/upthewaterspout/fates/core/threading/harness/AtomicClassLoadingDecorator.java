@@ -20,7 +20,7 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
 
 /**
  * A decorator for a {@link ExecutionEventListener} that allows disabling the {@link
- * ExecutionEventListener#beforeGetField(String, String, int)}  and {@link
+ * ExecutionEventListener#beforeGetField(Object, String, String, int)}  and {@link
  * ExecutionEventListener#beforeSetField(Object, Object, String, String, int)} while class loading is happening.
  *
  * This decorator is used to suppress context switching that would normally happen from field
@@ -155,9 +155,10 @@ public class AtomicClassLoadingDecorator
   }
 
   @Override
-  public void beforeGetField(String className, String methodName, int lineNumber) {
+  public void beforeGetField(Object owner, String className, String methodName,
+                             int lineNumber) {
     if(atomicEntryCount.get().isZero()) {
-      delegate.beforeGetField(className, methodName, lineNumber);
+      delegate.beforeGetField(owner, className, methodName, lineNumber);
     }
 
   }

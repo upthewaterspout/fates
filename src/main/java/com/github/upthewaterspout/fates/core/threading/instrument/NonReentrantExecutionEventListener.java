@@ -50,13 +50,14 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override
-  public void beforeGetField(String className, String methodName, int lineNumber) {
+  public void beforeGetField(Object owner, String className, String methodName,
+                             int lineNumber) {
     if(disabled.get()) {
       return;
     }
     disable();
     try {
-      delegate.beforeGetField(className, methodName, lineNumber);
+      delegate.beforeGetField(owner, className, methodName, lineNumber);
     } catch(RuntimeException t) {
       t.printStackTrace();
       lastError = t;

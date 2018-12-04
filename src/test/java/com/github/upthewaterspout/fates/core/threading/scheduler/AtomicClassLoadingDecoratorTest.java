@@ -30,23 +30,23 @@ public class AtomicClassLoadingDecoratorTest {
 
   @Test
   public void noAtomicControlShouldAllowBeforeGetFieldCall() {
-    scheduler.beforeGetField("class", "method", 5);
-    verify(delegate).beforeGetField("class", "method", 5);
+    scheduler.beforeGetField("owner", "class", "method", 5);
+    verify(delegate).beforeGetField("owner", "class", "method", 5);
   }
 
   @Test
   public void beforeLoadClassShouldPreventBeforeGetFieldCall() {
     scheduler.beforeLoadClass();
-    scheduler.beforeGetField("class", "method", 5);
-    verify(delegate, times(0)).beforeGetField("class", "method", 5);
+    scheduler.beforeGetField("owner", "class", "method", 5);
+    verify(delegate, times(0)).beforeGetField("owner", "class", "method", 5);
   }
 
   @Test
   public void afterLoadClassShouldAllowBeforeGetFieldCall() {
     scheduler.beforeLoadClass();
     scheduler.afterLoadClass();
-    scheduler.beforeGetField("class", "method", 5);
-    verify(delegate).beforeGetField("class", "method", 5);
+    scheduler.beforeGetField("owner", "class", "method", 5);
+    verify(delegate).beforeGetField("owner", "class", "method", 5);
   }
 
   @Test
@@ -54,8 +54,8 @@ public class AtomicClassLoadingDecoratorTest {
     scheduler.beforeLoadClass();
     scheduler.beforeLoadClass();
     scheduler.afterLoadClass();
-    scheduler.beforeGetField("class", "method", 5);
-    verify(delegate, times(0)).beforeGetField("class", "method", 5);
+    scheduler.beforeGetField("owner", "class", "method", 5);
+    verify(delegate, times(0)).beforeGetField("owner", "class", "method", 5);
   }
 
   @Test
@@ -64,7 +64,7 @@ public class AtomicClassLoadingDecoratorTest {
     scheduler.beforeLoadClass();
     scheduler.afterLoadClass();
     scheduler.afterLoadClass();
-    scheduler.beforeGetField("class", "method", 5);
-    verify(delegate).beforeGetField("class", "method", 5);
+    scheduler.beforeGetField("owner", "class", "method", 5);
+    verify(delegate).beforeGetField("owner", "class", "method", 5);
   }
 }

@@ -28,7 +28,8 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class NoopExecutionEventListener implements ExecutionEventListener {
   @Override
-  public void beforeGetField(String className, String methodName, int lineNumber) {
+  public void beforeGetField(Object owner, String className, String methodName,
+                             int lineNumber) {
     //do nothing
   }
 

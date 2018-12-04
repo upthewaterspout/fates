@@ -37,23 +37,23 @@ public class ThreadLocalEventListenerTest {
   @Test
   public void enabledForTrackedThread() throws InterruptedException {
     Thread thread = new Thread(() -> {
-      listener.beforeGetField("class", "method", 0);
+      listener.beforeGetField("any", "class", "method", 0);
     });
     listener.beforeThreadStart(thread);
     thread.start();
     listener.afterThreadStart(thread);
     thread.join();
-    verify(delegate).beforeGetField(any(), any(), anyInt());
+    verify(delegate).beforeGetField(any(), any(), any(), anyInt());
   }
 
   @Test
   public void notEnabledForUntrackedThread() throws InterruptedException {
     Thread thread = new Thread(() -> {
-      listener.beforeGetField("class", "method", 0);
+      listener.beforeGetField("owner", "class", "method", 0);
     });
     thread.start();
     thread.join();
-    verify(delegate, times(0)).beforeGetField(any(), any(), anyInt());
+    verify(delegate, times(0)).beforeGetField(any(), any(), any(), anyInt());
   }
 
   @Test
@@ -61,10 +61,10 @@ public class ThreadLocalEventListenerTest {
     Thread thread = new Thread();
     listener.beforeThreadStart(thread);
     listener.beforeSetField(null, null, "class", "method", 0);
-    verify(delegate, times(0)).beforeGetField(any(), any(), anyInt());
+    verify(delegate, times(0)).beforeGetField(any(), any(), any(), anyInt());
     listener.afterThreadStart(thread);
-    listener.beforeGetField("class", "method", 1);
-    verify(delegate, times(1)).beforeGetField(any(), any(), anyInt());
+    listener.beforeGetField("owner", "class", "method", 1);
+    verify(delegate, times(1)).beforeGetField(any(), any(), any(), anyInt());
   }
 
 }

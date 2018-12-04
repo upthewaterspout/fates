@@ -55,7 +55,8 @@ public class InstrumentationAgentTest {
   public void before() {
     hook = new ExecutionEventListener() {
       @Override
-      public void beforeGetField(String className, String methodName, int lineNumber) {
+      public void beforeGetField(Object owner, String className, String methodName,
+                                 int lineNumber) {
         fieldAccesses.incrementAndGet();
       }
 

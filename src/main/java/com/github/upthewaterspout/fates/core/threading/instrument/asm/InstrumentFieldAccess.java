@@ -67,7 +67,7 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
       //Don't instrument final fields.
       if(!isFinal(owner, name)) {
         if (isFieldRead(opcode)) {
-          callBeforeGetField(getClassName(), getMethodName(), getLastLineNumber());
+          callBeforeGetField(opcode, owner, getClassName(), getMethodName(), getLastLineNumber());
         } else if(isFieldUpdate(opcode)) {
           callBeforeSetField(opcode, owner, Type.getType(desc), getClassName(), getMethodName(), getLastLineNumber());
         }
@@ -76,10 +76,15 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
       super.visitFieldInsn(opcode, owner, name, desc);
     }
 
-    protected void callBeforeGetField(String className, String methodName, int lineNumber) {
+    protected void callBeforeGetField(int opcode, String owner, String className, String methodName, int lineNumber) {
+      if(opcode == GETSTATIC) {
+        visitLdcInsn(Type.getObjectType(owner));
+      } else {
+        visitInsn(DUP);
+      }
       putClassMethodAndLine(className, methodName, lineNumber);
       visitMethodInsn(Opcodes.INVOKESTATIC,
-          "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeGetField", "(Ljava/lang/String;Ljava/lang/String;I)V", false);
+          "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeGetField", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;I)V", false);
     }
 
     protected void callBeforeSetField(int opcode, String owner, Type fieldType, String className,
