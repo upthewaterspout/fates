@@ -19,6 +19,7 @@ package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.refEq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -30,8 +31,10 @@ import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrument
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithFieldAccessLong;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithFieldAccessObject;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithObjectRefences;
+import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithStaticField;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithStaticFieldAccess;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithStaticFieldAccessObject;
+import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithStaticFinalReferenceToAnotherClass;
 import org.junit.Test;
 
 public class InstrumentFieldAccessTest extends InstrumentationTest {
@@ -114,6 +117,15 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     Object innerClass = object.call();
     verify(hook, times(2)).afterNew(any());
     verifyNoMoreInteractions(hook);
+  }
+
+  @Test
+  public void instrumentFinalFieldFromAnotherClass() throws Exception {
+    String className = ClassWithStaticFinalReferenceToAnotherClass.class.getCanonicalName();
+    Callable<String[]> object = transformAndCreate(className);
+    String[] result = object.call();
+    assertEquals(0, result.length);
+    verify(hook, times(1)).beforeGetField(refEq(ClassWithStaticField.class), eq(className), eq("call"), eq(29));
   }
 
 }

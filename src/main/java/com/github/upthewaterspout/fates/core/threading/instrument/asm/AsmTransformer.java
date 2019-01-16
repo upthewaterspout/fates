@@ -22,6 +22,7 @@ import java.security.ProtectionDomain;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.util.CheckClassAdapter;
 
 /**
  * Pipeline of ASM ClassVisitors that transforms classes, adding
@@ -39,8 +40,10 @@ public class AsmTransformer implements ClassFileTransformer {
                           ProtectionDomain protectionDomain, byte[] classfileBuffer) {
     try {
       ClassWriter outputWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+      ClassVisitor transformingVisitor = new CheckClassAdapter(outputWriter, false);
 
-      ClassVisitor transformingVisitor = new InstrumentThreadSynchronizedMethods(outputWriter);
+      transformingVisitor = new MinimumVersionVisitor(transformingVisitor);
+      transformingVisitor = new InstrumentThreadSynchronizedMethods(transformingVisitor);
       transformingVisitor = new InstrumentSynchronizedBlock(transformingVisitor);
       if(classBeingRedefined == null) {
         transformingVisitor = new InstrumentSynchronizedMethod(transformingVisitor);
