@@ -17,20 +17,125 @@
 package com.github.upthewaterspout.fates.core.threading.confinement;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import org.junit.Before;
 import org.junit.Test;
 
 public class ThreadConfinementListenerTest {
 
-  @Test
-  public void listenerIgnoresCallsToThreadConfinedObject() {
-    ExecutionEventListener delegate = mock(ExecutionEventListener.class);
-    ExecutionEventListener defaultAction = mock(ExecutionEventListener.class);
-    ThreadConfinementListener listener = new ThreadConfinementListener(delegate);
+  private ExecutionEventListener delegate;
+  private ExecutionEventListener defaultAction;
+  private ThreadConfinementListener listener;
 
-    listener.beforeGetField("owner", "any", "any", 0);
-    listener.beforeSetField("owner", "value", "class", "method", 0);
+  @Before
+  public void setUp() throws Exception {
+    delegate = mock(ExecutionEventListener.class);
+    defaultAction = mock(ExecutionEventListener.class);
+    listener = new ThreadConfinementListener(delegate);
+  }
+
+  @Test
+  public void listenerPassesOnGetToSharedObject() {
+    Object object = new Object();
+    listener.beforeGetField(object, "any", "any", 0);
+    verify(delegate).beforeGetField(object, "any", "any", 0);
+  }
+
+  @Test
+  public void listenerElidesGetToThreadConfinedObject() {
+    Object object = new Object();
+    listener.afterNew(object);
+    listener.beforeGetField(object, "any", "any", 0);
+    verify(delegate).afterNew(object);
+    verifyNoMoreInteractions(delegate);
+  }
+
+  @Test
+  public void listenerPassesOnSetToSharedObject() {
+    Object object = new Object();
+    listener.beforeSetField(object, "value", "any", "any", 0);
+    verify(delegate).beforeSetField(object, "value", "any", "any", 0);
+  }
+
+  @Test
+  public void listenerElidesSetToThreadConfinedObject() {
+    Object object = new Object();
+    listener.afterNew(object);
+    listener.beforeSetField(object, "value", "any", "any", 0);
+    verify(delegate).afterNew(object);
+    verifyNoMoreInteractions(delegate);
+  }
+
+  @Test
+  public void objectBecomesSharedAfterSetOnSharedObject() {
+    Object object = new Object();
+    Object sharedObject = new Object();
+    listener.afterNew(object);
+
+    //Publish the object by setting it on a shared object
+    listener.beforeSetField(sharedObject, object, "any", "any", 0);
+
+    //After the object is published, events should be passed on
+    listener.beforeGetField(object, "any", "any", 0);
+    verify(delegate).beforeGetField(object, "any", "any", 0);
+  }
+
+  @Test
+  public void nestedConfinedObjectIsNotShared() {
+    Object object = new Object();
+    Object ownerObject = new Object();
+    listener.afterNew(ownerObject);
+    listener.afterNew(object);
+
+    //Nest the thread confined object in another thread confined object
+    listener.beforeSetField(ownerObject, object, "any", "any", 0);
+
+    listener.beforeGetField(object, "any", "any", 0);
+
+    verify(delegate).afterNew(object);
+    verify(delegate).afterNew(ownerObject);
+    //Operations on the nested object should not be passed along
+    verifyNoMoreInteractions(delegate);
+  }
+
+  /**
+   * Test that when an object becomes shared, everything reachable from that
+   * object becomes shared
+   */
+  @Test
+  public void nestedConfinedObjectIsPublishedWhenOwnerIsPublished() {
+    Object object = new Object();
+    Object ownerObject = new Object();
+    Object sharedObject = new Object();
+
+    listener.afterNew(ownerObject);
+    listener.afterNew(object);
+
+    //Nest the thread confined object in another thread confined object
+    listener.beforeSetField(ownerObject, object, "any", "any", 0);
+
+    //Make the ownerObject shared, which should also make the nested object shared
+    listener.beforeSetField(sharedObject, ownerObject, "any", "any", 0);
+
+
+    listener.beforeGetField(object, "any", "any", 0);
+
+    //Operations on the nested object should now be passed along
+    verify(delegate).beforeGetField(object, "any", "any", 0);
+  }
+
+    //Basic algorithm
+    // - New objects are stored in a thread local set
+    // - Calls to set that pass the new object to something not in the set remove it from the thread local set, along with any reachable objects? Reachability is computed through java reference chasing?
+    // - Calls to beforeGet/Set on the new object are ignored
+    // Would like to also ignore synchronization calls, maybe some others, but that gets trickier
+    // if the object is published after synchronization happens...
+    // Maybe the issue is that synchronization should *not* be considered a scheduling
+    // point by the scheduler unless the current thread is blocked? If we barged on in, would
+    // the behavior be different? Yeah, ... maybe
 
     //TODO, ignore all of these calls
     //This gets a bit tricky, because we need the effects of these calls
@@ -41,6 +146,5 @@ public class ThreadConfinementListenerTest {
 //    listener.replaceWait();
 //    listener.replaceNotify();
 //    listener.replaceNotifyAll();
-  }
 
 }

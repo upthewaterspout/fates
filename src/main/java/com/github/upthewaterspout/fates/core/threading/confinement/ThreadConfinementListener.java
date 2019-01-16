@@ -16,10 +16,19 @@
 
 package com.github.upthewaterspout.fates.core.threading.confinement;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Set;
+
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 
 public class ThreadConfinementListener implements ExecutionEventListener {
   private final ExecutionEventListener delegate;
+  private ReachableObjectFinder reachableObjects = new ReachableObjectFinder();
+
+  private ThreadLocal<Set<Object>> threadConfinedObjects = ThreadLocal.withInitial(() -> Collections
+      .newSetFromMap(new IdentityHashMap<>()));
 
   public ThreadConfinementListener(
       ExecutionEventListener listener) {
@@ -100,13 +109,30 @@ public class ThreadConfinementListener implements ExecutionEventListener {
 
   @Override
   public void beforeGetField(Object owner, String className, String methodName, int lineNumber) {
+    if(threadConfinedObjects.get().contains(owner)) {
+      //Do nothing if the object is confined to this thread
+      return;
+    }
     delegate.beforeGetField(owner, className, methodName, lineNumber);
   }
 
   @Override
   public void beforeSetField(Object owner, Object fieldValue, String className, String methodName,
                              int lineNumber) {
+    if(threadConfinedObjects.get().contains(owner)) {
+      //Do nothing if the object is confined to this thread
+      return;
+    }
+
+    removeThreadConfinedObject(fieldValue);
     delegate.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
+  }
+
+  private void removeThreadConfinedObject(Object fieldValue) {
+    Set<Object> threadLocalObjects = threadConfinedObjects.get();
+    if(threadLocalObjects.contains(fieldValue)) {
+      reachableObjects.stream(fieldValue).forEach(threadLocalObjects::remove);
+    }
   }
 
   @Override
@@ -121,6 +147,7 @@ public class ThreadConfinementListener implements ExecutionEventListener {
 
   @Override
   public void afterNew(Object object) {
+    threadConfinedObjects.get().add(object);
     delegate.afterNew(object);
   }
 }
