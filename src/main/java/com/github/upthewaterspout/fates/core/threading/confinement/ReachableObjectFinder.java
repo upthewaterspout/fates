@@ -19,11 +19,18 @@ package com.github.upthewaterspout.fates.core.threading.confinement;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.IdentityHashMap;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Utility for finding all of the objects reachable from a given object.
@@ -32,59 +39,74 @@ public class ReachableObjectFinder {
 
   /**
    * Return a stream of all objects that are reachable from a given object
+   * @param  root - The object to start from
+   * @param filter - A filter to control which objects are traversed. If this
+   * filter returns false, that object will not be returned in the stream, and it's
+   * references will not be followed.
    */
-  public Stream<Object> stream(Object root) {
-    return stream(root, Collections.newSetFromMap(new IdentityHashMap<>()));
+  public Stream<Object> stream(Object root, Predicate<Object> filter) {
+
+    return StreamSupport.stream(new ObjectTraversingIterator(root, filter), false);
   }
 
-  public Stream<Object> stream(Object root, Set<Object> visited) {
-    return root.getClass().isArray() ? streamArray(root, visited) : streamObject(root, visited);
+  /**
+   * Add the first level references from root to the unvisited list, if they have not been visited
+   * @param root
+   * @param filter
+   * @param unvisited
+   */
+  public void addReferences(Object root, Predicate<Object> filter,
+                            Deque<Object> unvisited) {
+    if(root.getClass().isArray()) {
+      arrayReferences(root, filter, unvisited);
+
+    } else {
+      fieldReferences(root, filter, unvisited);
+    }
   }
 
 
   /**
-   * Stream over the element in a array
+   * Find all of the elements of an array through reflection add them to the unvisited list
    */
-  private Stream<Object> streamArray(Object root, Set<Object> visited) {
+  private void arrayReferences(Object root, Predicate<Object> filter,
+                               Deque<Object> unvisited) {
     Class clazz = root.getClass();
     Class componentType = clazz.getComponentType();
     if(componentType.isPrimitive()) {
-      //If this is a primitive array, just include the array itself
-      return Stream.of(root);
+      return;
     }
 
-    //Otherwise, stream all of the elements in the array
-    Stream.Builder<Object> builder = Stream.builder();
     int length = Array.getLength(root);
     for(int i=0; i < length; i++) {
-      builder.add(Array.get(root, i));
-    }
-    Stream result = builder.build()
-        .flatMap(object -> stream(object, visited));
 
-    return Stream.concat(Stream.of(root), result);
+      Object object = Array.get(root, i);
+      if(filter.test(object)) {
+        unvisited.add(object);
+      }
+    }
   }
 
-  private Stream<Object> streamObject(Object root, Set<Object> visited) {
-    visited.add(root);
+  /**
+   * Find all of the fields of an object and add them to the unvisited list
+   */
+  private void fieldReferences(Object root, Predicate<Object> filter,
+                               Deque<Object> unvisited) {
 
-    Stream result = Stream.of(root);
     Class clazz = root.getClass();
+
 
     while(clazz != null) {
       Field[] fields = clazz.getDeclaredFields();
-      Stream<Object> fieldValues = Stream.of(fields)
+      Stream.of(fields)
           .filter(this::isObject)
           .filter(this::isNotStatic)
           .map(field -> getValue(root, field))
           .filter(Objects::nonNull)
-          .filter(object -> !visited.contains(object))
-          .flatMap(object -> stream(object, visited));
-      result = Stream.concat(result, fieldValues);
+          .filter(filter)
+          .forEach(unvisited::add);
       clazz = clazz.getSuperclass();
     };
-
-    return result;
   }
 
   private Object getValue(Object root, Field field) {
@@ -104,4 +126,45 @@ public class ReachableObjectFinder {
     return !field.getType().isPrimitive();
   }
 
+  private class ObjectTraversingIterator implements Spliterator<Object> {
+    private final Deque<Object> unvisited = new ArrayDeque<>();
+    private final Set<Object> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+    private final Predicate<Object> filter;
+
+    public ObjectTraversingIterator(Object root,
+                                    Predicate<Object> filter) {
+      if(filter.test(root)) {
+        unvisited.add(root);
+      }
+      this.filter = object -> !visited.contains(object) && filter.test(object);
+    }
+
+    @Override
+    public boolean tryAdvance(Consumer<? super Object> action) {
+      if(unvisited.isEmpty()) {
+        return false;
+      }
+
+      Object next = unvisited.pop();
+      visited.add(next);
+      addReferences(next, filter, unvisited);
+      action.accept(next);
+      return true;
+    }
+
+    @Override
+    public Spliterator<Object> trySplit() {
+      return null;
+    }
+
+    @Override
+    public long estimateSize() {
+      return Long.MAX_VALUE;
+    }
+
+    @Override
+    public int characteristics() {
+      return IMMUTABLE | DISTINCT | NONNULL;
+    }
+  }
 }

@@ -108,7 +108,7 @@ public class ThreadConfinementListenerTest {
   @Test
   public void nestedConfinedObjectIsPublishedWhenOwnerIsPublished() {
     Object object = new Object();
-    Object ownerObject = new Object();
+    ObjectWithReference ownerObject = new ObjectWithReference();
     Object sharedObject = new Object();
 
     listener.afterNew(ownerObject);
@@ -116,6 +116,7 @@ public class ThreadConfinementListenerTest {
 
     //Nest the thread confined object in another thread confined object
     listener.beforeSetField(ownerObject, object, "any", "any", 0);
+    ownerObject.reference = object;
 
     //Make the ownerObject shared, which should also make the nested object shared
     listener.beforeSetField(sharedObject, ownerObject, "any", "any", 0);
@@ -125,6 +126,10 @@ public class ThreadConfinementListenerTest {
 
     //Operations on the nested object should now be passed along
     verify(delegate).beforeGetField(object, "any", "any", 0);
+  }
+
+  private static class ObjectWithReference {
+    Object reference;
   }
 
     //Basic algorithm

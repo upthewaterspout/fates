@@ -130,9 +130,8 @@ public class ThreadConfinementListener implements ExecutionEventListener {
 
   private void removeThreadConfinedObject(Object fieldValue) {
     Set<Object> threadLocalObjects = threadConfinedObjects.get();
-    if(threadLocalObjects.contains(fieldValue)) {
-      reachableObjects.stream(fieldValue).forEach(threadLocalObjects::remove);
-    }
+    reachableObjects.stream(fieldValue, threadLocalObjects::contains)
+        .forEach(threadLocalObjects::remove);
   }
 
   @Override

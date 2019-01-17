@@ -31,7 +31,7 @@ public class ReachableObjectFinderTest {
     root.left = a;
     a.right = b;
 
-    assertThat(new ReachableObjectFinder().stream(root)).contains(root, a, b);
+    assertThat(new ReachableObjectFinder().stream(root, object -> true)).contains(root, a, b);
   }
 
   @Test
@@ -43,7 +43,7 @@ public class ReachableObjectFinderTest {
     a.left = b;
     b.right = root;
 
-    assertThat(new ReachableObjectFinder().stream(root)).contains(root, a, b);
+    assertThat(new ReachableObjectFinder().stream(root, object -> true)).contains(root, a, b);
   }
 
   @Test
@@ -55,7 +55,19 @@ public class ReachableObjectFinderTest {
     root.right = b;
     a.left = c;
 
-    assertThat(new ReachableObjectFinder().stream(root)).contains(root, a, b, c);
+    assertThat(new ReachableObjectFinder().stream(root, object -> true)).contains(root, a, b, c);
+  }
+
+
+  @Test
+  public void filterStopsReferenceChasing() {
+    ObjectWithReferences root = new ObjectWithReferences();
+    ObjectWithReferences a = new ObjectWithReferences();
+    ObjectWithReferences b = new ObjectWithReferences();
+    root.left = a;
+    a.left = b;
+
+    assertThat(new ReachableObjectFinder().stream(root, object -> !object.equals(a))).contains(root);
   }
 
   public static class ObjectWithReferences {
