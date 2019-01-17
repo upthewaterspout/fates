@@ -20,9 +20,34 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 
+/**
+ * {@link ExecutionEventListener} that does not pass on events that happen to objects
+ * which are reachable only by the current thread.
+ *
+ * <ul>
+ * Basic algorithm
+ * <li> When an object is created, it is stored in a thread confined set </li>
+ * <li> Calls to beforeGet/Set on anything in the thread local set are not passed on </li>
+ * <li> If thread confined object added as the value of a field on a non thread confined object,
+ *      the object anything reachable by it are removed from the the test </li>
+ *
+ * Reachability is determined by transversing references from the object through reflection.
+ *
+ */
+
+//TODO - also skip these calls if they affect a thread confined object. These are more
+// complicated because we still want the side effects of these calls (locking a monitor)
+// But we don't necessarily need to consider them events where we might want to schedule
+// a different thread.
+//  listener.beforeSynchronization("someobject");
+//  listener.afterSynchronization("someobject");
+//  listener.replaceWait();
+//  listener.replaceNotify();
+//  listener.replaceNotifyAll();
 public class ThreadConfinementListener implements ExecutionEventListener {
   private final ExecutionEventListener delegate;
   private ReachableObjectFinder reachableObjects = new ReachableObjectFinder();

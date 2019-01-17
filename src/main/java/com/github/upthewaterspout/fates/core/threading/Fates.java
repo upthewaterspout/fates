@@ -109,10 +109,11 @@ public class Fates {
     ThreadSchedulingListener scheduler = new ThreadSchedulingListener(decider);
     scheduler.begin();
 
-    //In front of that is a listener that can skip events if we doing class loading
+    //In front of that is a listener that can skip events if we are doing class loading
     ExecutionEventListener listener
         = new AtomicClassLoadingDecorator( scheduler);
 
+    //In front of that is a listener that detects if objects are only used by a single thread
     listener = new ThreadConfinementListener(listener);
 
     //In front of that is a listener which restricts instrumentation to threads started by

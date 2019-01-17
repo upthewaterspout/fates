@@ -132,24 +132,5 @@ public class ThreadConfinementListenerTest {
     Object reference;
   }
 
-    //Basic algorithm
-    // - New objects are stored in a thread local set
-    // - Calls to set that pass the new object to something not in the set remove it from the thread local set, along with any reachable objects? Reachability is computed through java reference chasing?
-    // - Calls to beforeGet/Set on the new object are ignored
-    // Would like to also ignore synchronization calls, maybe some others, but that gets trickier
-    // if the object is published after synchronization happens...
-    // Maybe the issue is that synchronization should *not* be considered a scheduling
-    // point by the scheduler unless the current thread is blocked? If we barged on in, would
-    // the behavior be different? Yeah, ... maybe
-
-    //TODO, ignore all of these calls
-    //This gets a bit tricky, because we need the effects of these calls
-    //To be consistent, even if we publish the sync object in the middle of the synchronized
-    //block
-//    listener.beforeSynchronization("someobject");
-//    listener.afterSynchronization("someobject");
-//    listener.replaceWait();
-//    listener.replaceNotify();
-//    listener.replaceNotifyAll();
 
 }
