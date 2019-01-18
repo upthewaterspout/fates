@@ -34,7 +34,7 @@ import sun.misc.Launcher;
 public class FatesAgent {
   public static void premain(String agentArgs, Instrumentation inst) {
     FilterTransformer transformer = new FilterTransformer(
-        new AsmTransformer(), "com/github/upthewaterspout/fates/core", "com/intellij");
+        new AsmTransformer(), "com/github/upthewaterspout/fates/core", "com/intellij", "java/lang/ThreadLocal", "java/lang/ref/WeakReference", "java/lang/ref/Reference");
     inst.addTransformer(transformer, true);
 
     ArrayList<Class<?>> toTransform = new ArrayList<>();
