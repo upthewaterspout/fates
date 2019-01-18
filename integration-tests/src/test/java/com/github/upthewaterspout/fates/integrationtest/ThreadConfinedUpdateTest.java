@@ -23,13 +23,14 @@ import java.util.Set;
 
 import com.github.upthewaterspout.fates.core.threading.Fates;
 import com.github.upthewaterspout.fates.integrationtest.executor.ParallelExecutor;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class ThreadConfinedUpdateTest {
 
-  @Test(timeout =  30_000L)
+  @Test(timeout =  300_000L)
   public void shouldNotHangForThreadConfinedUpdates() throws Exception {
     Fates.run(() -> {
       new ParallelExecutor<Set<Integer>>()
@@ -46,7 +47,7 @@ public class ThreadConfinedUpdateTest {
       Set<Integer> set = new HashSet<>();
 
       for(int i =0; i < 1000; i++) {
-        set.add(i);
+        set.add(new Integer(i));
       }
 
       return set;
