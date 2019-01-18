@@ -17,9 +17,12 @@
 package com.github.upthewaterspout.fates.core.threading.instrument.agent;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.AsmTransformer;
@@ -30,15 +33,23 @@ import sun.misc.Launcher;
  */
 public class FatesAgent {
   public static void premain(String agentArgs, Instrumentation inst) {
-    inst.addTransformer(new FilterTransformer("com.github.upthewaterspout.fates.core.*|com.intellij.*", ".*",
-        new AsmTransformer()), true);
-    try {
-      inst.retransformClasses(Thread.class);
-      inst.retransformClasses(ClassLoader.class);
-      inst.retransformClasses(URLClassLoader.class);
-    } catch (UnmodifiableClassException e) {
-      System.err.println("Could not transform Thread.class");
+    FilterTransformer transformer = new FilterTransformer(
+        new AsmTransformer(), "com/github/upthewaterspout/fates/core", "com/intellij");
+    inst.addTransformer(transformer, true);
+
+    ArrayList<Class<?>> toTransform = new ArrayList<>();
+    for(Class<?> clazz : inst.getAllLoadedClasses()) {
+      if(!clazz.isPrimitive() && !clazz.isArray() && !clazz.equals(Object.class)) {
+        toTransform.add(clazz);
+      }
     }
+
+    try {
+      inst.retransformClasses(toTransform.toArray(new Class[0]));
+    } catch (UnmodifiableClassException e) {
+      throw new RuntimeException("Could not transform previously defined classes: " + e);
+    }
+
     ExecutionEventSingleton.setAvailable();
   }
 

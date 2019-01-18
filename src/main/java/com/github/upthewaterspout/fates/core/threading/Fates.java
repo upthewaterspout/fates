@@ -18,16 +18,16 @@ package com.github.upthewaterspout.fates.core.threading;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.RepeatedTest;
+import com.github.upthewaterspout.fates.core.states.StateExplorationHarness;
 import com.github.upthewaterspout.fates.core.states.StateExplorer;
+import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
 import com.github.upthewaterspout.fates.core.threading.confinement.ThreadConfinementListener;
-import com.github.upthewaterspout.fates.core.threading.harness.ErrorCapturingExplorer;
 import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
+import com.github.upthewaterspout.fates.core.threading.harness.ErrorCapturingExplorer;
 import com.github.upthewaterspout.fates.core.threading.harness.ThreadLocalEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulingListener;
-import com.github.upthewaterspout.fates.core.states.StateExplorationHarness;
-import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
 
 /**
  * A harness for running a callable that launches multiple threads with all possible

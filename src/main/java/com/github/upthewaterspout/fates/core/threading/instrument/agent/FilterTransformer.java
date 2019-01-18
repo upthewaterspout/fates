@@ -27,21 +27,18 @@ import java.util.regex.Pattern;
  */
 public class FilterTransformer implements ClassFileTransformer {
 
-  private final Pattern exclude;
-  private final Pattern include;
+  private final String[] excludedPackages;
   private ClassFileTransformer delegate;
 
-  public FilterTransformer(String excludeRegex, String includeRegex,
-                           ClassFileTransformer delegate) {
-    this.exclude = Pattern.compile(excludeRegex);
-    this.include = Pattern.compile(includeRegex);
+  public FilterTransformer(ClassFileTransformer delegate, String ... excludedPackages) {
+    this.excludedPackages = excludedPackages;
     this.delegate = delegate;
   }
   @Override
   public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                           ProtectionDomain protectionDomain, byte[] classfileBuffer)
       throws IllegalClassFormatException {
-    if(!isExcluded(className) && isIncluded(className)) {
+    if(!isExcluded(className)) {
       return delegate.transform(loader,
           className,
           classBeingRedefined,
@@ -51,11 +48,13 @@ public class FilterTransformer implements ClassFileTransformer {
     return null;
   }
 
-  private boolean isIncluded(String className) {
-    return this.include.matcher(className).matches();
-  }
+  public boolean isExcluded(String className) {
+    for(String pakage : excludedPackages) {
+      if(className.startsWith(pakage)) {
+        return true;
+      }
+    }
 
-  private boolean isExcluded(String className) {
-    return exclude.matcher(className).matches();
+    return false;
   }
 }
