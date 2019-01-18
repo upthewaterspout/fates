@@ -16,6 +16,8 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
@@ -39,7 +41,8 @@ public class AsmTransformer implements ClassFileTransformer {
   public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                           ProtectionDomain protectionDomain, byte[] classfileBuffer) {
     try {
-      ClassWriter outputWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+      ClassReader reader = new ClassReader(classfileBuffer);
+      ClassWriter outputWriter = new ClassWriter(reader, COMPUTE_MAXS);
       ClassVisitor transformingVisitor = outputWriter;
 
       transformingVisitor = new MinimumVersionVisitor(transformingVisitor);
@@ -55,7 +58,6 @@ public class AsmTransformer implements ClassFileTransformer {
       transformingVisitor = new InstrumentFieldAccess(transformingVisitor);
       transformingVisitor = new InstrumentClassLoading(transformingVisitor);
       transformingVisitor = new InstrumentNewObject(transformingVisitor);
-      ClassReader reader = new ClassReader(classfileBuffer);
       reader.accept(transformingVisitor, ClassReader.EXPAND_FRAMES);
       byte[] result =  outputWriter.toByteArray();
 
