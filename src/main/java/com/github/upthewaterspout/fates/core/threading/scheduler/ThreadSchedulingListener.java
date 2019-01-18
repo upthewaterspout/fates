@@ -125,7 +125,8 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
    * Before a field read, potentially switch to a new thread
    */
   @Override
-  public void beforeGetField(String className, String methodName, int lineNumber) {
+  public void beforeGetField(Object owner, String className, String methodName,
+                             int lineNumber) {
     schedulerState.setLineNumber(Thread.currentThread(), className, methodName, lineNumber);
     yield();
   }
@@ -134,7 +135,9 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
    * Before a field write, potentially switch to a new thread
    */
   @Override
-  public void beforeSetField(String className, String methodName, int lineNumber) {
+  public void beforeSetField(Object owner, Object fieldValue, String className,
+                             String methodName,
+                             int lineNumber) {
     schedulerState.setLineNumber(Thread.currentThread(), className, methodName, lineNumber);
     yield();
   }
@@ -250,6 +253,11 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
       lock.unlock();
     }
 
+  }
+
+  @Override
+  public void afterNew(final Object object) {
+    //do nothing
   }
 
   @Override

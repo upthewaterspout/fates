@@ -36,7 +36,7 @@ public class InstrumentSynchronizedBlock extends AbstractClassVisitor {
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
     final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
-    return new InstrumentSynchronization(Opcodes.ASM5, delegate, access, name, desc);
+    return new InstrumentSynchronization(Opcodes.ASM7, delegate, access, name, desc);
   }
 
   private class InstrumentSynchronization extends AdviceAdapter {
@@ -54,15 +54,15 @@ public class InstrumentSynchronizedBlock extends AbstractClassVisitor {
     @Override
     public void visitInsn(int opcode) {
       if (Opcodes.MONITORENTER == opcode) {
-        mv.visitInsn(DUP);
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitInsn(DUP);
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeSynchronization",
           "(Ljava/lang/Object;)V", false);
         super.visitInsn(opcode);
       } else if (Opcodes.MONITOREXIT == opcode) {
-        mv.visitInsn(DUP);
+        visitInsn(DUP);
         super.visitInsn(opcode);
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "afterSynchronization",
           "(Ljava/lang/Object;)V", false);
 

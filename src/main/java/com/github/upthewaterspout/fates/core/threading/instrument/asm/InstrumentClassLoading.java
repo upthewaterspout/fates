@@ -36,7 +36,7 @@ public class InstrumentClassLoading extends AbstractClassVisitor {
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
     final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
     if(name.equals("loadClass")) {
-      return new InstrumentMethod(Opcodes.ASM5, delegate, access, name, desc);
+      return new InstrumentMethod(Opcodes.ASM7, delegate, access, name, desc);
     } else {
       return delegate;
     }
@@ -49,7 +49,7 @@ public class InstrumentClassLoading extends AbstractClassVisitor {
 
     @Override
     protected void onMethodEnter() {
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+      visitMethodInsn(Opcodes.INVOKESTATIC,
           Type.getInternalName(ExecutionEventSingleton.class), "beforeLoadClass", "()V", false);
 
       super.onMethodEnter();
@@ -57,7 +57,7 @@ public class InstrumentClassLoading extends AbstractClassVisitor {
 
     @Override
     protected void onMethodExit(int opcode) {
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+      visitMethodInsn(Opcodes.INVOKESTATIC,
           Type.getInternalName(ExecutionEventSingleton.class), "afterLoadClass", "()V", false);
 
       super.onMethodExit(opcode);

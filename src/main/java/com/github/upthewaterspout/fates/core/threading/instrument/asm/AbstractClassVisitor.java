@@ -20,6 +20,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  * Base class for synchronization hook adding visitors with common functionality.
@@ -32,7 +33,7 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
   private String sourceFile;
 
   public AbstractClassVisitor(ClassVisitor cv) {
-    super(Opcodes.ASM5, cv);
+    super(Opcodes.ASM7, cv);
   }
 
   public void visit(int version, int access, String name, String signature, String superName,
@@ -51,8 +52,7 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
   public MethodVisitor visitMethod(int access, String name, String desc, String signature,
                                    String[] exceptions) {
     methodName = name;
-    return new HookMethodVisitor(name,
-        super.visitMethod(access, name, desc, signature, exceptions));
+    return new HookMethodVisitor(super.visitMethod(access, name, desc, signature, exceptions), access, name, desc);
   }
   
 
@@ -72,10 +72,10 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
     return lastLineNumber;
   }
 
-  public class HookMethodVisitor extends MethodVisitor {
+  public class HookMethodVisitor extends AdviceAdapter {
 
-    public HookMethodVisitor(String methodName, MethodVisitor mv) {
-      super(Opcodes.ASM5, mv);
+    protected HookMethodVisitor(MethodVisitor mv, int access, String name, String desc) {
+      super(ASM7, mv, access, name, desc);
     }
 
     @Override

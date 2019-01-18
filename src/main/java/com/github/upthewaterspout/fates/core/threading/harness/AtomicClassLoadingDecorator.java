@@ -20,8 +20,8 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
 
 /**
  * A decorator for a {@link ExecutionEventListener} that allows disabling the {@link
- * ExecutionEventListener#beforeGetField(String, String, int)}  and {@link
- * ExecutionEventListener#beforeSetField(String, String, int)} while class loading is happening.
+ * ExecutionEventListener#beforeGetField(Object, String, String, int)}  and {@link
+ * ExecutionEventListener#beforeSetField(Object, Object, String, String, int)} while class loading is happening.
  *
  * This decorator is used to suppress context switching that would normally happen from field
  * accesses within classloading, to reduce the number of decision points in a test.
@@ -155,17 +155,27 @@ public class AtomicClassLoadingDecorator
   }
 
   @Override
-  public void beforeGetField(String className, String methodName, int lineNumber) {
+  public void beforeGetField(Object owner, String className, String methodName,
+                             int lineNumber) {
     if(atomicEntryCount.get().isZero()) {
-      delegate.beforeGetField(className, methodName, lineNumber);
+      delegate.beforeGetField(owner, className, methodName, lineNumber);
     }
 
   }
 
   @Override
-  public void beforeSetField(String className, String methodName, int lineNumber) {
+  public void beforeSetField(Object owner, Object fieldValue, String className,
+                             String methodName,
+                             int lineNumber) {
     if(atomicEntryCount.get().isZero()) {
-      delegate.beforeSetField(className, methodName, lineNumber);
+      delegate.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
+    }
+  }
+
+  @Override
+  public void afterNew(Object object) {
+    if(atomicEntryCount.get().isZero()) {
+      delegate.afterNew(object);
     }
   }
 

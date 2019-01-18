@@ -38,7 +38,7 @@ public class InstrumentLockSupport extends AbstractClassVisitor {
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
     final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
-    return new ReplaceParkAndUnpark(Opcodes.ASM5, delegate, access, name, desc);
+    return new ReplaceParkAndUnpark(Opcodes.ASM7, delegate, access, name, desc);
   }
 
   private class ReplaceParkAndUnpark extends AdviceAdapter {
@@ -56,16 +56,16 @@ public class InstrumentLockSupport extends AbstractClassVisitor {
     public void visitMethodInsn(final int opcode, final String owner, final String name,
                                 final String desc, final boolean itf) {
       if(opcode == INVOKESTATIC && owner.equals("java/util/concurrent/locks/LockSupport") && name.equals("park")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replacePark", desc, false);
       } else if(opcode == INVOKESTATIC && owner.equals("java/util/concurrent/locks/LockSupport") && name.equals("parkNanos")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceParkNanos", desc, false);
       } else if(opcode == INVOKESTATIC && owner.equals("java/util/concurrent/locks/LockSupport") && name.equals("parkUntil")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceParkUntil", desc, false);
       } else if(opcode == INVOKESTATIC && owner.equals("java/util/concurrent/locks/LockSupport") && name.equals("unpark")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton",
             "replaceUnpark", desc, false);
       } else {

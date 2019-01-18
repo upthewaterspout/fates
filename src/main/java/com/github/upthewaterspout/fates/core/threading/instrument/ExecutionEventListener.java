@@ -126,19 +126,23 @@ public interface ExecutionEventListener {
 
   /**
    * Called before a GETFIELD instruction
+   * @param owner
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get
    */
-  void beforeGetField(String className, String methodName, int lineNumber);
+  void beforeGetField(Object owner, String className, String methodName, int lineNumber);
 
   /**
    * Called before a SETFIELD instruction
+   * @param owner
+   * @param fieldValue
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get
    */
-  void beforeSetField(String className, String methodName, int lineNumber);
+  void beforeSetField(Object owner, Object fieldValue, String className,
+                      String methodName, int lineNumber);
 
   /**
    * Called when class loading starts
@@ -151,4 +155,9 @@ public interface ExecutionEventListener {
   void afterLoadClass();
 
 
+  /**
+   * Called after a new object is created in the current thread
+   * (but before the constructor!)
+   */
+  void afterNew(Object object);
 }

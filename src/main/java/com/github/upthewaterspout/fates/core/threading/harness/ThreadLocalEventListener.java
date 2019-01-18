@@ -49,16 +49,19 @@ public class ThreadLocalEventListener implements ExecutionEventListener {
   }
 
   @Override
-  public void beforeGetField(String className, String methodName, int lineNumber) {
+  public void beforeGetField(Object owner, String className, String methodName,
+                             int lineNumber) {
     if(enabled()) {
-      delegate.beforeGetField(className, methodName, lineNumber);
+      delegate.beforeGetField(owner, className, methodName, lineNumber);
     }
   }
 
   @Override
-  public void beforeSetField(String className, String methodName, int lineNumber) {
+  public void beforeSetField(Object owner, Object fieldValue, String className,
+                             String methodName,
+                             int lineNumber) {
     if(enabled()) {
-      delegate.beforeSetField(className, methodName, lineNumber);
+      delegate.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
     }
   }
 
@@ -188,6 +191,13 @@ public class ThreadLocalEventListener implements ExecutionEventListener {
       delegate.replaceJoin(defaultAction, thread, timeout, nanos);
     } else {
       defaultAction.replaceJoin(defaultAction, thread, timeout, nanos);
+    }
+  }
+
+  @Override
+  public void afterNew(Object object) {
+    if (enabled()) {
+      delegate.afterNew(object);
     }
   }
 }

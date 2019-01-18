@@ -18,14 +18,20 @@ package com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumen
 
 import java.util.concurrent.Callable;
 
-
-public class ClassWithFieldAccess implements Callable {
-  int a = 5;
+public class ClassWithAnonymousInnerClass implements Callable {
 
   public Object call() {
-    if(a == 5) {
-      a = a + 1;
+    Callable class1 = new MyCallable();
+
+    return class1;
+
+  }
+
+  private class MyCallable implements Callable {
+
+    @Override
+    public Object call() throws Exception {
+      return ClassWithAnonymousInnerClass.this.hashCode();
     }
-    return a;
   }
 }

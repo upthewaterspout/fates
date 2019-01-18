@@ -29,15 +29,15 @@ import org.junit.Test;
 public class FilterTransformerTest {
 
   @Test
-  public void transformHonorsExcludesAndIncludes() throws IllegalClassFormatException {
+  public void transformHonorsExcludes() throws IllegalClassFormatException {
 
     ClassFileTransformer delegate = mock(ClassFileTransformer.class);
-    FilterTransformer filterTransformer = new FilterTransformer(".*excluded", "hello.*", delegate);
+    FilterTransformer filterTransformer = new FilterTransformer(delegate, "excluded");
     byte[] transfomed = new byte[0];
     when(delegate.transform(any(), any(), any() ,any() ,any())).thenReturn(transfomed);
 
     assertEquals(transfomed, filterTransformer.transform(null, "hello world", null, null, null));
-    assertEquals(null, filterTransformer.transform(null, "hello world excluded", null, null, null));
+    assertEquals(null, filterTransformer.transform(null, "excluded hello world", null, null, null));
     assertEquals(null, filterTransformer.transform(null, "excluded", null, null, null));
   }
 

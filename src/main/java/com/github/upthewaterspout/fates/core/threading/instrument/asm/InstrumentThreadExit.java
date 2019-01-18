@@ -38,7 +38,7 @@ public class InstrumentThreadExit extends AbstractClassVisitor {
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
     if(getClassName().equals("java/lang/Thread") && name.equals("exit")) {
       final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
-      return new InstrumentingMethodVisitor(Opcodes.ASM5, delegate, access, name, desc);
+      return new InstrumentingMethodVisitor(Opcodes.ASM7, delegate, access, name, desc);
     } else {
       return super.visitMethod(access, name, desc, signature, exceptions);
     }
@@ -49,7 +49,7 @@ public class InstrumentThreadExit extends AbstractClassVisitor {
     /**
      * Creates a new {@link AdviceAdapter}.
      * @param api the ASM API version implemented by this visitor. Must be one
-     * of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
+     * of {@link Opcodes#ASM4} or {@link Opcodes#ASM7}.
      * @param mv the method visitor to which this adapter delegates calls.
      * @param access the method's access flags (see {@link Opcodes}).
      * @param name the method's name.
@@ -66,9 +66,9 @@ public class InstrumentThreadExit extends AbstractClassVisitor {
 
     @Override
     protected void onMethodEnter() {
-      mv.visitMethodInsn(INVOKESTATIC,
+      visitMethodInsn(INVOKESTATIC,
           "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeThreadExit", "()V", false);
-      mv.visitLabel(new Label());
+      visitLabel(new Label());
       super.onMethodEnter();
     }
   }

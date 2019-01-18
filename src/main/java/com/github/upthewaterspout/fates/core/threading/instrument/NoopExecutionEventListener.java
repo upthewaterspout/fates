@@ -28,12 +28,15 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class NoopExecutionEventListener implements ExecutionEventListener {
   @Override
-  public void beforeGetField(String className, String methodName, int lineNumber) {
+  public void beforeGetField(Object owner, String className, String methodName,
+                             int lineNumber) {
     //do nothing
   }
 
   @Override
-  public void beforeSetField(String className, String methodName, int lineNumber) {
+  public void beforeSetField(Object owner, Object fieldValue, String className,
+                             String methodName,
+                             int lineNumber) {
     //do nothing
   }
 
@@ -117,5 +120,10 @@ public class NoopExecutionEventListener implements ExecutionEventListener {
   @Override
   public void replaceParkUntil(ExecutionEventListener defaultAction, Object blocker, long deadline) {
     LockSupport.parkUntil(blocker, deadline);
+  }
+
+  @Override
+  public void afterNew(Object object) {
+
   }
 }

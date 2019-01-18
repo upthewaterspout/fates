@@ -50,13 +50,14 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override
-  public void beforeGetField(String className, String methodName, int lineNumber) {
+  public void beforeGetField(Object owner, String className, String methodName,
+                             int lineNumber) {
     if(disabled.get()) {
       return;
     }
     disable();
     try {
-      delegate.beforeGetField(className, methodName, lineNumber);
+      delegate.beforeGetField(owner, className, methodName, lineNumber);
     } catch(RuntimeException t) {
       t.printStackTrace();
       lastError = t;
@@ -66,13 +67,15 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override
-  public void beforeSetField(String className, String methodName, int lineNumber) {
+  public void beforeSetField(Object owner, Object fieldValue, String className,
+                             String methodName,
+                             int lineNumber) {
     if(disabled.get()) {
       return;
     }
     disable();
     try {
-      delegate.beforeSetField(className, methodName, lineNumber);
+      delegate.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
     } catch(RuntimeException t) {
       t.printStackTrace();
       lastError = t;
@@ -334,6 +337,21 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   }
 
+  @Override
+  public void afterNew(final Object object) {
+    if(disabled.get()) {
+      return;
+    }
+    disable();
+    try {
+      delegate.afterNew(object);
+    } catch(RuntimeException t) {
+      t.printStackTrace();
+      lastError = t;
+    } finally {
+      enable();
+    }
+  }
 
   public void disable() {
     disabled.set(Boolean.TRUE);

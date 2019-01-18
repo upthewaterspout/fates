@@ -16,12 +16,15 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.util.CheckClassAdapter;
 
 /**
  * Pipeline of ASM ClassVisitors that transforms classes, adding
@@ -38,9 +41,12 @@ public class AsmTransformer implements ClassFileTransformer {
   public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                           ProtectionDomain protectionDomain, byte[] classfileBuffer) {
     try {
-      ClassWriter outputWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+      ClassReader reader = new ClassReader(classfileBuffer);
+      ClassWriter outputWriter = new ClassWriter(reader, COMPUTE_MAXS);
+      ClassVisitor transformingVisitor = outputWriter;
 
-      ClassVisitor transformingVisitor = new InstrumentThreadSynchronizedMethods(outputWriter);
+      transformingVisitor = new MinimumVersionVisitor(transformingVisitor);
+      transformingVisitor = new InstrumentThreadSynchronizedMethods(transformingVisitor);
       transformingVisitor = new InstrumentSynchronizedBlock(transformingVisitor);
       if(classBeingRedefined == null) {
         transformingVisitor = new InstrumentSynchronizedMethod(transformingVisitor);
@@ -51,10 +57,15 @@ public class AsmTransformer implements ClassFileTransformer {
       transformingVisitor = new InstrumentJoin(transformingVisitor);
       transformingVisitor = new InstrumentFieldAccess(transformingVisitor);
       transformingVisitor = new InstrumentClassLoading(transformingVisitor);
-      ClassReader reader = new ClassReader(classfileBuffer);
+      transformingVisitor = new InstrumentNewObject(transformingVisitor);
       reader.accept(transformingVisitor, ClassReader.EXPAND_FRAMES);
-      return outputWriter.toByteArray();
+      byte[] result =  outputWriter.toByteArray();
+
+      new ClassReader(result).accept(new CheckClassAdapter(new ClassWriter(0)), 0);
+
+      return result;
     } catch(Throwable t) {
+      System.err.println("Error transforming " + className);
       t.printStackTrace();
       throw t;
     }

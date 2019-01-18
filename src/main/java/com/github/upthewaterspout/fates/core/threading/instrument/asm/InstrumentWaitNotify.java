@@ -35,7 +35,7 @@ public class InstrumentWaitNotify extends AbstractClassVisitor {
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
       final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
-      return new InstrumentWaitNotifyCalls(Opcodes.ASM5, delegate, access, name, desc);
+      return new InstrumentWaitNotifyCalls(Opcodes.ASM7, delegate, access, name, desc);
   }
 
   private class InstrumentWaitNotifyCalls extends AdviceAdapter {
@@ -62,24 +62,24 @@ public class InstrumentWaitNotify extends AbstractClassVisitor {
       }
 
       if(name.equals("wait") && desc.equals("()V")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton",
             "replaceWait",
             "(Ljava/lang/Object;)V", false);
       } else if(name.equals("wait") && desc.equals("(J)V")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceWait",
             "(Ljava/lang/Object;J)V", false);
       } else if(name.equals("wait") && desc.equals("(JI)V")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceWait",
             "(Ljava/lang/Object;JI)V", false);
       } else if(name.equals("notify")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceNotify",
           "(Ljava/lang/Object;)V", false);
       } else if (name.equals("notifyAll")) {
-        mv.visitMethodInsn(INVOKESTATIC,
+        visitMethodInsn(INVOKESTATIC,
             "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceNotifyAll",
           "(Ljava/lang/Object;)V", false);
       } else {

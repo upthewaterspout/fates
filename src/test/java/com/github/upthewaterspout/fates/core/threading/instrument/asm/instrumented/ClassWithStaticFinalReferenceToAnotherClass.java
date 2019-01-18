@@ -18,14 +18,18 @@ package com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumen
 
 import java.util.concurrent.Callable;
 
+public class ClassWithStaticFinalReferenceToAnotherClass implements Callable<String[]> {
 
-public class ClassWithFieldAccess implements Callable {
-  int a = 5;
+  public String[] call() {
 
-  public Object call() {
-    if(a == 5) {
-      a = a + 1;
+    if ("" == null) {
+      return null;
     }
-    return a;
+    if ("".length() == 0) {
+      return ClassWithStaticField.RESULT;
+    }
+
+    return null;
   }
+
 }

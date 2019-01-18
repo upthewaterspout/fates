@@ -19,8 +19,8 @@ package com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumen
 import java.util.concurrent.Callable;
 
 
-public class ClassWithFieldAccess implements Callable {
-  int a = 5;
+public class ClassWithFieldAccessLong implements Callable {
+  long a = 5;
 
   public Object call() {
     if(a == 5) {
