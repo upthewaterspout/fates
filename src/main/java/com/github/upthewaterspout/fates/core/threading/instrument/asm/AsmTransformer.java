@@ -40,7 +40,7 @@ public class AsmTransformer implements ClassFileTransformer {
                           ProtectionDomain protectionDomain, byte[] classfileBuffer) {
     try {
       ClassWriter outputWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-      ClassVisitor transformingVisitor = new CheckClassAdapter(outputWriter, false);
+      ClassVisitor transformingVisitor = outputWriter;
 
       transformingVisitor = new MinimumVersionVisitor(transformingVisitor);
       transformingVisitor = new InstrumentThreadSynchronizedMethods(transformingVisitor);
@@ -57,7 +57,11 @@ public class AsmTransformer implements ClassFileTransformer {
       transformingVisitor = new InstrumentNewObject(transformingVisitor);
       ClassReader reader = new ClassReader(classfileBuffer);
       reader.accept(transformingVisitor, ClassReader.EXPAND_FRAMES);
-      return outputWriter.toByteArray();
+      byte[] result =  outputWriter.toByteArray();
+
+      new ClassReader(result).accept(new CheckClassAdapter(new ClassWriter(0)), 0);
+
+      return result;
     } catch(Throwable t) {
       System.err.println("Error transforming " + className);
       t.printStackTrace();

@@ -103,7 +103,6 @@ public class InstrumentationAgentTest {
 
       @Override public void afterSynchronization(final Object sync) {
         afterSynchronization.incrementAndGet();
-
       }
 
       @Override
@@ -167,15 +166,6 @@ public class InstrumentationAgentTest {
   }
 
   @Test
-  public void invokingCallWithFieldAccessCallsListener() {
-    SampleFieldAccess instance = new SampleFieldAccess();
-    int initialCount = fieldAccesses.get();
-    instance.call();
-    int finalCount = fieldAccesses.get();
-    assertEquals(4, finalCount - initialCount);
-  }
-
-  @Test
   public void invokingCallWithThreadStartCallsListener() throws Exception {
     SampleThreadStart instance = new SampleThreadStart();
     int initialBeforeCount = beforeThreadStarts.get();
@@ -195,17 +185,6 @@ public class InstrumentationAgentTest {
     instance.call();
     assertEquals(1, replaceThreadPark.get() - initialPark);
     assertEquals(1, replaceUnpark.get() - initialUnpark);
-  }
-
-  @Test
-  public void invokingCallWithSynchronizationCallsListener() throws Exception {
-    //Trigger classloading, etc. which do synchronization before the test
-    SampleSynchronization.testNormalSync();
-    int initialBeforeSync = beforeSynchronization.get();
-    int initialAfterSync = afterSynchronization.get();
-    SampleSynchronization.testNormalSync();
-    assertEquals(1, beforeSynchronization.get() - initialBeforeSync);
-    assertEquals(1, afterSynchronization.get() - initialAfterSync);
   }
 
   @Test
