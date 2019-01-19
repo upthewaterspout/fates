@@ -16,8 +16,7 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
-import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
-
+import java.io.PrintWriter;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
@@ -25,6 +24,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.CheckClassAdapter;
+import org.objectweb.asm.util.TraceClassVisitor;
 
 /**
  * Pipeline of ASM ClassVisitors that transforms classes, adding
@@ -42,22 +42,22 @@ public class AsmTransformer implements ClassFileTransformer {
                           ProtectionDomain protectionDomain, byte[] classfileBuffer) {
     try {
       ClassReader reader = new ClassReader(classfileBuffer);
-      ClassWriter outputWriter = new ClassWriter(reader, COMPUTE_MAXS);
+      ClassWriter outputWriter = new ClassWriter(reader, 0);
       ClassVisitor transformingVisitor = outputWriter;
-
-      transformingVisitor = new MinimumVersionVisitor(transformingVisitor);
-      transformingVisitor = new InstrumentThreadSynchronizedMethods(transformingVisitor);
-      transformingVisitor = new InstrumentSynchronizedBlock(transformingVisitor);
+      transformingVisitor = new IncreaseMaxStack(transformingVisitor, 5);
+      transformingVisitor = new MinimumVersionVisitor(transformingVisitor); //No stack usage
+      transformingVisitor = new InstrumentThreadSynchronizedMethods(transformingVisitor); //No stack usage
+      transformingVisitor = new InstrumentSynchronizedBlock(transformingVisitor); //One additional stack element
       if(classBeingRedefined == null) {
-        transformingVisitor = new InstrumentSynchronizedMethod(transformingVisitor);
+        transformingVisitor = new InstrumentSynchronizedMethod(transformingVisitor); //One additional stack element
       }
-      transformingVisitor = new InstrumentWaitNotify(transformingVisitor);
-      transformingVisitor = new InstrumentLockSupport(transformingVisitor);
-      transformingVisitor = new InstrumentThreadExit(transformingVisitor);
-      transformingVisitor = new InstrumentJoin(transformingVisitor);
-      transformingVisitor = new InstrumentFieldAccess(transformingVisitor);
-      transformingVisitor = new InstrumentClassLoading(transformingVisitor);
-      transformingVisitor = new InstrumentNewObject(transformingVisitor);
+      transformingVisitor = new InstrumentWaitNotify(transformingVisitor); //No stack usage
+      transformingVisitor = new InstrumentLockSupport(transformingVisitor); //No stack usage
+      transformingVisitor = new InstrumentThreadExit(transformingVisitor); //No stack usage
+      transformingVisitor = new InstrumentJoin(transformingVisitor); //No stack usage
+      transformingVisitor = new InstrumentFieldAccess(transformingVisitor); //5 stack elements max
+      transformingVisitor = new InstrumentClassLoading(transformingVisitor); //No stack usage
+      transformingVisitor = new InstrumentNewObject(transformingVisitor); //One additional stack element
       reader.accept(transformingVisitor, ClassReader.EXPAND_FRAMES);
       byte[] result =  outputWriter.toByteArray();
 
