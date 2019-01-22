@@ -126,7 +126,7 @@ public interface ExecutionEventListener {
 
   /**
    * Called before a GETFIELD instruction
-   * @param owner
+   * @param owner The object which owns the field
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get
@@ -135,8 +135,8 @@ public interface ExecutionEventListener {
 
   /**
    * Called before a SETFIELD instruction
-   * @param owner
-   * @param fieldValue
+   * @param owner The object which owns the field
+   * @param fieldValue the new value of the field, or null if the field is primitive
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get
@@ -158,6 +158,7 @@ public interface ExecutionEventListener {
   /**
    * Called after a new object is created in the current thread
    * (but before the constructor!)
+   * @param object - the object being created
    */
   void afterNew(Object object);
 }

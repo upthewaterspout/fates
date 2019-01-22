@@ -24,4 +24,12 @@ shadowJar {
     relocate 'org.objectweb.asm.', 'fates.shadow.org.objectweb.asm'
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact shadowJar
+        }
+    }
+}
+
 assemble.dependsOn shadowJar

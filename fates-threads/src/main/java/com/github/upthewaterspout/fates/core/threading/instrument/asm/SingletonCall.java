@@ -34,8 +34,9 @@ public class SingletonCall {
   /**
    * Add a call to {@link ExecutionEventSingleton in this method}. It is the responsibility
    * of the caller of this method to have already prepared the stack correctly!
-   * @param methodName
-   * @param parameterTypes
+   * @param methodName The name of the method
+   * @param returnType The return type of the method
+   * @param parameterTypes The parameter types of the method
    */
   public static void add(MethodVisitor methodVisitor, String methodName, Type returnType, Type ... parameterTypes) {
 

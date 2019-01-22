@@ -17,16 +17,12 @@
 package com.github.upthewaterspout.fates.core.threading.instrument.agent;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.AsmTransformer;
-import sun.misc.Launcher;
 
 /**
  * Java agent class to initialize our bytecode manipulating agent.

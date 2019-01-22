@@ -28,12 +28,14 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
  * {@link ExecutionEventListener} that does not pass on events that happen to objects
  * which are reachable only by the current thread.
  *
- * <ul>
+ * <br><br>
  * Basic algorithm
+ * <ul>
  * <li> When an object is created, it is stored in a thread confined set </li>
  * <li> Calls to beforeGet/Set on anything in the thread local set are not passed on </li>
  * <li> If thread confined object added as the value of a field on a non thread confined object,
  *      the object anything reachable by it are removed from the the test </li>
+ * </ul>
  *
  * Reachability is determined by transversing references from the object through reflection.
  *

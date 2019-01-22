@@ -43,6 +43,7 @@ public class ReachableObjectFinder {
    * @param filter - A filter to control which objects are traversed. If this
    * filter returns false, that object will not be returned in the stream, and it's
    * references will not be followed.
+   * @return A Stream of reachable objects
    */
   public Stream<Object> stream(Object root, Predicate<Object> filter) {
 
@@ -51,11 +52,8 @@ public class ReachableObjectFinder {
 
   /**
    * Add the first level references from root to the unvisited list, if they have not been visited
-   * @param root
-   * @param filter
-   * @param unvisited
    */
-  public void addReferences(Object root, Predicate<Object> filter,
+  private void addReferences(Object root, Predicate<Object> filter,
                             Deque<Object> unvisited) {
     if(root.getClass().isArray()) {
       arrayReferences(root, filter, unvisited);
