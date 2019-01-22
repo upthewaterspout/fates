@@ -18,6 +18,10 @@
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'maven'
+
+    group = 'com.github.upthewaterspout.fates'
+    version = '0.1'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
