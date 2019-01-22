@@ -16,6 +16,15 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.DUP2;
+import static org.objectweb.asm.Opcodes.DUP2_X1;
+import static org.objectweb.asm.Opcodes.DUP_X2;
+import static org.objectweb.asm.Opcodes.GETSTATIC;
+import static org.objectweb.asm.Opcodes.POP;
+import static org.objectweb.asm.Opcodes.POP2;
+import static org.objectweb.asm.Opcodes.PUTSTATIC;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -162,7 +171,7 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
       } else {
 
         //Stack  = value
-        visitInsn(Opcodes.DUP);
+        visitInsn(DUP);
 
         //Stack  = value, value
 
@@ -183,7 +192,7 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
     private boolean isFieldRead(int opcode) {
       switch (opcode) {
         case Opcodes.GETFIELD:
-        case Opcodes.GETSTATIC:
+        case GETSTATIC:
           return true;
         default:
           return false;
@@ -193,7 +202,7 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
     private boolean isFieldUpdate(int opcode) {
       switch (opcode) {
         case Opcodes.PUTFIELD:
-        case Opcodes.PUTSTATIC:
+        case PUTSTATIC:
           return true;
         default:
           return false;

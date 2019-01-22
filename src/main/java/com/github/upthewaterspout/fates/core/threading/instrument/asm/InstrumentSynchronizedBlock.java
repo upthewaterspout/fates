@@ -16,6 +16,9 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -39,7 +42,7 @@ public class InstrumentSynchronizedBlock extends AbstractClassVisitor {
     return new InstrumentSynchronization(Opcodes.ASM7, delegate, access, name, desc);
   }
 
-  private class InstrumentSynchronization extends AdviceAdapter {
+  private class InstrumentSynchronization extends MethodVisitor {
 
     protected InstrumentSynchronization(final int api,
                                         final MethodVisitor mv,
@@ -47,7 +50,7 @@ public class InstrumentSynchronizedBlock extends AbstractClassVisitor {
                                         final String name,
                                         final String desc)
     {
-      super(api, mv, access, name, desc);
+      super(api, mv);
     }
 
 

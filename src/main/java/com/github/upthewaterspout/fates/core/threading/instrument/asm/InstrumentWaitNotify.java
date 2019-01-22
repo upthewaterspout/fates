@@ -16,11 +16,12 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  * Replaces {@link Object#wait()} and {@link Object#notify()} with calls to
@@ -38,7 +39,7 @@ public class InstrumentWaitNotify extends AbstractClassVisitor {
       return new InstrumentWaitNotifyCalls(Opcodes.ASM7, delegate, access, name, desc);
   }
 
-  private class InstrumentWaitNotifyCalls extends AdviceAdapter {
+  private class InstrumentWaitNotifyCalls extends MethodVisitor {
 
     protected InstrumentWaitNotifyCalls(final int api,
                                         final MethodVisitor mv,
@@ -46,7 +47,7 @@ public class InstrumentWaitNotify extends AbstractClassVisitor {
                                         final String name,
                                         final String desc)
     {
-      super(api, mv, access, name, desc);
+      super(api, mv);
     }
 
     @Override

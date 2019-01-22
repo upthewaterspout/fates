@@ -16,13 +16,14 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+
 import java.util.concurrent.locks.LockSupport;
 
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  * Replace calls to {@link LockSupport} with calls to {@link ExecutionEventSingleton}
@@ -41,7 +42,7 @@ public class InstrumentLockSupport extends AbstractClassVisitor {
     return new ReplaceParkAndUnpark(Opcodes.ASM7, delegate, access, name, desc);
   }
 
-  private class ReplaceParkAndUnpark extends AdviceAdapter {
+  private class ReplaceParkAndUnpark extends MethodVisitor {
 
     protected ReplaceParkAndUnpark(final int api,
                                    final MethodVisitor mv,
@@ -49,7 +50,7 @@ public class InstrumentLockSupport extends AbstractClassVisitor {
                                    final String name,
                                    final String desc)
     {
-      super(api, mv, access, name, desc);
+      super(api, mv);
     }
 
     @Override

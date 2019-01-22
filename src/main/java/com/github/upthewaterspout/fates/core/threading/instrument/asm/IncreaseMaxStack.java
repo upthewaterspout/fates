@@ -21,7 +21,6 @@ import static org.objectweb.asm.Opcodes.ASM7;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  * A {@link ClassVisitor} that adjusts the maximum stack size up by 5 for all methods.
@@ -56,11 +55,11 @@ public class IncreaseMaxStack extends ClassVisitor {
     return new MaxStackAdjuster(mv, access, name, descriptor);
   }
 
-  public class MaxStackAdjuster extends AdviceAdapter {
+  public class MaxStackAdjuster extends MethodVisitor {
 
     protected MaxStackAdjuster(MethodVisitor methodVisitor, int access,
                                String name, String descriptor) {
-      super(ASM7, methodVisitor, access, name, descriptor);
+      super(ASM7, methodVisitor);
     }
 
     @Override

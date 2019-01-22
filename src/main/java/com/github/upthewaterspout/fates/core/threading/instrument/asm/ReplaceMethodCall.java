@@ -16,6 +16,9 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.objectweb.asm.Opcodes.H_INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+
 import java.util.Objects;
 
 import org.objectweb.asm.ClassVisitor;
@@ -46,7 +49,7 @@ public class ReplaceMethodCall extends AbstractClassVisitor {
       return new ReplacingMethodVisitor(Opcodes.ASM7, delegate, access, name, desc);
   }
 
-  private class ReplacingMethodVisitor extends AdviceAdapter {
+  private class ReplacingMethodVisitor extends MethodVisitor {
 
     protected ReplacingMethodVisitor(final int api,
                                      final MethodVisitor mv,
@@ -54,7 +57,7 @@ public class ReplaceMethodCall extends AbstractClassVisitor {
                                      final String name,
                                      final String desc)
     {
-      super(api, mv, access, name, desc);
+      super(api, mv);
     }
 
     @Override

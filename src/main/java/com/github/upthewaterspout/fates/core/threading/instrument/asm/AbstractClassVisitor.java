@@ -16,11 +16,12 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.objectweb.asm.Opcodes.ASM7;
+
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  * Base class for synchronization hook adding visitors with common functionality.
@@ -33,7 +34,7 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
   private String sourceFile;
 
   public AbstractClassVisitor(ClassVisitor cv) {
-    super(Opcodes.ASM7, cv);
+    super(ASM7, cv);
   }
 
   public void visit(int version, int access, String name, String signature, String superName,
@@ -72,10 +73,10 @@ public abstract class AbstractClassVisitor extends ClassVisitor {
     return lastLineNumber;
   }
 
-  public class HookMethodVisitor extends AdviceAdapter {
+  public class HookMethodVisitor extends MethodVisitor {
 
     protected HookMethodVisitor(MethodVisitor mv, int access, String name, String desc) {
-      super(ASM7, mv, access, name, desc);
+      super(ASM7, mv);
     }
 
     @Override

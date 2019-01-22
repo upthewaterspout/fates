@@ -16,6 +16,9 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -39,11 +42,11 @@ public class InstrumentNewObject  extends AbstractClassVisitor  {
     return new InstrumentNew(Opcodes.ASM7, delegate, access, name, desc);
   }
 
-  public static class InstrumentNew extends AdviceAdapter {
+  public static class InstrumentNew extends MethodVisitor {
 
     protected InstrumentNew(int api, MethodVisitor methodVisitor, int access, String name,
                             String descriptor) {
-      super(api, methodVisitor, access, name, descriptor);
+      super(api, methodVisitor);
     }
 
     @Override
