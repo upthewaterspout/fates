@@ -5,6 +5,7 @@
 /.gradle
 /.idea
 *.swp
+/*/build
 /build
 setenv.sh
 integration-tests/build

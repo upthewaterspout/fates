@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-plugins {
-    id 'com.github.johnrengelman.shadow' version '4.0.4'
-}
 
 
-allprojects {
+subprojects {
     apply plugin: 'java'
-    apply plugin: 'eclipse'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -33,30 +29,8 @@ allprojects {
     dependencies {
         testCompile 'junit:junit:4.12'
         testCompile 'org.mockito:mockito-all:1.10.19'
+        testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
     }
 }
 
-dependencies {
-    compile 'org.ow2.asm:asm:7.0'
-    compile 'org.ow2.asm:asm-commons:7.0'
-    compile 'org.ow2.asm:asm-util:7.0'
 
-    testCompile 'commons-io:commons-io:2.4'
-    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
-}
-
-shadowJar {
-    manifest {
-        attributes (
-            'Premain-Class' : 'com.github.upthewaterspout.fates.core.threading.instrument.agent.FatesAgent',
-            'Agent-Class' : 'com.github.upthewaterspout.fates.core.threading.instrument.agent.FatesAgent',
-            'Boot-Class-Path' : archiveName,
-            'Can-Redefine-Classes' : 'true',
-            'Can-Retransform-Classes' : 'true'
-        )
-    }
-
-    relocate 'org.objectweb.asm.', 'fates.shadow.org.objectweb.asm'
-}
-
-assemble.dependsOn shadowJar

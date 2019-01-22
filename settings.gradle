@@ -15,3 +15,5 @@ include 'services:webservice'
 
 rootProject.name = 'fates'
 include 'integration-tests'
+include 'fates-explore'
+include 'fates-threads'
