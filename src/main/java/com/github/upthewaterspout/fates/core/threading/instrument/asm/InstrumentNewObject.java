@@ -22,7 +22,7 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.commons.AdviceAdapter;
+import org.objectweb.asm.Type;
 
 /**
  * Instrument calls to create an object. This class adds a call to afterNew immediately
@@ -67,9 +67,7 @@ public class InstrumentNewObject  extends AbstractClassVisitor  {
       super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 
       //Invoke the hook
-      visitMethodInsn(INVOKESTATIC,
-          "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "afterNew",
-          "(Ljava/lang/Object;)V", false);
+      SingletonCall.add(this, "afterNew", Type.VOID_TYPE, SingletonCall.OBJECT);
     }
   }
 

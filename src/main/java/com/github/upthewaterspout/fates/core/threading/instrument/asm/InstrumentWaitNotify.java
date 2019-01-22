@@ -16,12 +16,14 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static com.github.upthewaterspout.fates.core.threading.instrument.asm.SingletonCall.OBJECT;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 /**
  * Replaces {@link Object#wait()} and {@link Object#notify()} with calls to
@@ -63,26 +65,15 @@ public class InstrumentWaitNotify extends AbstractClassVisitor {
       }
 
       if(name.equals("wait") && desc.equals("()V")) {
-        visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton",
-            "replaceWait",
-            "(Ljava/lang/Object;)V", false);
+        SingletonCall.add(this, "replaceWait", Type.VOID_TYPE, OBJECT);
       } else if(name.equals("wait") && desc.equals("(J)V")) {
-        visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceWait",
-            "(Ljava/lang/Object;J)V", false);
+        SingletonCall.add(this, "replaceWait", Type.VOID_TYPE, OBJECT, Type.LONG_TYPE);
       } else if(name.equals("wait") && desc.equals("(JI)V")) {
-        visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceWait",
-            "(Ljava/lang/Object;JI)V", false);
+        SingletonCall.add(this, "replaceWait", Type.VOID_TYPE, OBJECT, Type.LONG_TYPE, Type.INT_TYPE);
       } else if(name.equals("notify")) {
-        visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceNotify",
-          "(Ljava/lang/Object;)V", false);
+        SingletonCall.add(this, "replaceNotify", Type.VOID_TYPE, OBJECT);
       } else if (name.equals("notifyAll")) {
-        visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceNotifyAll",
-          "(Ljava/lang/Object;)V", false);
+        SingletonCall.add(this, "replaceNotifyAll", Type.VOID_TYPE, OBJECT);
       } else {
         super.visitMethodInsn(opcode, owner, name, desc, itf);
       }

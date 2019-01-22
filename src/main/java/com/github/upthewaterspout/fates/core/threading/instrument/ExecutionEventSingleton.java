@@ -29,8 +29,6 @@ package com.github.upthewaterspout.fates.core.threading.instrument;
  */
 public class ExecutionEventSingleton {
 
-  public static final String NAME =
-      "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton";
   private static volatile boolean available = false;
 
   private static final ExecutionEventListener NOOP_HOOK = new NoopExecutionEventListener();

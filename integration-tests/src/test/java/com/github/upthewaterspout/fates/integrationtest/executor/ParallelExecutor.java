@@ -18,10 +18,9 @@ package com.github.upthewaterspout.fates.integrationtest.executor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
 
 import com.github.upthewaterspout.fates.core.threading.Fates;
-import jdk.nashorn.internal.codegen.CompilerConstants;
 
 /**
  * Some syntax sugar around {@link Fates} that makes it easier to set

@@ -38,7 +38,7 @@ import org.objectweb.asm.Type;
 
 /**
  * Adds calls to {@link ExecutionEventSingleton#beforeSetField(Object, Object, String, String, int)} and
- * {@link ExecutionEventSingleton#beforeGetField(String, String, int)} before all
+ * {@link ExecutionEventSingleton#beforeGetField(Object, String, String, int)} before all
  * field access.
  */
 public class InstrumentFieldAccess extends AbstractClassVisitor {
@@ -92,8 +92,8 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
         visitInsn(DUP);
       }
       putClassMethodAndLine(className, methodName, lineNumber);
-      visitMethodInsn(Opcodes.INVOKESTATIC,
-          "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeGetField", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;I)V", false);
+      SingletonCall.add(this, "beforeGetField", Type.VOID_TYPE, SingletonCall.OBJECT,
+          SingletonCall.STRING, SingletonCall.STRING, Type.INT_TYPE);
     }
 
     protected void callBeforeSetField(int opcode, String owner, Type fieldType, String className,
@@ -153,8 +153,8 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
     }
 
     private void invokeSetFieldHook() {
-      visitMethodInsn(Opcodes.INVOKESTATIC,
-          "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeSetField", "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;I)V", false);
+      SingletonCall.add(this, "beforeSetField", Type.VOID_TYPE, SingletonCall.OBJECT, SingletonCall.OBJECT,
+          SingletonCall.STRING, SingletonCall.STRING, Type.INT_TYPE);
     }
 
     private void putClassMethodAndLine(String className, String methodName, int lineNumber) {

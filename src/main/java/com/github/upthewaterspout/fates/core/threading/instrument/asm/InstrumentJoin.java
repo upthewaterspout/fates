@@ -20,6 +20,7 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.ReplaceMethodCall.MethodCall;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 /**
  * Replaces all calls to {@link Thread#join()} with  calls to {@link ExecutionEventSingleton#replaceJoin(Thread)}
@@ -37,17 +38,17 @@ public class InstrumentJoin extends AbstractClassVisitor {
   private static ClassVisitor build(ClassVisitor cv) {
     cv = new ReplaceMethodCall(cv,
         new MethodCall(Opcodes.INVOKEVIRTUAL, THREAD, JOIN, "()V"),
-        new MethodCall(Opcodes.INVOKESTATIC, ExecutionEventSingleton.NAME, REPLACE_JOIN,
+        new MethodCall(Opcodes.INVOKESTATIC, Type.getInternalName(ExecutionEventSingleton.class), REPLACE_JOIN,
             "(Ljava/lang/Thread;)V"));
 
     cv = new ReplaceMethodCall(cv,
         new MethodCall(Opcodes.INVOKEVIRTUAL, THREAD, JOIN, "(J)V"),
-        new MethodCall(Opcodes.INVOKESTATIC, ExecutionEventSingleton.NAME, REPLACE_JOIN,
+        new MethodCall(Opcodes.INVOKESTATIC, Type.getInternalName(ExecutionEventSingleton.class), REPLACE_JOIN,
             "(Ljava/lang/Thread;J)V"));
 
     cv = new ReplaceMethodCall(cv,
         new MethodCall(Opcodes.INVOKEVIRTUAL, THREAD, JOIN, "(JI)V"),
-        new MethodCall(Opcodes.INVOKESTATIC, ExecutionEventSingleton.NAME, REPLACE_JOIN,
+        new MethodCall(Opcodes.INVOKESTATIC, Type.getInternalName(ExecutionEventSingleton.class), REPLACE_JOIN,
             "(Ljava/lang/Thread;JI)V"));
     return cv;
   }

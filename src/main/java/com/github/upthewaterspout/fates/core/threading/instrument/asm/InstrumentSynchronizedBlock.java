@@ -23,6 +23,7 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 
 
@@ -58,16 +59,12 @@ public class InstrumentSynchronizedBlock extends AbstractClassVisitor {
     public void visitInsn(int opcode) {
       if (Opcodes.MONITORENTER == opcode) {
         visitInsn(DUP);
-        visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "beforeSynchronization",
-          "(Ljava/lang/Object;)V", false);
+        SingletonCall.add(this, "beforeSynchronization", Type.VOID_TYPE, SingletonCall.OBJECT);
         super.visitInsn(opcode);
       } else if (Opcodes.MONITOREXIT == opcode) {
         visitInsn(DUP);
         super.visitInsn(opcode);
-        visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "afterSynchronization",
-          "(Ljava/lang/Object;)V", false);
+        SingletonCall.add(this, "afterSynchronization", Type.VOID_TYPE, SingletonCall.OBJECT);
 
       } else {
         super.visitInsn(opcode);

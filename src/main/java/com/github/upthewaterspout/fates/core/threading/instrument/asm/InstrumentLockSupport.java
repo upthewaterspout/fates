@@ -24,6 +24,7 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 /**
  * Replace calls to {@link LockSupport} with calls to {@link ExecutionEventSingleton}
@@ -44,6 +45,8 @@ public class InstrumentLockSupport extends AbstractClassVisitor {
 
   private class ReplaceParkAndUnpark extends MethodVisitor {
 
+    public static final String LOCK_SUPPORT = "java/util/concurrent/locks/LockSupport";
+
     protected ReplaceParkAndUnpark(final int api,
                                    final MethodVisitor mv,
                                    final int access,
@@ -56,19 +59,18 @@ public class InstrumentLockSupport extends AbstractClassVisitor {
     @Override
     public void visitMethodInsn(final int opcode, final String owner, final String name,
                                 final String desc, final boolean itf) {
-      if(opcode == INVOKESTATIC && owner.equals("java/util/concurrent/locks/LockSupport") && name.equals("park")) {
+      if(opcode == INVOKESTATIC && owner.equals(LOCK_SUPPORT) && name.equals("park")) {
         visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replacePark", desc, false);
-      } else if(opcode == INVOKESTATIC && owner.equals("java/util/concurrent/locks/LockSupport") && name.equals("parkNanos")) {
+            Type.getInternalName(ExecutionEventSingleton.class), "replacePark", desc, false);
+      } else if(opcode == INVOKESTATIC && owner.equals(LOCK_SUPPORT) && name.equals("parkNanos")) {
         visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceParkNanos", desc, false);
-      } else if(opcode == INVOKESTATIC && owner.equals("java/util/concurrent/locks/LockSupport") && name.equals("parkUntil")) {
+            Type.getInternalName(ExecutionEventSingleton.class), "replaceParkNanos", desc, false);
+      } else if(opcode == INVOKESTATIC && owner.equals(LOCK_SUPPORT) && name.equals("parkUntil")) {
         visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton", "replaceParkUntil", desc, false);
-      } else if(opcode == INVOKESTATIC && owner.equals("java/util/concurrent/locks/LockSupport") && name.equals("unpark")) {
+            Type.getInternalName(ExecutionEventSingleton.class), "replaceParkUntil", desc, false);
+      } else if(opcode == INVOKESTATIC && owner.equals(LOCK_SUPPORT) && name.equals("unpark")) {
         visitMethodInsn(INVOKESTATIC,
-            "com/github/upthewaterspout/fates/core/threading/instrument/ExecutionEventSingleton",
-            "replaceUnpark", desc, false);
+            Type.getInternalName(ExecutionEventSingleton.class), "replaceUnpark", desc, false);
       } else {
         super.visitMethodInsn(opcode, owner, name, desc, itf);
       }

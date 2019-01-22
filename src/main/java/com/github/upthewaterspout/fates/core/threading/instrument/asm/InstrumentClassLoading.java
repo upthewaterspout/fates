@@ -49,16 +49,13 @@ public class InstrumentClassLoading extends AbstractClassVisitor {
 
     @Override
     protected void onMethodEnter() {
-      visitMethodInsn(Opcodes.INVOKESTATIC,
-          Type.getInternalName(ExecutionEventSingleton.class), "beforeLoadClass", "()V", false);
-
+      SingletonCall.add(this, "beforeLoadClass", Type.VOID_TYPE);
       super.onMethodEnter();
     }
 
     @Override
     protected void onMethodExit(int opcode) {
-      visitMethodInsn(Opcodes.INVOKESTATIC,
-          Type.getInternalName(ExecutionEventSingleton.class), "afterLoadClass", "()V", false);
+      SingletonCall.add(this, "afterLoadClass", Type.VOID_TYPE);
 
       super.onMethodExit(opcode);
     }
