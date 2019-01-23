@@ -22,6 +22,7 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
+import com.github.upthewaterspout.fates.core.threading.harness.DelegatingExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 
 /**
@@ -50,8 +51,7 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
 //  listener.replaceWait();
 //  listener.replaceNotify();
 //  listener.replaceNotifyAll();
-public class ThreadConfinementListener implements ExecutionEventListener {
-  private final ExecutionEventListener delegate;
+public class ThreadConfinementListener extends DelegatingExecutionEventListener {
   private ReachableObjectFinder reachableObjects = new ReachableObjectFinder();
 
   private ThreadLocal<Set<Object>> threadConfinedObjects = ThreadLocal.withInitial(() -> Collections
@@ -59,80 +59,9 @@ public class ThreadConfinementListener implements ExecutionEventListener {
 
   public ThreadConfinementListener(
       ExecutionEventListener listener) {
-    this.delegate = listener;
+    super(listener);
   }
 
-  @Override
-  public void beforeThreadStart(Thread thread) {
-    delegate.beforeThreadStart(thread);
-
-  }
-
-  @Override
-  public void afterThreadStart(Thread thread) {
-    delegate.afterThreadStart(thread);
-
-  }
-
-  @Override
-  public void beforeThreadExit() {
-    delegate.beforeThreadExit();
-  }
-
-  @Override
-  public void replaceJoin(ExecutionEventListener defaultAction, Thread thread, long timeout,
-                          int nanos) throws InterruptedException {
-    delegate.replaceJoin(defaultAction, thread, timeout, nanos);
-
-  }
-
-  @Override
-  public void replacePark(ExecutionEventListener defaultAction, Object blocker) {
-    delegate.replacePark(defaultAction, blocker);
-
-  }
-
-  @Override
-  public void replaceParkNanos(ExecutionEventListener defaultAction, Object blocker, long timeout) {
-    delegate.replaceParkNanos(defaultAction, blocker, timeout);
-  }
-
-  @Override
-  public void replaceParkUntil(ExecutionEventListener defaultAction, Object blocker,
-                               long deadline) {
-    delegate.replaceParkUntil(defaultAction, blocker, deadline);
-  }
-
-  @Override
-  public void replaceUnpark(ExecutionEventListener defaultAction, Thread thread) {
-    delegate.replaceUnpark(defaultAction, thread);
-  }
-
-  @Override
-  public void replaceWait(ExecutionEventListener defaultAction, Object sync, long timeout,
-                          int nanos) throws InterruptedException {
-    delegate.replaceWait(defaultAction, sync, timeout, nanos);
-  }
-
-  @Override
-  public void replaceNotify(ExecutionEventListener defaultAction, Object sync) {
-    delegate.replaceNotify(defaultAction, sync);
-  }
-
-  @Override
-  public void replaceNotifyAll(ExecutionEventListener defaultAction, Object sync) {
-    delegate.replaceNotifyAll(defaultAction, sync);
-  }
-
-  @Override
-  public void beforeSynchronization(Object sync) {
-    delegate.beforeSynchronization(sync);
-  }
-
-  @Override
-  public void afterSynchronization(Object sync) {
-    delegate.afterSynchronization(sync);
-  }
 
   @Override
   public void beforeGetField(Object owner, String className, String methodName, int lineNumber) {

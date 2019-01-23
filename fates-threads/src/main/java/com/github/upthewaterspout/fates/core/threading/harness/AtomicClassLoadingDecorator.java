@@ -26,9 +26,7 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
  * This decorator is used to suppress context switching that would normally happen from field
  * accesses within classloading, to reduce the number of decision points in a test.
  */
-public class AtomicClassLoadingDecorator
-    implements ExecutionEventListener {
-  private ExecutionEventListener delegate;
+public class AtomicClassLoadingDecorator extends DelegatingExecutionEventListener {
 
   private ThreadLocal<EntryCount> atomicEntryCount = new ThreadLocal<EntryCount> () {
     @Override protected EntryCount initialValue() {
@@ -37,164 +35,24 @@ public class AtomicClassLoadingDecorator
   };
 
   public AtomicClassLoadingDecorator(final ExecutionEventListener delegate) {
-    this.delegate = delegate;
-  }
-
-  public void afterThreadStart(final Thread thread) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.afterThreadStart(thread);
-    }
+    super(delegate);
   }
 
   @Override
-  public void beforeThreadExit() {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.beforeThreadExit();
-    }
-  }
-
-  @Override
-  public void replacePark(
-      ExecutionEventListener defaultAction,
-      Object blocker) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.replacePark(defaultAction, blocker);
-    } else {
-      defaultAction.replacePark(defaultAction, blocker);
-    }
-  }
-
-  @Override
-  public void replaceParkNanos(
-      ExecutionEventListener defaultAction,
-      Object blocker, long time) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.replaceParkNanos(defaultAction, blocker, time);
-    } else {
-      defaultAction.replaceParkNanos(defaultAction,blocker,time);
-    }
-  }
-
-  @Override
-  public void replaceParkUntil(
-      ExecutionEventListener defaultAction,
-      Object blocker, long time) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.replaceParkUntil(defaultAction, blocker, time);
-    } else {
-      defaultAction.replaceParkUntil(defaultAction, blocker, time);
-    }
-  }
-
-  @Override
-  public void replaceUnpark(ExecutionEventListener defaultAction, final Thread thread) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.replaceUnpark(defaultAction, thread);
-    } else {
-      defaultAction.replaceUnpark(defaultAction, thread);
-    }
-
-  }
-
-  @Override
-  public void replaceWait(
-      ExecutionEventListener defaultAction,
-      final Object sync, long timeout, int nanos) throws InterruptedException {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.replaceWait(defaultAction, sync, timeout, nanos);
-    } else {
-      defaultAction.replaceWait(defaultAction, sync, timeout, nanos);
-    }
-
-  }
-
-  @Override
-  public void replaceNotify(
-      ExecutionEventListener defaultAction,
-      final Object sync) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.replaceNotify(defaultAction, sync);
-    } else {
-      defaultAction.replaceNotify(defaultAction, sync);
-    }
-  }
-
-  @Override
-  public void replaceNotifyAll(
-      ExecutionEventListener defaultAction,
-      final Object sync) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.replaceNotifyAll(defaultAction, sync);
-    } else {
-      defaultAction.replaceNotifyAll(defaultAction, sync);
-    }
-  }
-
-  @Override
-  public void beforeSynchronization(final Object sync) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.beforeSynchronization(sync);
-    }
-  }
-
-  @Override
-  public void afterSynchronization(final Object sync) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.afterSynchronization(sync);
-    }
-  }
-
-  @Override
-  public void replaceJoin(ExecutionEventListener defaultAction, Thread thread, long timeout,
-                          int nanos) throws InterruptedException {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.replaceJoin(defaultAction, thread, timeout, nanos);
-    } else {
-      defaultAction.replaceJoin(defaultAction, thread, timeout, nanos);
-    }
-  }
-
-  @Override
-  public void beforeGetField(Object owner, String className, String methodName,
-                             int lineNumber) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.beforeGetField(owner, className, methodName, lineNumber);
-    }
-
-  }
-
-  @Override
-  public void beforeSetField(Object owner, Object fieldValue, String className,
-                             String methodName,
-                             int lineNumber) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
-    }
-  }
-
-  @Override
-  public void afterNew(Object object) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.afterNew(object);
-    }
+  protected boolean beforeEvent() {
+    return atomicEntryCount.get().isZero();
   }
 
   @Override
   public void beforeLoadClass() {
     beginAtomic();
-    delegate.beforeLoadClass();
+    super.beforeLoadClass();
   }
 
   @Override
   public void afterLoadClass() {
-    delegate.afterLoadClass();
+    super.afterLoadClass();
     endAtomic();
-  }
-
-  public void beforeThreadStart(final Thread thread) {
-    if(atomicEntryCount.get().isZero()) {
-      delegate.beforeThreadStart(thread);
-    }
   }
 
   private void beginAtomic() {
