@@ -16,7 +16,7 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument;
 
-import com.github.upthewaterspout.fates.core.threading.Fates;
+import com.github.upthewaterspout.fates.core.threading.ThreadFates;
 import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulingListener;
 
 /**
@@ -24,7 +24,7 @@ import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulin
  * from {@link ExecutionEventSingleton}, which itself is invoked by directly from new bytecode
  * that is added to users classes.
  *
- * In practice, the {@link Fates} uses a chain of {@link ExecutionEventListener}s that
+ * In practice, the {@link ThreadFates} uses a chain of {@link ExecutionEventListener}s that
  * start from the {@link ExecutionEventSingleton} and end with a {@link ThreadSchedulingListener}
  */
 public interface ExecutionEventListener {

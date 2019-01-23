@@ -21,7 +21,7 @@ package com.github.upthewaterspout.fates.core.states;
  * decisions and their affects.
  *
  * Users should implement this interface for their tests and pass the test to {@link
- * StateExplorationHarness} {@link StateExplorationHarness} will execute the test repeatedly until
+ * Fates} {@link Fates} will execute the test repeatedly until
  * all possible decisions have been exercised.
  */
 public interface RepeatedTest {

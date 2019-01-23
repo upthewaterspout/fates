@@ -16,6 +16,8 @@
 
 package com.github.upthewaterspout.fates.core.states;
 
+import java.util.function.Supplier;
+
 import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
 
 /**
@@ -38,7 +40,7 @@ import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplore
  * Example:
  * <pre>
  * {@code
- *   StateExplorationHarness.explore(new DepthFirstExplorer(), decider -> {
+ *   new Fates().explore(decider -> {
  *     int a = * decider.decide(1,3,5);
  *     int b = decider.decide(2,4);
  *     assertIsEven(a * b);
@@ -46,15 +48,31 @@ import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplore
  * }
  * </pre>
  */
-public class StateExplorationHarness {
+public class Fates {
+
+
+  private Supplier<StateExplorer> explorerSupplier = () -> new DepthFirstExplorer();
+
+  /**
+   * Configure the {@link StateExplorer} that should be used. The default is {@link DepthFirstExplorer}
+   *
+   * @param explorerSupplier A supplier for the explorer to use. Each call to {@link #explore(RepeatedTest)}
+   * will invoke this supplier to create a new instance of the potentially stateful explorer class.
+   */
+  public Fates setExplorer(
+      Supplier<StateExplorer> explorerSupplier) {
+    this.explorerSupplier = explorerSupplier;
+    return this;
+  }
 
   /**
    * Execute a test multiple times, exploring some or all of the possible states of the test
-   * @param explorer An state space exploration strategy to use.
    * @param test the test to explore. It will be run many times.
    * @throws Exception if the test fails
    */
-  public static void explore(StateExplorer explorer, RepeatedTest test) throws Exception {
+  public void explore(RepeatedTest test) throws Exception {
+    StateExplorer explorer = explorerSupplier.get();
+
     int count = 0;
     while(!explorer.isCompletelyTested()) {
       try {

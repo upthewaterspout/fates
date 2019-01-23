@@ -21,8 +21,8 @@ import com.github.upthewaterspout.fates.core.states.tree.DecisionTree;
 /**
  * An algorithm for exploring the space of possible decisions during a test run.
  * <p>
- * The {@link StateExplorationHarness} will take this algorithm and use it as the
- * {@link Decider} when executing a test. After the test is done, the {@link StateExplorationHarness}
+ * The {@link Fates} will take this algorithm and use it as the
+ * {@link Decider} when executing a test. After the test is done, the {@link Fates}
  * will call the done() method. The harness will then execute the test <i>again</i>, and the
  * {@link StateExplorer} is expected to make new decisions the next time around.
  *

@@ -18,7 +18,7 @@ package com.github.upthewaterspout.fates.core.threading;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.RepeatedTest;
-import com.github.upthewaterspout.fates.core.states.StateExplorationHarness;
+import com.github.upthewaterspout.fates.core.states.Fates;
 import com.github.upthewaterspout.fates.core.states.StateExplorer;
 import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
 import com.github.upthewaterspout.fates.core.threading.confinement.ThreadConfinementListener;
@@ -50,7 +50,7 @@ import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulin
  *
  * <pre>
  *   {@code
- *     Fates.run(() -> {
+ *     ThreadFates.run(() -> {
  *       //Do some multhreaded test
  *       //Make assertions about the outcome
  *     });
@@ -58,28 +58,7 @@ import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulin
  * </pre>
  *
  */
-public class Fates {
-
-  /**
-   * Run a multithreaded test in FATES. The test will be run many times, with all possible
-   * thread execution orders.
-   *
-   * @param runnable The test to run
-   * @throws Exception if the test fails.
-   */
-  public static void run(MultiThreadedTest runnable) throws Exception {
-    StateExplorer explorer = new ErrorCapturingExplorer(new DepthFirstExplorer());
-
-    //Do a fews run without the harness to try to get classloading, etc out of the way
-    //This is run 20 times because that is how long it will take the JVM to decide to generate
-    //native methods for reflection calls
-    for(int i =0; i < 20; i++)
-    runnable.run();
-
-    //Use the state exploration harness to explore the possible thread orderings
-    StateExplorationHarness.explore(explorer, instrumentTest(runnable));
-
-  }
+public class ThreadFates {
 
   /**
    * Convert a {@link MultiThreadedTest}, which uses threads, into a {@link RepeatedTest},
@@ -124,6 +103,28 @@ public class Fates {
     listener = new ThreadLocalEventListener(listener);
 
     return listener;
+  }
+
+  /**
+   * Run a multithreaded test in FATES. The test will be run many times, with all possible
+   * thread execution orders.
+   *
+   * @param runnable The test to run
+   * @throws Exception if the test fails.
+   */
+  public void run(MultiThreadedTest runnable) throws Exception {
+
+    //Do a fews run without the harness to try to get classloading, etc out of the way
+    //This is run 20 times because that is how long it will take the JVM to decide to generate
+    //native methods for reflection calls
+    for(int i =0; i < 20; i++)
+    runnable.run();
+
+    //Use the state exploration harness to explore the possible thread orderings
+    new Fates()
+        .setExplorer(() -> new ErrorCapturingExplorer(new DepthFirstExplorer()))
+        .explore(instrumentTest(runnable));
+
   }
 
   /**

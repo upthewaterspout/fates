@@ -20,14 +20,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.github.upthewaterspout.fates.executor.ParallelExecutor;
-import com.github.upthewaterspout.fates.core.threading.Fates;
+import com.github.upthewaterspout.fates.core.threading.ThreadFates;
 import org.junit.Test;
 
 public class ThreadConfinedUpdateTest {
 
   @Test(timeout =  300_000L)
   public void shouldNotHangForThreadConfinedUpdates() throws Exception {
-    Fates.run(() -> {
+    new ThreadFates().run(() -> {
       new ParallelExecutor<Set<Integer>>()
           .inParallel(() -> new ThreadConfinedChanges().update())
           .inParallel(() -> new ThreadConfinedChanges().update())

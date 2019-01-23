@@ -25,13 +25,15 @@ import java.util.Set;
 
 import org.junit.Test;
 
-public class StateExplorationHarnessTest {
+public class FatesTest {
 
   @Test
   public  void exploresUntilDone() throws Exception {
     RepeatedTest test = mock(RepeatedTest.class);
-    StateExplorer explorer = new NIteratorExplorer(3);
-    StateExplorationHarness.explore(explorer, test);
+    NIteratorExplorer explorer = new NIteratorExplorer(3);
+    new Fates()
+        .setExplorer(() -> explorer)
+        .explore(test);
 
     verify(test, times(3)).doOnce(eq(explorer));
   }

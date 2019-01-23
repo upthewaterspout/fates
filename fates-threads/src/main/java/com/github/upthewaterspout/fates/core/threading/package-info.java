@@ -18,6 +18,6 @@
  * This package contains all functionality related running multithreaded
  * tests and controlling the thread ordering of the test using java instrumentation.
  *
- * See {@link com.github.upthewaterspout.fates.core.threading.Fates}
+ * See {@link com.github.upthewaterspout.fates.core.threading.ThreadFates}
  */
 package com.github.upthewaterspout.fates.core.threading;

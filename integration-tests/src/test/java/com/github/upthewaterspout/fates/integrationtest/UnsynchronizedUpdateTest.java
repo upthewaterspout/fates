@@ -19,13 +19,13 @@ package com.github.upthewaterspout.fates.integrationtest;
 import static org.junit.Assert.assertEquals;
 
 import com.github.upthewaterspout.fates.executor.ParallelExecutor;
-import com.github.upthewaterspout.fates.core.threading.Fates;
+import com.github.upthewaterspout.fates.core.threading.ThreadFates;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
- * Integration test that {@link Fates} can correctly catch a race condition
+ * Integration test that {@link ThreadFates} can correctly catch a race condition
  * between two threads doing an unsynchronized update.
  */
 public class UnsynchronizedUpdateTest {
@@ -35,7 +35,7 @@ public class UnsynchronizedUpdateTest {
   @Test()
   public void shouldFailOnUnsynchronizedUpdate() throws Exception {
     expectedException.expect(AssertionError.class);
-    Fates.run(() -> {
+    new ThreadFates().run(() -> {
       UnsynchronizedUpdate updater = new UnsynchronizedUpdate();
       new ParallelExecutor<Integer>()
           .inParallel(updater::update)

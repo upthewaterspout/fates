@@ -16,7 +16,7 @@
 
 /**
  * This package contains all logic related to executing tests multiple times to explore an unknown
- * space of possible test states. See {@link com.github.upthewaterspout.fates.core.states.StateExplorationHarness}
+ * space of possible test states. See {@link com.github.upthewaterspout.fates.core.states.Fates}
  * for where to start.
  */
 package com.github.upthewaterspout.fates.core.states;

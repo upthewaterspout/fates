@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * Interface for making a choice between a set of possible options
  *
- * See {@link StateExplorationHarness} for how to use this interface.
+ * See {@link Fates} for how to use this interface.
  */
 public interface Decider {
   /**

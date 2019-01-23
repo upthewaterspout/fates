@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import com.github.upthewaterspout.fates.core.threading.Fates;
+import com.github.upthewaterspout.fates.core.threading.ThreadFates;
 
 /**
- * A simple parallel executor for use with {@link Fates.MultiThreadedTest}s run
- * inside {@link Fates}. This executor is optimized to avoid extra thread
+ * A simple parallel executor for use with {@link ThreadFates.MultiThreadedTest}s run
+ * inside {@link ThreadFates}. This executor is optimized to avoid extra thread
  * scheduling decisions during it's setup and tear down.
  */
 public class ParallelExecutor<OUT> {

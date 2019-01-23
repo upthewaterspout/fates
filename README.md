@@ -1,5 +1,11 @@
 FATES stands for Find All Thread Execution Schedules. It is a framework for
-testing multi-threaded Java applications. It instruments the bytecode of the
+testing multi-threaded Java applications. 
+
+Fates contains two sub-modules
+
+* **fates-explore** - A utility that runs a test with *decision points* repeatedly, until
+all possible decisions are tested
+* **fates-threads** - A tool for finding race conditions in multi-threaded java code. It instruments the bytecode of the
 program under test and takes control of thread scheduling. It then runs the
 test repeatedly until all possible scheduling orders are tested.
 
@@ -7,27 +13,29 @@ This framework is in very early stages of development, and will not
 successfully run for anything but very trivial cases.
 
 # How to use
-1. Add fates-all.jar as a javaagent to the command line when you run your tests.
+
+## Multithreaded tests
+Add fates-threads-0.1-SNAPSHOT.jar as a javaagent to the command line when you run your tests.
 
 ```
-java -java-agent:fates-all.jar ...
+java -javaagent:fates-threads-0.1-SNAPSHOT.jar ...
 ```
 
-In your test code, run your multithreaded test using the Fates class, like so
+In your test code, run your multithreaded test using the Fates class. For example, using junit:
 ```java
 @Test
 public void findRace() {
-  Fates.run(() -> {
-    //Your test code here
+  ThreadFates.run(() -> {
+    //Your mutlithreaded test
   });
 }
 ```
 
 See the [javadocs](https://upthewaterspout.github.io/fates/javadoc/) for more
 information. The two useful classes from a user perspective are:
-* [Fates](https://upthewaterspout.github.io/fates/javadoc/com/github/upthewaterspout/fates/core/threading/Fates.html)
+* [ThreadFates](https://upthewaterspout.github.io/fates/javadoc/com/github/upthewaterspout/fates/core/threading/ThreadFates.html)
 The main harness for running multithreaded tests
-* [StateExplorationHarness](https://upthewaterspout.github.io/fates/javadoc/com/github/upthewaterspout/fates/core/states/StateExplorationHarness.html)
+* [Fates](https://upthewaterspout.github.io/fates/javadoc/com/github/upthewaterspout/fates/core/states/Fates.html)
 A harness for running any test that has decision points repeatedly until all
 possible decisions are exercised
 
@@ -46,22 +54,19 @@ the scheduler.
 The test is run repeatedly until all possible schedules are exercised.
 
 ## Interesting classes
- * `StateExplorationHarness` and the `states` package - this package contains all
- of the logic to execute a test multiple times and explore all of the possible
- choices a test might make. This harness may be useful in other contexts. For
- example instead of using junit's parameterized tests, a test could simply ask
- the decider to choose between a set of parameters and the test will be run
- once for each choice.
-
- * `SharedStateSpaceScheduler` - this is the class that actually tries to
+ * THe `fates-explore` module with the `Fates` class and the `states` package - this package contains 
+ all of the logic to execute a test multiple times and explore all of the possible
+ choices a test might make. This module does not do any bytecode instrumentation 
+ and isn't tied to multi-threaded testing.
+ 
+ * Within the `fates-threads` module:
+   * `SharedStateSpaceScheduler` - this is the class that actually tries to
  control the order of the threads. It uses the `Decider` provided by the
  `StateExplorationHarness` to choose which thread to schedule at each point in
  time
-
- * `ExecutionEventSingleton` - this class has all of the events that the bytecode 
+   * `ExecutionEventSingleton` - this class has all of the events that the bytecode 
  instrumentation calls.
- 
- * `AsmTransformer` - This class builds the pipeline of `ClassVisitors` that actually
+   * `AsmTransformer` - This class builds the pipeline of `ClassVisitors` that actually
  modify the user's bytecode
 
 
@@ -76,14 +81,8 @@ point. This means that tests may take a *very* long time to complete.
 
 ## Classloading
 Currently the scheduler is using a classloader that disables instrumentation
-during classloading. That means we may miss race conditions that occur during
-classloading. But without this, a second run through the same path won't load
-classes, so it won't be the same path anymore.
-
-We could start with a fresh classloader for each run, but we can't replay the
-loading of JDK classes as far as I can tell, so we still have a problem. Maybe
-a combination of a fresh classloader and treating the loading of JDK classes as
-atomic would work.
+during classloading. That means it may miss race conditions that occur during
+classloading. 
 
 ## Blocked thread handling
 
