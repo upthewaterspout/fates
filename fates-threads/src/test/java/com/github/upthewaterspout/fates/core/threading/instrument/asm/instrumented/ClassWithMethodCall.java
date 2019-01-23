@@ -18,18 +18,14 @@ package com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumen
 
 import java.util.concurrent.Callable;
 
-public class ClassWithClassLoading implements Callable<Class> {
+public class ClassWithMethodCall implements Callable<String> {
 
   @Override
-  public Class call() throws Exception {
-    return new TestClassLoader().loadClass(LoadedClass.class.getCanonicalName());
+  public String call() throws Exception {
+    return doSomething();
   }
 
-  private static class TestClassLoader extends ClassLoader {
-
-    @Override
-    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-      return super.loadClass(name, resolve);
-    }
+  private String doSomething() {
+    return "hello";
   }
 }

@@ -16,7 +16,6 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
-import java.io.PrintWriter;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
@@ -24,7 +23,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.util.CheckClassAdapter;
-import org.objectweb.asm.util.TraceClassVisitor;
 
 /**
  * Pipeline of ASM ClassVisitors that transforms classes, adding
@@ -56,7 +54,7 @@ public class AsmTransformer implements ClassFileTransformer {
       transformingVisitor = new InstrumentThreadExit(transformingVisitor); //No stack usage
       transformingVisitor = new InstrumentJoin(transformingVisitor); //No stack usage
       transformingVisitor = new InstrumentFieldAccess(transformingVisitor); //5 stack elements max
-      transformingVisitor = new InstrumentClassLoading(transformingVisitor); //No stack usage
+      transformingVisitor = new InstrumentMethodCalls(transformingVisitor); //No stack usage
       transformingVisitor = new InstrumentNewObject(transformingVisitor); //One additional stack element
       reader.accept(transformingVisitor, ClassReader.EXPAND_FRAMES);
       byte[] result =  outputWriter.toByteArray();

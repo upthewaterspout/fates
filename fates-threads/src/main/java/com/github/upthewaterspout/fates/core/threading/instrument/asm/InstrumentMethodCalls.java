@@ -26,20 +26,16 @@ import org.objectweb.asm.commons.AdviceAdapter;
 /**
  * Replaces all calls to {@link Thread#join()} with  calls to {@link ExecutionEventSingleton#replaceJoin(Thread)}
  */
-public class InstrumentClassLoading extends AbstractClassVisitor {
+public class InstrumentMethodCalls extends AbstractClassVisitor {
 
-  public InstrumentClassLoading(ClassVisitor cv) {
+  public InstrumentMethodCalls(ClassVisitor cv) {
     super(cv);
   }
 
   @Override
   public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
     final MethodVisitor delegate = super.visitMethod(access, name, desc, signature, exceptions);
-    if(name.equals("loadClass")) {
-      return new InstrumentMethod(Opcodes.ASM7, delegate, access, name, desc);
-    } else {
-      return delegate;
-    }
+    return new InstrumentMethod(Opcodes.ASM7, delegate, access, name, desc);
   }
 
   private class InstrumentMethod extends AdviceAdapter {
@@ -49,13 +45,23 @@ public class InstrumentClassLoading extends AbstractClassVisitor {
 
     @Override
     protected void onMethodEnter() {
-      SingletonCall.add(this, "beforeLoadClass", Type.VOID_TYPE);
+      pushClassAndMethod();
+      SingletonCall.add(this, "beforeMethod", Type.VOID_TYPE, SingletonCall.STRING, SingletonCall.STRING);
       super.onMethodEnter();
+    }
+
+    private void pushClassAndMethod() {
+      String className = getClassName();
+      String methodName = getMethodName();
+
+      visitLdcInsn(className.replace('/', '.'));
+      visitLdcInsn(methodName);
     }
 
     @Override
     protected void onMethodExit(int opcode) {
-      SingletonCall.add(this, "afterLoadClass", Type.VOID_TYPE);
+      pushClassAndMethod();
+      SingletonCall.add(this, "afterMethod", Type.VOID_TYPE, SingletonCall.STRING, SingletonCall.STRING);
 
       super.onMethodExit(opcode);
     }

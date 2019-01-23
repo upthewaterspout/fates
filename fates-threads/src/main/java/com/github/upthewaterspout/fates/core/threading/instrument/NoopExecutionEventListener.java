@@ -41,12 +41,12 @@ public class NoopExecutionEventListener implements ExecutionEventListener {
   }
 
   @Override
-  public void beforeLoadClass() {
+  public void beforeMethod(String className, String methodName) {
     //do nothing
   }
 
   @Override
-  public void afterLoadClass() {
+  public void afterMethod(String className, String methodName) {
     //do nothing
   }
 

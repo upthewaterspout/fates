@@ -148,12 +148,12 @@ public class ExecutionEventSingleton {
     instance.replaceJoin(NOOP_HOOK, thread, timeout, nanos);
   }
 
-  public static void beforeLoadClass() {
-    instance.beforeLoadClass();
+  public static void beforeMethod(String className, String methodName) {
+    instance.beforeMethod(className, methodName);
   }
 
-  public static void afterLoadClass() {
-    instance.afterLoadClass();
+  public static void afterMethod(String className, String methodName) {
+    instance.afterMethod(className, methodName);
   }
 
   public static void afterNew(Object object) {

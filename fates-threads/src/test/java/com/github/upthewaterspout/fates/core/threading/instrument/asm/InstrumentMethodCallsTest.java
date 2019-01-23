@@ -21,18 +21,18 @@ import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.Callable;
 
-import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithClassLoading;
+import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithMethodCall;
 import org.junit.Test;
 
-public class InstrumentClassLoadingTest extends InstrumentationTest {
+public class InstrumentMethodCallsTest extends InstrumentationTest {
 
   @Test
-  public void classLoadingIsInstrumented() throws Exception {
-    String className = ClassWithClassLoading.class.getCanonicalName();
+  public void methodCallsAreInstrumented() throws Exception {
+    String className = ClassWithMethodCall.class.getCanonicalName();
     Callable object = transformAndCreate(className);
     object.call();
-    verify(hook, times(1)).beforeLoadClass();
-    verify(hook, times(1)).afterLoadClass();
+    verify(hook, times(1)).beforeMethod(className, "doSomething");
+    verify(hook, times(1)).afterMethod(className, "doSomething");
   }
 
 }

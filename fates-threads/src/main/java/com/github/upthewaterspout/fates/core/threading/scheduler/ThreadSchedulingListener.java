@@ -143,12 +143,12 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
   }
 
   @Override
-  public void beforeLoadClass() {
+  public void beforeMethod(String className, String methodName) {
     //Do nothing
   }
 
   @Override
-  public void afterLoadClass() {
+  public void afterMethod(String className, String methodName) {
     //Do nothing
   }
 

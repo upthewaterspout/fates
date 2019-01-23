@@ -17,10 +17,8 @@
 package com.github.upthewaterspout.fates.core.threading.confinement;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 
 import com.github.upthewaterspout.fates.core.threading.harness.DelegatingExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
@@ -91,13 +89,13 @@ public class ThreadConfinementListener extends DelegatingExecutionEventListener 
   }
 
   @Override
-  public void beforeLoadClass() {
-    delegate.beforeLoadClass();
+  public void beforeMethod(String className, String methodName) {
+    delegate.beforeMethod(className, methodName);
   }
 
   @Override
-  public void afterLoadClass() {
-    delegate.afterLoadClass();
+  public void afterMethod(String className, String methodName) {
+    delegate.afterMethod(className, methodName);
   }
 
   @Override

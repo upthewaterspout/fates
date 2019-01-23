@@ -52,7 +52,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   @Override
   public void beforeGetField(Object owner, String className, String methodName,
                              int lineNumber) {
-    if(disabled.get()) {
+    if(disabled()) {
       return;
     }
     disable();
@@ -66,11 +66,15 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
     }
   }
 
+  private boolean disabled() {
+    return disabled.get() == Boolean.TRUE;
+  }
+
   @Override
   public void beforeSetField(Object owner, Object fieldValue, String className,
                              String methodName,
                              int lineNumber) {
-    if(disabled.get()) {
+    if(disabled()) {
       return;
     }
     disable();
@@ -86,13 +90,13 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override
-  public void beforeLoadClass() {
-    if(disabled.get()) {
+  public void beforeMethod(String className, String methodName) {
+    if(disabled()) {
       return;
     }
     disable();
     try {
-      delegate.beforeLoadClass();
+      delegate.beforeMethod(className, methodName);
     } catch(RuntimeException t) {
       t.printStackTrace();
       lastError = t;
@@ -102,13 +106,13 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override
-  public void afterLoadClass() {
-    if(disabled.get()) {
+  public void afterMethod(String className, String methodName) {
+    if(disabled()) {
       return;
     }
     disable();
     try {
-      delegate.afterLoadClass();
+      delegate.afterMethod(className, methodName);
     } catch(RuntimeException t) {
       t.printStackTrace();
       lastError = t;
@@ -119,7 +123,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void beforeThreadStart(Thread thread) {
-    if(disabled.get()) {
+    if(disabled()) {
       return;
     }
     disable();
@@ -136,7 +140,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void afterThreadStart(Thread thread) {
-    if(disabled.get()) {
+    if(disabled()) {
       return;
     }
     disable();
@@ -152,7 +156,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override public void beforeThreadExit() {
-    if(disabled.get()) {
+    if(disabled()) {
       return;
     }
     disable();
@@ -167,7 +171,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override public void beforeSynchronization(final Object sync) {
-    if(disabled.get()) {
+    if(disabled()) {
       return;
     }
     disable();
@@ -182,7 +186,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override public void afterSynchronization(final Object sync) {
-    if(disabled.get()) {
+    if(disabled()) {
       return;
     }
     disable();
@@ -199,7 +203,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   @Override
   public void replaceWait(final ExecutionEventListener defaultAction, final Object sync, final long timeout, int nanos)
       throws InterruptedException {
-    if(disabled.get()) {
+    if(disabled()) {
       defaultAction.replaceWait(defaultAction, sync, timeout, nanos);
       return;
     }
@@ -216,7 +220,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void replaceNotify(final ExecutionEventListener defaultAction, final Object sync) {
-    if(disabled.get()) {
+    if(disabled()) {
       defaultAction.replaceNotify(defaultAction, sync);
       return;
     }
@@ -233,7 +237,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void replaceNotifyAll(final ExecutionEventListener defaultAction, final Object sync) {
-    if(disabled.get()) {
+    if(disabled()) {
       defaultAction.replaceNotifyAll(defaultAction, sync);
       return;
     }
@@ -250,7 +254,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void replaceUnpark(final ExecutionEventListener defaultAction, final Thread thread) {
-    if(disabled.get()) {
+    if(disabled()) {
       defaultAction.replaceUnpark(defaultAction, thread);
       return;
     }
@@ -267,7 +271,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void replacePark(final ExecutionEventListener defaultAction, final Object blocker) {
-    if(disabled.get()) {
+    if(disabled()) {
       defaultAction.replacePark(defaultAction, blocker);
       return;
     }
@@ -285,7 +289,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void replaceJoin(ExecutionEventListener defaultAction, Thread thread, long timeout, int nanos) throws InterruptedException {
-    if(disabled.get()) {
+    if(disabled()) {
       defaultAction.replaceJoin(defaultAction, thread, timeout, nanos);
       return;
     }
@@ -303,7 +307,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void replaceParkNanos(ExecutionEventListener defaultAction, Object blocker, long timeout) {
-    if(disabled.get()) {
+    if(disabled()) {
       defaultAction.replaceParkNanos(defaultAction, blocker, timeout);
       return;
     }
@@ -321,7 +325,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void replaceParkUntil(ExecutionEventListener defaultAction, Object blocker, long deadline) {
-    if(disabled.get()) {
+    if(disabled()) {
       defaultAction.replaceParkUntil(defaultAction, blocker, deadline);
       return;
     }
@@ -339,7 +343,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
 
   @Override
   public void afterNew(final Object object) {
-    if(disabled.get()) {
+    if(disabled()) {
       return;
     }
     disable();

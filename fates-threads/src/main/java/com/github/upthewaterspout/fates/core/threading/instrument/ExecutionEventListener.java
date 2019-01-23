@@ -145,14 +145,18 @@ public interface ExecutionEventListener {
                       String methodName, int lineNumber);
 
   /**
-   * Called when class loading starts
+   * Called when a method call starts
+   * @param className the name of the class
+   * @param methodName the name of the method
    */
-  void beforeLoadClass();
+  void beforeMethod(String className, String methodName);
 
   /**
-   * Called when class loading finishes
+   * Called when a method call finishes
+   * @param className the name of the class
+   * @param methodName the name of the method
    */
-  void afterLoadClass();
+  void afterMethod(String className, String methodName);
 
 
   /**

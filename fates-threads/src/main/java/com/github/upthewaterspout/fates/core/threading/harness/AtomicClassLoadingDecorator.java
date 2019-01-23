@@ -44,15 +44,19 @@ public class AtomicClassLoadingDecorator extends DelegatingExecutionEventListene
   }
 
   @Override
-  public void beforeLoadClass() {
-    beginAtomic();
-    super.beforeLoadClass();
+  public void beforeMethod(String className, String methodName) {
+    if(methodName.equals("loadClass")) {
+      beginAtomic();
+    }
+    super.beforeMethod(className, methodName);
   }
 
   @Override
-  public void afterLoadClass() {
-    super.afterLoadClass();
-    endAtomic();
+  public void afterMethod(String className, String methodName) {
+    super.afterMethod(className, methodName);
+    if(methodName.equals("loadClass")) {
+      endAtomic();
+    }
   }
 
   private void beginAtomic() {

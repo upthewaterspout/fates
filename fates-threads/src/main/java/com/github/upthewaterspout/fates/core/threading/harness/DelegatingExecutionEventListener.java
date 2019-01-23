@@ -54,15 +54,15 @@ public abstract class DelegatingExecutionEventListener implements ExecutionEvent
     }
   }
 
-  public void beforeLoadClass() {
+  public void beforeMethod(String className, String methodName) {
     if(beforeEvent()) {
-      delegate.beforeLoadClass();
+      delegate.beforeMethod(className, methodName);
     }
   }
 
-  public void afterLoadClass() {
+  public void afterMethod(String className, String methodName) {
     if(beforeEvent()) {
-      delegate.afterLoadClass();
+      delegate.afterMethod(className, methodName);
     }
   }
 
