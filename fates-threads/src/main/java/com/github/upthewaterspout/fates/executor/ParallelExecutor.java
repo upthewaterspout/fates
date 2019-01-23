@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.integrationtest.executor;
+package com.github.upthewaterspout.fates.executor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +23,9 @@ import java.util.concurrent.Callable;
 import com.github.upthewaterspout.fates.core.threading.Fates;
 
 /**
- * Some syntax sugar around {@link Fates} that makes it easier to set
- * up a test that uses multiple threads.
+ * A simple parallel executor for use with {@link Fates.MultiThreadedTest}s run
+ * inside {@link Fates}. This executor is optimized to avoid extra thread
+ * scheduling decisions during it's setup and tear down.
  */
 public class ParallelExecutor<OUT> {
 

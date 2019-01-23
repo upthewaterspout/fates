@@ -60,6 +60,7 @@ public interface StateExplorer extends Decider {
 
   /**
    * Get a trace of the current run, for debugging purposes
+   * @return a human readable trace of the run
    */
   String getTrace();
 }

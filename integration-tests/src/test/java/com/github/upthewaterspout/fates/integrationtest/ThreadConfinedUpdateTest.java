@@ -16,17 +16,12 @@
 
 package com.github.upthewaterspout.fates.integrationtest;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.HashSet;
 import java.util.Set;
 
+import com.github.upthewaterspout.fates.executor.ParallelExecutor;
 import com.github.upthewaterspout.fates.core.threading.Fates;
-import com.github.upthewaterspout.fates.integrationtest.executor.ParallelExecutor;
-import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class ThreadConfinedUpdateTest {
 

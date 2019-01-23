@@ -70,7 +70,10 @@ public class Fates {
   public static void run(MultiThreadedTest runnable) throws Exception {
     StateExplorer explorer = new ErrorCapturingExplorer(new DepthFirstExplorer());
 
-    //Do one run without the harness to try to get classloading, etc out of the way
+    //Do a fews run without the harness to try to get classloading, etc out of the way
+    //This is run 20 times because that is how long it will take the JVM to decide to generate
+    //native methods for reflection calls
+    for(int i =0; i < 20; i++)
     runnable.run();
 
     //Use the state exploration harness to explore the possible thread orderings

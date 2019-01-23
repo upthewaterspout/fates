@@ -114,6 +114,7 @@ public class DecisionTree<K> {
 
   /**
    * Get the label for this tree
+   * @return A label for this tree
    */
   public Object getLabel() {
     return label;

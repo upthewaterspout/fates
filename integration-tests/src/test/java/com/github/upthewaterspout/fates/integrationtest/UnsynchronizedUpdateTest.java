@@ -16,14 +16,13 @@
 
 package com.github.upthewaterspout.fates.integrationtest;
 
+import static org.junit.Assert.assertEquals;
+
+import com.github.upthewaterspout.fates.executor.ParallelExecutor;
 import com.github.upthewaterspout.fates.core.threading.Fates;
-import com.github.upthewaterspout.fates.integrationtest.executor.ParallelExecutor;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Integration test that {@link Fates} can correctly catch a race condition
