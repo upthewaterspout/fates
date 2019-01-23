@@ -55,14 +55,9 @@ public class Trees {
 
     LinkedList<String> decisionChanges = new LinkedList<>();
 
-    while(tree.getParent() != null) {
-      Object decision = tree.getDecision();
-      DecisionTree<?> parent = tree.getParent();
-      if(parent == null || !decision.equals(parent.getDecision())) {
-        decisionChanges.addFirst(parent.getLabel().toString());
-        if(parent.getParent() != null) {
-          decisionChanges.addFirst(parent.getParent().getLabel().toString());
-        }
+    while(tree != null) {
+      if(tree.getState() != DecisionTree.State.UNTESTED) {
+        decisionChanges.addFirst(tree.getLabel().toString());
       }
       tree = tree.getParent();
     }

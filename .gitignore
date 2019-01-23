@@ -11,4 +11,5 @@ setenv.sh
 integration-tests/build
 *.iml
 /out
+/*/out
 integration-tests/out

@@ -59,6 +59,41 @@ import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulin
  *
  */
 public class ThreadFates {
+  public boolean trace;
+
+  /**
+   * Enable execution traces. When this is turned on, a trace of all thread scheduling points from
+   * the first pass through the test will be printed to standard out. This is useful for debugging
+   * how many decision points exist within a test.
+   * @param trace true to enable tracing
+   * @return this
+   */
+  public ThreadFates setTrace(boolean trace) {
+    this.trace = trace;
+    return this;
+  }
+
+  /**
+   * Run a multithreaded test in FATES. The test will be run many times, with all possible
+   * thread execution orders.
+   *
+   * @param runnable The test to run
+   * @throws Exception if the test fails.
+   */
+  public void run(MultiThreadedTest runnable) throws Exception {
+
+    //Do a fews run without the harness to try to get classloading, etc out of the way
+    //This is run 20 times because that is how long it will take the JVM to decide to generate
+    //native methods for reflection calls
+    for(int i =0; i < 20; i++)
+      runnable.run();
+
+    //Use the state exploration harness to explore the possible thread orderings
+    new Fates()
+        .setExplorer(() -> new ErrorCapturingExplorer(new DepthFirstExplorer()))
+        .setTrace(trace)
+        .explore(instrumentTest(runnable));
+  }
 
   /**
    * Convert a {@link MultiThreadedTest}, which uses threads, into a {@link RepeatedTest},
@@ -105,27 +140,6 @@ public class ThreadFates {
     return listener;
   }
 
-  /**
-   * Run a multithreaded test in FATES. The test will be run many times, with all possible
-   * thread execution orders.
-   *
-   * @param runnable The test to run
-   * @throws Exception if the test fails.
-   */
-  public void run(MultiThreadedTest runnable) throws Exception {
-
-    //Do a fews run without the harness to try to get classloading, etc out of the way
-    //This is run 20 times because that is how long it will take the JVM to decide to generate
-    //native methods for reflection calls
-    for(int i =0; i < 20; i++)
-    runnable.run();
-
-    //Use the state exploration harness to explore the possible thread orderings
-    new Fates()
-        .setExplorer(() -> new ErrorCapturingExplorer(new DepthFirstExplorer()))
-        .explore(instrumentTest(runnable));
-
-  }
 
   /**
    * A multithreaded test to run in FATES.

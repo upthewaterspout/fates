@@ -52,6 +52,7 @@ public class Fates {
 
 
   private Supplier<StateExplorer> explorerSupplier = () -> new DepthFirstExplorer();
+  private boolean trace;
 
   /**
    * Configure the {@link StateExplorer} that should be used. The default is {@link DepthFirstExplorer}
@@ -81,6 +82,11 @@ public class Fates {
         System.err.println(explorer.getTrace());
         throw e;
       }
+
+      if(trace && count == 0) {
+        System.out.println("TRACE" + explorer.getTrace());
+      }
+
       explorer.done();
 
       long estimate = explorer.estimateIterations();
@@ -89,5 +95,16 @@ public class Fates {
       }
     }
 
+  }
+
+  /**
+   * Enable execution traces. When this is turned on, a trace of all thread scheduling points from
+   * the first pass through the test will be printed to standard out. This is useful for debugging
+   * how many decision points exist within a test.
+   * @param trace true if traces should be enabled
+   */
+  public Fates setTrace(boolean trace) {
+    this.trace = trace;
+    return this;
   }
 }

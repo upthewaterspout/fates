@@ -88,7 +88,7 @@ public class DepthFirstExplorerJUnitTest {
     String expected =  "\n========================================" +
         "\nTest History:" +
         "\n========================================" +
-        "\n" + "label1\nlabel3\nlabel4" +
+        "\n" + "label1\nlabel2\nlabel3\nlabel4\nlabel5" +
         "\n========================================";
     assertEquals(expected, trace);
   }
