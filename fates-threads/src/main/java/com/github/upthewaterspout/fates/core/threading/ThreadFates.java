@@ -16,6 +16,10 @@
 
 package com.github.upthewaterspout.fates.core.threading;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.RepeatedTest;
 import com.github.upthewaterspout.fates.core.states.Fates;
@@ -23,6 +27,7 @@ import com.github.upthewaterspout.fates.core.states.StateExplorer;
 import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
 import com.github.upthewaterspout.fates.core.threading.confinement.ThreadConfinementListener;
 import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
+import com.github.upthewaterspout.fates.core.threading.harness.AtomicMethodListener;
 import com.github.upthewaterspout.fates.core.threading.harness.ErrorCapturingExplorer;
 import com.github.upthewaterspout.fates.core.threading.harness.ThreadLocalEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
@@ -60,6 +65,7 @@ import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulin
  */
 public class ThreadFates {
   public boolean trace;
+  private List<Class<?>> atomicClasses = new ArrayList<>();
 
   /**
    * Enable execution traces. When this is turned on, a trace of all thread scheduling points from
@@ -70,6 +76,20 @@ public class ThreadFates {
    */
   public ThreadFates setTrace(boolean trace) {
     this.trace = trace;
+    return this;
+  }
+
+  /**
+   * Add a list of classes that should be treated as atomic with respect to the scheduler.
+   *
+   * Any code exercised within one a call to one of these classes will be executed atomically
+   * - no scheduling will happen.
+   *
+   * @param atomicClasses A list of classes that should execute atomically during the test
+   * @return this
+   */
+  public ThreadFates addAtomicClasses(Class<?> ... atomicClasses) {
+    this.atomicClasses.addAll(Arrays.asList(atomicClasses));
     return this;
   }
 
@@ -100,7 +120,7 @@ public class ThreadFates {
    * which which has a bunch of decision points, by enabling instrumentation and using
    * the {@link Decider} to pick which thread ordering to use
    */
-  private static RepeatedTest instrumentTest(MultiThreadedTest runnable) {
+  private RepeatedTest instrumentTest(MultiThreadedTest runnable) {
     return decider -> {
 
       ExecutionEventListener listener = createExecutionEventPipeline(decider);
@@ -120,15 +140,19 @@ public class ThreadFates {
    *
    * @param decider The decider used to choose which thread to allow to proceed for this test
    */
-  private static ExecutionEventListener createExecutionEventPipeline(Decider decider) {
+  private ExecutionEventListener createExecutionEventPipeline(Decider decider) {
 
     //At the end of the pipeline is the actual thread scheduler
     ThreadSchedulingListener scheduler = new ThreadSchedulingListener(decider);
     scheduler.begin();
 
+    ExecutionEventListener listener = scheduler;
+
+    //In front of that is a listener that suppresses events for calls with atomicClasses
+    listener = new AtomicMethodListener(listener, atomicClasses);
+
     //In front of that is a listener that can skip events if we are doing class loading
-    ExecutionEventListener listener
-        = new AtomicClassLoadingDecorator( scheduler);
+    listener = new AtomicClassLoadingDecorator( listener);
 
     //In front of that is a listener that detects if objects are only used by a single thread
     listener = new ThreadConfinementListener(listener);
