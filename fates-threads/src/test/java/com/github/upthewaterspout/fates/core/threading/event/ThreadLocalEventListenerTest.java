@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.harness;
+package com.github.upthewaterspout.fates.core.threading.event;
 
 import static org.mockito.Mockito.*;
 
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ThreadLocalEventListener;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,34 +38,34 @@ public class ThreadLocalEventListenerTest {
   @Test
   public void enabledForTrackedThread() throws InterruptedException {
     Thread thread = new Thread(() -> {
-      listener.beforeGetField("any", "class", "method", 0);
+      listener.beforeGetField("any", "any", "class", "method", 0);
     });
     listener.beforeThreadStart(thread);
     thread.start();
     listener.afterThreadStart(thread);
     thread.join();
-    verify(delegate).beforeGetField(any(), any(), any(), anyInt());
+    verify(delegate).beforeGetField(any(), any(), any(), any(), anyInt());
   }
 
   @Test
   public void notEnabledForUntrackedThread() throws InterruptedException {
     Thread thread = new Thread(() -> {
-      listener.beforeGetField("owner", "class", "method", 0);
+      listener.beforeGetField("owner", "any", "class", "method", 0);
     });
     thread.start();
     thread.join();
-    verify(delegate, times(0)).beforeGetField(any(), any(), any(), anyInt());
+    verify(delegate, times(0)).beforeGetField(any(), any(), any(), any(), anyInt());
   }
 
   @Test
   public void shouldDisableDuringThreadStart() {
     Thread thread = new Thread();
     listener.beforeThreadStart(thread);
-    listener.beforeSetField(null, null, "class", "method", 0);
-    verify(delegate, times(0)).beforeGetField(any(), any(), any(), anyInt());
+    listener.beforeSetField(null, null, "any", "class", "method", 0);
+    verify(delegate, times(0)).beforeGetField(any(), any(), any(), any(), anyInt());
     listener.afterThreadStart(thread);
-    listener.beforeGetField("owner", "class", "method", 1);
-    verify(delegate, times(1)).beforeGetField(any(), any(), any(), anyInt());
+    listener.beforeGetField("owner", "any", "class", "method", 1);
+    verify(delegate, times(1)).beforeGetField(any(), any(), any(), any(), anyInt());
   }
 
 }

@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.instrument;
+package com.github.upthewaterspout.fates.core.threading.event;
 
+
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 
 /**
  * A decorator for {@link ExecutionEventListener} that prevents instrumentation
@@ -50,14 +52,15 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override
-  public void beforeGetField(Object owner, String className, String methodName,
+  public void beforeGetField(Object owner, String fieldName, String className,
+                             String methodName,
                              int lineNumber) {
     if(disabled()) {
       return;
     }
     disable();
     try {
-      delegate.beforeGetField(owner, className, methodName, lineNumber);
+      delegate.beforeGetField(owner, fieldName, className, methodName, lineNumber);
     } catch(RuntimeException t) {
       t.printStackTrace();
       lastError = t;
@@ -71,7 +74,8 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
   }
 
   @Override
-  public void beforeSetField(Object owner, Object fieldValue, String className,
+  public void beforeSetField(Object owner, Object fieldValue, String fieldName,
+                             String className,
                              String methodName,
                              int lineNumber) {
     if(disabled()) {
@@ -79,7 +83,7 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
     }
     disable();
     try {
-      delegate.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
+      delegate.beforeSetField(owner, fieldValue, fieldName, className, methodName, lineNumber);
     } catch(RuntimeException t) {
       t.printStackTrace();
       lastError = t;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.scheduler;
+package com.github.upthewaterspout.fates.core.threading.event;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -22,9 +22,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
 
-import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
-import com.github.upthewaterspout.fates.core.threading.harness.AtomicMethodListener;
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
 import org.junit.Test;
 
 public class AtomicMethodListenerTest {
@@ -35,23 +32,23 @@ public class AtomicMethodListenerTest {
 
   @Test
   public void noAtomicControlShouldAllowBeforeGetFieldCall() {
-    scheduler.beforeGetField("owner", CLASS_NAME, "method", 5);
-    verify(delegate).beforeGetField("owner", CLASS_NAME, "method", 5);
+    scheduler.beforeGetField("owner", "any", CLASS_NAME, "method", 5);
+    verify(delegate).beforeGetField("owner", "any", CLASS_NAME, "method", 5);
   }
 
   @Test
   public void beforeMethodShouldPreventBeforeGetFieldCall() {
     scheduler.beforeMethod(CLASS_NAME, "someMethod");
-    scheduler.beforeGetField("owner", CLASS_NAME, "method", 5);
-    verify(delegate, times(0)).beforeGetField("owner", CLASS_NAME, "method", 5);
+    scheduler.beforeGetField("owner", "any", CLASS_NAME, "method", 5);
+    verify(delegate, times(0)).beforeGetField("owner", "any", CLASS_NAME, "method", 5);
   }
 
   @Test
   public void afterMethodShouldAllowBeforeGetFieldCall() {
     scheduler.beforeMethod(CLASS_NAME, "loadClass");
     scheduler.afterMethod(CLASS_NAME, "loadClass");
-    scheduler.beforeGetField("owner", CLASS_NAME, "method", 5);
-    verify(delegate).beforeGetField("owner", CLASS_NAME, "method", 5);
+    scheduler.beforeGetField("owner", "any", CLASS_NAME, "method", 5);
+    verify(delegate).beforeGetField("owner", "any", CLASS_NAME, "method", 5);
   }
 
   @Test
@@ -59,8 +56,8 @@ public class AtomicMethodListenerTest {
     scheduler.beforeMethod(CLASS_NAME, "loadClass");
     scheduler.beforeMethod(CLASS_NAME, "loadClass");
     scheduler.afterMethod(CLASS_NAME, "loadClass");
-    scheduler.beforeGetField("owner", CLASS_NAME, "method", 5);
-    verify(delegate, times(0)).beforeGetField("owner", CLASS_NAME, "method", 5);
+    scheduler.beforeGetField("owner", "any", CLASS_NAME, "method", 5);
+    verify(delegate, times(0)).beforeGetField("owner", "any", CLASS_NAME, "method", 5);
   }
 
   @Test
@@ -69,7 +66,7 @@ public class AtomicMethodListenerTest {
     scheduler.beforeMethod(CLASS_NAME, "loadClass");
     scheduler.afterMethod(CLASS_NAME, "loadClass");
     scheduler.afterMethod(CLASS_NAME, "loadClass");
-    scheduler.beforeGetField("owner", CLASS_NAME, "method", 5);
-    verify(delegate).beforeGetField("owner", CLASS_NAME, "method", 5);
+    scheduler.beforeGetField("owner", "any", CLASS_NAME, "method", 5);
+    verify(delegate).beforeGetField("owner", "any", CLASS_NAME, "method", 5);
   }
 }

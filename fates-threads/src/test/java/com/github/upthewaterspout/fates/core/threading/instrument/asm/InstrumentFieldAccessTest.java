@@ -47,9 +47,9 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     Callable<Integer> object = transformAndCreate(className);
     int value = object.call();
     assertEquals(6, value);
-    verify(hook, times(1)).beforeGetField(eq(object), eq(className), eq("call"), eq(26));
-    verify(hook, times(1)).beforeSetField(eq(object), eq(null), eq(className), eq("call"), eq(27));
-    verify(hook, times(1)).beforeGetField(eq(object), eq(className), eq("call"), eq(27));
+    verify(hook, times(1)).beforeGetField(eq(object), eq("a"), eq(className), eq("call"), eq(26));
+    verify(hook, times(1)).beforeSetField(eq(object), eq(null), eq("a"), eq(className), eq("call"), eq(27));
+    verify(hook, times(1)).beforeGetField(eq(object), eq("a"), eq(className), eq("call"), eq(27));
   }
 
   @Test
@@ -58,9 +58,9 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     Callable<Long> object = transformAndCreate(className);
     long value = object.call();
     assertEquals(6, value);
-    verify(hook, times(1)).beforeGetField(eq(object), eq(className), eq("call"), eq(26));
-    verify(hook, times(1)).beforeSetField(eq(object), eq(null), eq(className), eq("call"), eq(27));
-    verify(hook, times(1)).beforeGetField(eq(object), eq(className), eq("call"), eq(27));
+    verify(hook, times(1)).beforeGetField(eq(object), eq("a"), eq(className), eq("call"), eq(26));
+    verify(hook, times(1)).beforeSetField(eq(object), eq(null), eq("a"), eq(className), eq("call"), eq(27));
+    verify(hook, times(1)).beforeGetField(eq(object), eq("a"), eq(className), eq("call"), eq(27));
   }
 
   @Test
@@ -69,8 +69,8 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     Callable<String> object = transformAndCreate(className);
     String value = object.call();
     assertEquals("world", value);
-    verify(hook, times(1)).beforeGetField(eq(object), eq(className), eq("call"), eq(27));
-    verify(hook, times(1)).beforeSetField(eq(object), eq("world"), eq(className), eq("call"), eq(26));
+    verify(hook, times(1)).beforeGetField(eq(object), eq("a"), eq(className), eq("call"), eq(27));
+    verify(hook, times(1)).beforeSetField(eq(object), eq("world"), eq("a"), eq(className), eq("call"), eq(26));
   }
 
   @Test
@@ -79,9 +79,9 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     Callable<Integer> object = transformAndCreate(className);
     int value = object.call();
     assertEquals(6, value);
-    verify(hook, times(1)).beforeGetField(eq(object.getClass()), eq(className), eq("call"), eq(26));
-    verify(hook, times(1)).beforeSetField(eq(object.getClass()), eq(null), eq(className), eq("call"), eq(26));
-    verify(hook, times(1)).beforeGetField(eq(object.getClass()), eq(className), eq("call"), eq(26));
+    verify(hook, times(1)).beforeGetField(eq(object.getClass()), eq("a"), eq(className), eq("call"), eq(26));
+    verify(hook, times(1)).beforeSetField(eq(object.getClass()), eq(null), eq("a"), eq(className), eq("call"), eq(26));
+    verify(hook, times(1)).beforeGetField(eq(object.getClass()), eq("a"), eq(className), eq("call"), eq(26));
   }
 
   @Test
@@ -90,8 +90,8 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     Callable<String> object = transformAndCreate(className);
     String value = object.call();
     assertEquals("world", value);
-    verify(hook, times(1)).beforeGetField(eq(object.getClass()), eq(className), eq("call"), eq(27));
-    verify(hook, times(1)).beforeSetField(eq(object.getClass()), eq("world"), eq(className), eq("call"), eq(26));
+    verify(hook, times(1)).beforeGetField(eq(object.getClass()), eq("a"), eq(className), eq("call"), eq(27));
+    verify(hook, times(1)).beforeSetField(eq(object.getClass()), eq("world"), eq("a"), eq(className), eq("call"), eq(26));
   }
 
   @Test
@@ -99,7 +99,7 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     String className = ClassWithObjectRefences.class.getCanonicalName();
     Callable object = transformAndCreate(className);
     Object fieldValue = object.call();
-    verify(hook, times(1)).beforeSetField(eq(object), eq(fieldValue), eq(className), eq("call"), eq(30));
+    verify(hook, times(1)).beforeSetField(eq(object), eq(fieldValue), eq("ref"), eq(className), eq("call"), eq(30));
   }
 
   /**
@@ -109,7 +109,7 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
    * inner class before the super constructor is called, and these
    * fields are initialized before the super constructor call
    *
-   * see {@link InstrumentFieldAccess#isFinal(String, String)}
+   * see {@link InstrumentFieldAccess}
    * @throws Exception
    */
   @Test
@@ -129,7 +129,7 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     Callable<String[]> object = transformAndCreate(className);
     String[] result = object.call();
     assertEquals(0, result.length);
-    verify(hook, times(1)).beforeGetField(refEq(ClassWithStaticField.class), eq(className), eq("call"), eq(29));
+    verify(hook, times(1)).beforeGetField(refEq(ClassWithStaticField.class), eq("RESULT"), eq(className), eq("call"), eq(29));
   }
 
 }

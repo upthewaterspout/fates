@@ -21,7 +21,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 import sun.misc.Unsafe;
 
 /**
@@ -125,7 +125,8 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
    * Before a field read, potentially switch to a new thread
    */
   @Override
-  public void beforeGetField(Object owner, String className, String methodName,
+  public void beforeGetField(Object owner, String fieldName, String className,
+                             String methodName,
                              int lineNumber) {
     schedulerState.setLineNumber(Thread.currentThread(), className, methodName, lineNumber);
     yield();
@@ -135,7 +136,8 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
    * Before a field write, potentially switch to a new thread
    */
   @Override
-  public void beforeSetField(Object owner, Object fieldValue, String className,
+  public void beforeSetField(Object owner, Object fieldValue, String fieldName,
+                             String className,
                              String methodName,
                              int lineNumber) {
     schedulerState.setLineNumber(Thread.currentThread(), className, methodName, lineNumber);

@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.harness;
+package com.github.upthewaterspout.fates.core.threading.event;
 
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * A decorator for a {@link ExecutionEventListener} that allows disabling the {@link
- * ExecutionEventListener#beforeGetField(Object, String, String, int)}  and {@link
- * ExecutionEventListener#beforeSetField(Object, Object, String, String, int)} while class loading is happening.
+ * A decorator for a {@link ExecutionEventListener} that allows disabling execution events
+ * while inside a certain list of classes.
  *
- * This decorator is used to suppress context switching that would normally happen from field
- * accesses within classloading, to reduce the number of decision points in a test.
  */
-public class AtomicClassLoadingDecorator extends DelegatingExecutionEventListener {
+public class AtomicMethodListener extends DelegatingExecutionEventListener {
 
-  private ThreadLocal<EntryCount> atomicEntryCount = new ThreadLocal<EntryCount> () {
-    @Override protected EntryCount initialValue() {
-      return new EntryCount();
-    }
-  };
+  private final Set<String> suppressedClasses;
+  private ThreadLocal<EntryCount> atomicEntryCount = ThreadLocal.withInitial(EntryCount::new);
 
-  public AtomicClassLoadingDecorator(final ExecutionEventListener delegate) {
+  public AtomicMethodListener(final ExecutionEventListener delegate, Collection<Class<?>> suppressedClasses) {
     super(delegate);
+
+    this.suppressedClasses = suppressedClasses.stream()
+      .map(Class::getCanonicalName)
+        .collect(Collectors.toCollection(HashSet::new));
   }
 
   @Override
@@ -45,7 +46,7 @@ public class AtomicClassLoadingDecorator extends DelegatingExecutionEventListene
 
   @Override
   public void beforeMethod(String className, String methodName) {
-    if(methodName.equals("loadClass")) {
+    if(suppressedClasses.contains(className)) {
       beginAtomic();
     }
     super.beforeMethod(className, methodName);
@@ -54,7 +55,7 @@ public class AtomicClassLoadingDecorator extends DelegatingExecutionEventListene
   @Override
   public void afterMethod(String className, String methodName) {
     super.afterMethod(className, methodName);
-    if(methodName.equals("loadClass")) {
+    if(suppressedClasses.contains(className)) {
       endAtomic();
     }
   }

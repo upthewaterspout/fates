@@ -16,6 +16,10 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument;
 
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.NonReentrantExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.NoopExecutionEventListener;
+
 /**
  * Static methods that should be called from instrumented bytecode to control the execution of
  * code.
@@ -59,12 +63,12 @@ public class ExecutionEventSingleton {
     }
   }
 
-  public static void beforeGetField(Object owner, String className, String methodName, int lineNumber) {
-    instance.beforeGetField(owner, className, methodName, lineNumber);
+  public static void beforeGetField(Object owner, String fieldName, String className, String methodName, int lineNumber) {
+    instance.beforeGetField(owner, fieldName, className, methodName, lineNumber);
   }
 
-  public static void beforeSetField(Object owner, Object fieldValue, String className, String methodName, int lineNumber) {
-    instance.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
+  public static void beforeSetField(Object owner, Object fieldValue, String fieldName, String className, String methodName, int lineNumber) {
+    instance.beforeSetField(owner, fieldValue, fieldName, className, methodName, lineNumber);
   }
 
   public static void beforeThreadStart(Thread thread) {

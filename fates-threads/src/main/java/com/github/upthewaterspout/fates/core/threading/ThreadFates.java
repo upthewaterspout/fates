@@ -23,14 +23,14 @@ import java.util.List;
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.RepeatedTest;
 import com.github.upthewaterspout.fates.core.states.Fates;
-import com.github.upthewaterspout.fates.core.states.StateExplorer;
 import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
-import com.github.upthewaterspout.fates.core.threading.confinement.ThreadConfinementListener;
-import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
-import com.github.upthewaterspout.fates.core.threading.harness.AtomicMethodListener;
+import com.github.upthewaterspout.fates.core.threading.event.IgnoreFinalFieldsListener;
+import com.github.upthewaterspout.fates.core.threading.event.confinement.ThreadConfinementListener;
+import com.github.upthewaterspout.fates.core.threading.event.AtomicClassLoadingDecorator;
+import com.github.upthewaterspout.fates.core.threading.event.AtomicMethodListener;
 import com.github.upthewaterspout.fates.core.threading.harness.ErrorCapturingExplorer;
-import com.github.upthewaterspout.fates.core.threading.harness.ThreadLocalEventListener;
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ThreadLocalEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulingListener;
 
@@ -147,6 +147,8 @@ public class ThreadFates {
     scheduler.begin();
 
     ExecutionEventListener listener = scheduler;
+    //In front of that is a listener that suppresses events on final fields
+    listener = new IgnoreFinalFieldsListener(listener);
 
     //In front of that is a listener that suppresses events for calls with atomicClasses
     listener = new AtomicMethodListener(listener, atomicClasses);

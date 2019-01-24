@@ -16,9 +16,9 @@
 
 package com.github.upthewaterspout.fates.instrument;
 
-import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
-import com.github.upthewaterspout.fates.core.threading.harness.ThreadLocalEventListener;
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.AtomicClassLoadingDecorator;
+import com.github.upthewaterspout.fates.core.threading.event.ThreadLocalEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.instrument.instrumented.*;
 
@@ -55,13 +55,15 @@ public class InstrumentationAgentTest {
   public void before() {
     hook = new ExecutionEventListener() {
       @Override
-      public void beforeGetField(Object owner, String className, String methodName,
+      public void beforeGetField(Object owner, String fieldName, String className,
+                                 String methodName,
                                  int lineNumber) {
         fieldAccesses.incrementAndGet();
       }
 
       @Override
-      public void beforeSetField(Object owner, Object fieldValue, String className,
+      public void beforeSetField(Object owner, Object fieldValue, String fieldName,
+                                 String className,
                                  String methodName,
                                  int lineNumber) {
         fieldAccesses.incrementAndGet();

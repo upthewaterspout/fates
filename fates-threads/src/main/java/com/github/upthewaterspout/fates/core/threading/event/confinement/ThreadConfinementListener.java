@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.confinement;
+package com.github.upthewaterspout.fates.core.threading.event.confinement;
 
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
-import com.github.upthewaterspout.fates.core.threading.harness.DelegatingExecutionEventListener;
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.DelegatingExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 
 /**
  * {@link ExecutionEventListener} that does not pass on events that happen to objects
@@ -62,16 +62,18 @@ public class ThreadConfinementListener extends DelegatingExecutionEventListener 
 
 
   @Override
-  public void beforeGetField(Object owner, String className, String methodName, int lineNumber) {
+  public void beforeGetField(Object owner, String fieldName, String className,
+                             String methodName, int lineNumber) {
     if(threadConfinedObjects.get().contains(owner)) {
       //Do nothing if the object is confined to this thread
       return;
     }
-    delegate.beforeGetField(owner, className, methodName, lineNumber);
+    delegate.beforeGetField(owner, fieldName, className, methodName, lineNumber);
   }
 
   @Override
-  public void beforeSetField(Object owner, Object fieldValue, String className, String methodName,
+  public void beforeSetField(Object owner, Object fieldValue, String fieldName,
+                             String className, String methodName,
                              int lineNumber) {
     if(threadConfinedObjects.get().contains(owner)) {
       //Do nothing if the object is confined to this thread
@@ -79,7 +81,7 @@ public class ThreadConfinementListener extends DelegatingExecutionEventListener 
     }
 
     removeThreadConfinedObject(fieldValue);
-    delegate.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
+    delegate.beforeSetField(owner, fieldValue, fieldName, className, methodName, lineNumber);
   }
 
   private void removeThreadConfinedObject(Object fieldValue) {

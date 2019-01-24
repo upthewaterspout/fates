@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.instrument;
+package com.github.upthewaterspout.fates.core.threading.event;
 
 import com.github.upthewaterspout.fates.core.threading.ThreadFates;
+import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulingListener;
 
 /**
@@ -127,21 +128,24 @@ public interface ExecutionEventListener {
   /**
    * Called before a GETFIELD instruction
    * @param owner The object which owns the field
+   * @param fieldName
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get
    */
-  void beforeGetField(Object owner, String className, String methodName, int lineNumber);
+  void beforeGetField(Object owner, String fieldName, String className, String methodName,
+                      int lineNumber);
 
   /**
    * Called before a SETFIELD instruction
    * @param owner The object which owns the field
    * @param fieldValue the new value of the field, or null if the field is primitive
+   * @param fieldName
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get
    */
-  void beforeSetField(Object owner, Object fieldValue, String className,
+  void beforeSetField(Object owner, Object fieldValue, String fieldName, String className,
                       String methodName, int lineNumber);
 
   /**

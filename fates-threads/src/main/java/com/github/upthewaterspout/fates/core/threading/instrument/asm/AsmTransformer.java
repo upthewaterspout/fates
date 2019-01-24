@@ -42,20 +42,20 @@ public class AsmTransformer implements ClassFileTransformer {
       ClassReader reader = new ClassReader(classfileBuffer);
       ClassWriter outputWriter = new ClassWriter(reader, 0);
       ClassVisitor transformingVisitor = outputWriter;
-      transformingVisitor = new IncreaseMaxStack(transformingVisitor, 5);
-      transformingVisitor = new MinimumVersionVisitor(transformingVisitor); //No stack usage
-      transformingVisitor = new InstrumentThreadSynchronizedMethods(transformingVisitor); //No stack usage
-      transformingVisitor = new InstrumentSynchronizedBlock(transformingVisitor); //One additional stack element
+      transformingVisitor = new IncreaseMaxStack(transformingVisitor, 6);
+      transformingVisitor = new MinimumVersionVisitor(transformingVisitor);
+      transformingVisitor = new InstrumentThreadSynchronizedMethods(transformingVisitor);
+      transformingVisitor = new InstrumentSynchronizedBlock(transformingVisitor);
       if(classBeingRedefined == null) {
-        transformingVisitor = new InstrumentSynchronizedMethod(transformingVisitor); //One additional stack element
+        transformingVisitor = new InstrumentSynchronizedMethod(transformingVisitor);
       }
-      transformingVisitor = new InstrumentWaitNotify(transformingVisitor); //No stack usage
-      transformingVisitor = new InstrumentLockSupport(transformingVisitor); //No stack usage
-      transformingVisitor = new InstrumentThreadExit(transformingVisitor); //No stack usage
-      transformingVisitor = new InstrumentJoin(transformingVisitor); //No stack usage
-      transformingVisitor = new InstrumentFieldAccess(transformingVisitor); //5 stack elements max
-      transformingVisitor = new InstrumentMethodCalls(transformingVisitor); //No stack usage
-      transformingVisitor = new InstrumentNewObject(transformingVisitor); //One additional stack element
+      transformingVisitor = new InstrumentWaitNotify(transformingVisitor);
+      transformingVisitor = new InstrumentLockSupport(transformingVisitor);
+      transformingVisitor = new InstrumentThreadExit(transformingVisitor);
+      transformingVisitor = new InstrumentJoin(transformingVisitor);
+      transformingVisitor = new InstrumentFieldAccess(transformingVisitor);
+      transformingVisitor = new InstrumentMethodCalls(transformingVisitor);
+      transformingVisitor = new InstrumentNewObject(transformingVisitor);
       reader.accept(transformingVisitor, ClassReader.EXPAND_FRAMES);
       byte[] result =  outputWriter.toByteArray();
 

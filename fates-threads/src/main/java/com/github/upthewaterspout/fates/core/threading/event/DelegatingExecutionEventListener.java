@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.harness;
+package com.github.upthewaterspout.fates.core.threading.event;
 
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 
 /**
  * An {@link ExecutionEventListener} that delegates all calls to a nested
@@ -157,19 +157,21 @@ public abstract class DelegatingExecutionEventListener implements ExecutionEvent
     }
   }
 
-  public void beforeGetField(Object owner, String className, String methodName,
+  public void beforeGetField(Object owner, String fieldName, String className,
+                             String methodName,
                              int lineNumber) {
     if(beforeEvent()) {
-      delegate.beforeGetField(owner, className, methodName, lineNumber);
+      delegate.beforeGetField(owner, fieldName, className, methodName, lineNumber);
     }
 
   }
 
-  public void beforeSetField(Object owner, Object fieldValue, String className,
+  public void beforeSetField(Object owner, Object fieldValue, String fieldName,
+                             String className,
                              String methodName,
                              int lineNumber) {
     if(beforeEvent()) {
-      delegate.beforeSetField(owner, fieldValue, className, methodName, lineNumber);
+      delegate.beforeSetField(owner, fieldValue, fieldName, className, methodName, lineNumber);
     }
   }
 

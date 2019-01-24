@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.confinement;
+package com.github.upthewaterspout.fates.core.threading.event.confinement;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.IdentityHashMap;

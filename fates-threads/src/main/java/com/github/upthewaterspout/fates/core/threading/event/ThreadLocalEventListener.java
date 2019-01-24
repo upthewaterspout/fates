@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.harness;
+package com.github.upthewaterspout.fates.core.threading.event;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.DelegatingExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 
 /**
  * A decorator for a {@link ExecutionEventListener} that is only enabled for the current thread

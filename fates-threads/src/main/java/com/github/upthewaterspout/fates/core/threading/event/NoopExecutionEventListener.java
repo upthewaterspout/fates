@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.instrument;
+package com.github.upthewaterspout.fates.core.threading.event;
 
 import java.util.concurrent.locks.LockSupport;
+
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 
 /**
  * An {@link ExecutionEventListener} that behaves as though the code has not been instrumented.
@@ -28,13 +30,15 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class NoopExecutionEventListener implements ExecutionEventListener {
   @Override
-  public void beforeGetField(Object owner, String className, String methodName,
+  public void beforeGetField(Object owner, String fieldName, String className,
+                             String methodName,
                              int lineNumber) {
     //do nothing
   }
 
   @Override
-  public void beforeSetField(Object owner, Object fieldValue, String className,
+  public void beforeSetField(Object owner, Object fieldValue, String fieldName,
+                             String className,
                              String methodName,
                              int lineNumber) {
     //do nothing

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.confinement;
+package com.github.upthewaterspout.fates.core.threading.event.confinement;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

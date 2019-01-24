@@ -20,9 +20,9 @@ import static org.mockito.Mockito.spy;
 
 import java.util.concurrent.Callable;
 
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
-import com.github.upthewaterspout.fates.core.threading.instrument.NoopExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.NoopExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.instrument.classloader.TransformingClassLoader;
 import org.junit.After;
 import org.junit.Before;

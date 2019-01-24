@@ -16,6 +16,8 @@
 
 package com.github.upthewaterspout.fates.core.threading.instrument.asm;
 
+import static com.github.upthewaterspout.fates.core.threading.instrument.asm.SingletonCall.OBJECT;
+import static com.github.upthewaterspout.fates.core.threading.instrument.asm.SingletonCall.STRING;
 import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.DUP2;
 import static org.objectweb.asm.Opcodes.DUP2_X1;
@@ -37,8 +39,8 @@ import org.objectweb.asm.Type;
 
 
 /**
- * Adds calls to {@link ExecutionEventSingleton#beforeSetField(Object, Object, String, String, int)} and
- * {@link ExecutionEventSingleton#beforeGetField(Object, String, String, int)} before all
+ * Adds calls to {@link ExecutionEventSingleton#beforeSetField(Object, Object, String, String, String, int)} and
+ * {@link ExecutionEventSingleton#beforeGetField(Object, String, String, String, int)} before all
  * field access.
  */
 public class InstrumentFieldAccess extends AbstractClassVisitor {
@@ -76,37 +78,37 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
       //Don't instrument final fields.
       if(!isFinal(owner, name)) {
         if (isFieldRead(opcode)) {
-          callBeforeGetField(opcode, owner, getClassName(), getMethodName(), getLastLineNumber());
+          callBeforeGetField(opcode, owner, name, getClassName(), getMethodName(), getLastLineNumber());
         } else if(isFieldUpdate(opcode)) {
-          callBeforeSetField(opcode, owner, Type.getType(desc), getClassName(), getMethodName(), getLastLineNumber());
+          callBeforeSetField(opcode, owner, name, Type.getType(desc), getClassName(), getMethodName(), getLastLineNumber());
         }
       }
 
       super.visitFieldInsn(opcode, owner, name, desc);
     }
 
-    protected void callBeforeGetField(int opcode, String owner, String className, String methodName, int lineNumber) {
+    protected void callBeforeGetField(int opcode, String owner, String fieldName, String className, String methodName, int lineNumber) {
       if(opcode == GETSTATIC) {
         visitLdcInsn(Type.getObjectType(owner));
       } else {
         visitInsn(DUP);
       }
-      putClassMethodAndLine(className, methodName, lineNumber);
-      SingletonCall.add(this, "beforeGetField", Type.VOID_TYPE, SingletonCall.OBJECT,
-          SingletonCall.STRING, SingletonCall.STRING, Type.INT_TYPE);
+      putClassMethodAndLine(fieldName, className, methodName, lineNumber);
+      SingletonCall.add(this, "beforeGetField", Type.VOID_TYPE, OBJECT,
+          STRING, STRING, STRING, Type.INT_TYPE);
     }
 
-    protected void callBeforeSetField(int opcode, String owner, Type fieldType, String className,
+    protected void callBeforeSetField(int opcode, String owner, String fieldName, Type fieldType, String className,
                                       String methodName, int lineNumber) {
 
       if(opcode == PUTSTATIC) {
-        callBeforeStaticSetField(owner, fieldType, className, methodName, lineNumber);
+        callBeforeStaticSetField(owner, fieldType, fieldName, className, methodName, lineNumber);
       } else {
-        callBeforeSetInstanceField(fieldType, className, methodName, lineNumber);
+        callBeforeSetInstanceField(fieldType, fieldName, className, methodName, lineNumber);
       }
     }
 
-    private void callBeforeSetInstanceField(Type fieldType, String className, String methodName,
+    private void callBeforeSetInstanceField(Type fieldType, String fieldName, String className, String methodName,
                                             int lineNumber) {
       if (isDoubleOrlong(fieldType)) {
         //Push the owner and null onto the stack
@@ -130,7 +132,7 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
         //Stack = owner, value, owner, value
       }
 
-      putClassMethodAndLine(className, methodName, lineNumber);
+      putClassMethodAndLine(fieldName, className, methodName, lineNumber);
       invokeSetFieldHook();
     }
 
@@ -153,17 +155,18 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
     }
 
     private void invokeSetFieldHook() {
-      SingletonCall.add(this, "beforeSetField", Type.VOID_TYPE, SingletonCall.OBJECT, SingletonCall.OBJECT,
-          SingletonCall.STRING, SingletonCall.STRING, Type.INT_TYPE);
+      SingletonCall.add(this, "beforeSetField", Type.VOID_TYPE, OBJECT, OBJECT, STRING,
+          STRING, STRING, Type.INT_TYPE);
     }
 
-    private void putClassMethodAndLine(String className, String methodName, int lineNumber) {
+    private void putClassMethodAndLine(String fieldName, String className, String methodName, int lineNumber) {
+      visitLdcInsn(fieldName);
       visitLdcInsn(className.replace('/', '.'));
       visitLdcInsn(methodName);
       visitIntInsn(Opcodes.SIPUSH, lineNumber);
     }
 
-    private void callBeforeStaticSetField(String owner, Type fieldType, String className,
+    private void callBeforeStaticSetField(String owner, Type fieldType, String fieldName, String className,
                                           String methodName, int lineNumber) {
       if(isPrimitive(fieldType)) {
         visitLdcInsn(Type.getObjectType(owner));
@@ -184,7 +187,7 @@ public class InstrumentFieldAccess extends AbstractClassVisitor {
         //Stack  = value, owner_class, value
       }
 
-      putClassMethodAndLine(className, methodName, lineNumber);
+      putClassMethodAndLine(fieldName, className, methodName, lineNumber);
       invokeSetFieldHook();
     }
 

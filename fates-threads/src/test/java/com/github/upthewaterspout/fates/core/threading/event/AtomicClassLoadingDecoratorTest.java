@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.scheduler;
+package com.github.upthewaterspout.fates.core.threading.event;
 
 import static org.mockito.Mockito.*;
 
-import com.github.upthewaterspout.fates.core.threading.harness.AtomicClassLoadingDecorator;
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.AtomicClassLoadingDecorator;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 import org.junit.Test;
 
 public class AtomicClassLoadingDecoratorTest {
@@ -30,23 +30,23 @@ public class AtomicClassLoadingDecoratorTest {
 
   @Test
   public void noAtomicControlShouldAllowBeforeGetFieldCall() {
-    scheduler.beforeGetField("owner", "class", "method", 5);
-    verify(delegate).beforeGetField("owner", "class", "method", 5);
+    scheduler.beforeGetField("owner", "any", "class", "method", 5);
+    verify(delegate).beforeGetField("owner", "any", "class", "method", 5);
   }
 
   @Test
   public void beforeLoadClassShouldPreventBeforeGetFieldCall() {
     scheduler.beforeMethod("class", "loadClass");
-    scheduler.beforeGetField("owner", "class", "method", 5);
-    verify(delegate, times(0)).beforeGetField("owner", "class", "method", 5);
+    scheduler.beforeGetField("owner", "any", "class", "method", 5);
+    verify(delegate, times(0)).beforeGetField("owner", "any", "class", "method", 5);
   }
 
   @Test
   public void afterLoadClassShouldAllowBeforeGetFieldCall() {
     scheduler.beforeMethod("class", "loadClass");
     scheduler.afterMethod("class", "loadClass");
-    scheduler.beforeGetField("owner", "class", "method", 5);
-    verify(delegate).beforeGetField("owner", "class", "method", 5);
+    scheduler.beforeGetField("owner", "any", "class", "method", 5);
+    verify(delegate).beforeGetField("owner", "any", "class", "method", 5);
   }
 
   @Test
@@ -54,8 +54,8 @@ public class AtomicClassLoadingDecoratorTest {
     scheduler.beforeMethod("class", "loadClass");
     scheduler.beforeMethod("class", "loadClass");
     scheduler.afterMethod("class", "loadClass");
-    scheduler.beforeGetField("owner", "class", "method", 5);
-    verify(delegate, times(0)).beforeGetField("owner", "class", "method", 5);
+    scheduler.beforeGetField("owner", "any", "class", "method", 5);
+    verify(delegate, times(0)).beforeGetField("owner", "any", "class", "method", 5);
   }
 
   @Test
@@ -64,7 +64,7 @@ public class AtomicClassLoadingDecoratorTest {
     scheduler.beforeMethod("class", "loadClass");
     scheduler.afterMethod("class", "loadClass");
     scheduler.afterMethod("class", "loadClass");
-    scheduler.beforeGetField("owner", "class", "method", 5);
-    verify(delegate).beforeGetField("owner", "class", "method", 5);
+    scheduler.beforeGetField("owner", "any", "class", "method", 5);
+    verify(delegate).beforeGetField("owner", "any", "class", "method", 5);
   }
 }
