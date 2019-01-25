@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.assertj.core.util.Sets;
 import org.junit.Test;
 
 public class DepthFirstExplorerJUnitTest {
@@ -79,11 +80,11 @@ public class DepthFirstExplorerJUnitTest {
   public void wilLGenerateADebuggingTrace() {
     DepthFirstExplorer explorer = new DepthFirstExplorer();
 
-    explorer.decide("label1", Collections.singleton(1));
-    explorer.decide("label2", Collections.singleton(1));
-    explorer.decide("label3", Collections.singleton(1));
-    explorer.decide("label4", Collections.singleton(2));
-    explorer.decide("label5", Collections.singleton(2));
+    explorer.decide("label1", Sets.newLinkedHashSet(1, 2));
+    explorer.decide("label2", Sets.newLinkedHashSet(1, 2));
+    explorer.decide("label3", Sets.newLinkedHashSet(1, 2));
+    explorer.decide("label4", Sets.newLinkedHashSet(1, 2));
+    explorer.decide("label5", Sets.newLinkedHashSet(1, 2));
     String trace = explorer.getTrace();
     String expected =  "\n========================================" +
         "\nTest History:" +

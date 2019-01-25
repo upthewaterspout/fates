@@ -83,7 +83,7 @@ public class Fates {
         throw e;
       }
 
-      if(trace && count == 0) {
+      if(trace && (count % 1000 == 0)) {
         System.out.println("TRACE" + explorer.getTrace());
       }
 

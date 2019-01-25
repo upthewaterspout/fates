@@ -46,8 +46,9 @@ public class Trees {
   /**
    * Display the history of a given DecisionTree in a human readable format.
    *
-   * This method will follow all of the parent decisions that lead to this decision
-   * and print out each place where we switched from one choice to the next.
+   *
+   * This displays all of the decision points in the history of this point
+   * where there was more than one choice to be made.
    * @param tree the tree to examine
    * @return a human readable view of the history of decisions that lead to this tree
    */
@@ -56,7 +57,7 @@ public class Trees {
     LinkedList<String> decisionChanges = new LinkedList<>();
 
     while(tree != null) {
-      if(tree.getState() != DecisionTree.State.UNTESTED) {
+      if(tree.getSubTrees().size() > 1) {
         decisionChanges.addFirst(tree.getLabel().toString());
       }
       tree = tree.getParent();
