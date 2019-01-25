@@ -35,7 +35,7 @@ public class AtomicMethodListener extends DelegatingExecutionEventListener {
     super(delegate);
 
     this.suppressedClasses = suppressedClasses.stream()
-      .map(Class::getCanonicalName)
+      .map(Class::getName)
         .collect(Collectors.toCollection(HashSet::new));
   }
 

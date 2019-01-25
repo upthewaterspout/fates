@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -28,7 +29,8 @@ public class AtomicMethodListenerTest {
 
   public static final String CLASS_NAME = AtomicMethodListenerTest.class.getCanonicalName();
   public ExecutionEventListener delegate = mock(ExecutionEventListener.class);
-  public AtomicMethodListener scheduler = new AtomicMethodListener(delegate, Collections.singleton(AtomicMethodListenerTest.class));
+  public AtomicMethodListener scheduler = new AtomicMethodListener(delegate,
+      Arrays.asList(AtomicMethodListenerTest.class, AtomicMethodListenerTest.InnerClass.class));
 
   @Test
   public void noAtomicControlShouldAllowBeforeGetFieldCall() {
@@ -68,5 +70,16 @@ public class AtomicMethodListenerTest {
     scheduler.afterMethod(CLASS_NAME, "loadClass");
     scheduler.beforeGetField("owner", "any", CLASS_NAME, "method", 5);
     verify(delegate).beforeGetField("owner", "any", CLASS_NAME, "method", 5);
+  }
+
+  @Test
+  public void beforeMethodShouldPreventBeforeGetFieldCallForNamedInnerClass() {
+    scheduler.beforeMethod(InnerClass.class.getName(), "someMethod");
+    scheduler.beforeGetField("owner", "any", InnerClass.class.getName(), "method", 5);
+    verify(delegate, times(0)).beforeGetField("owner", "any",InnerClass.class.getName() , "method", 5);
+  }
+
+  public static class InnerClass {
+
   }
 }
