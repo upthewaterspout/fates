@@ -42,15 +42,17 @@ public class ParallelExecutor<OUT> {
 
     for(int i =0; i < threads.length; i++) {
       Callable<OUT> task = parallelTasks.get(i);
-      threads[i] = new Thread(() -> {
-              try {
-                task.call();
-              } catch (Throwable t) {
-                if(throwable != null) {
-                  throwable = t;
-                }
-              }
-            });
+      threads[i] = new Thread() {
+        public void run() {
+          try {
+            task.call();
+          } catch (Throwable t) {
+            if(throwable != null) {
+              throwable = t;
+            }
+          }
+        }
+      };
     };
 
     for(int i =0; i < threads.length; i++) {
