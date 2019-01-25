@@ -17,10 +17,13 @@
 package com.github.upthewaterspout.fates.executor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.github.upthewaterspout.fates.core.threading.ThreadFates;
+import jdk.nashorn.internal.codegen.CompilerConstants;
 
 /**
  * A simple parallel executor for use with {@link ThreadFates.MultiThreadedTest}s run
@@ -29,20 +32,22 @@ import com.github.upthewaterspout.fates.core.threading.ThreadFates;
  */
 public class ParallelExecutor<OUT> {
 
-  private final List<Callable<OUT>> parallelTasks = new ArrayList<>();
+  private final Map<String, Callable<OUT>> parallelTasks = new HashMap<>();
   volatile Throwable throwable = null;
 
-  public ParallelExecutor<OUT> inParallel(Callable<OUT> task) {
-    this.parallelTasks.add(task);
+  public ParallelExecutor<OUT> inParallel(String label, Callable<OUT> task) {
+    this.parallelTasks.put(label, task);
     return this;
   }
 
   public void run() throws Exception {
     Thread[] threads = new Thread[parallelTasks.size()];
 
-    for(int i =0; i < threads.length; i++) {
-      Callable<OUT> task = parallelTasks.get(i);
-      threads[i] = new Thread() {
+    int threadNum =0;
+    for(Map.Entry<String, Callable<OUT>> entry: parallelTasks.entrySet()) {
+      String label = entry.getKey();
+      Callable<OUT> task = entry.getValue();
+      threads[threadNum] = new Thread(label) {
         public void run() {
           try {
             task.call();
@@ -53,6 +58,8 @@ public class ParallelExecutor<OUT> {
           }
         }
       };
+
+      threadNum++;
     };
 
     for(int i =0; i < threads.length; i++) {

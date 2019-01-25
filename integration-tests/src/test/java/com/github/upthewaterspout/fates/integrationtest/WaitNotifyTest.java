@@ -34,8 +34,8 @@ public class WaitNotifyTest {
 
       WaitNotify waitNotify = new WaitNotify();
       new ParallelExecutor<Boolean>()
-          .inParallel(waitNotify::doWait)
-          .inParallel(waitNotify::doNotify)
+          .inParallel("waiter", waitNotify::doWait)
+          .inParallel("notifier", waitNotify::doNotify)
           .run();
 
       assertEquals(true, waitNotify.notified);

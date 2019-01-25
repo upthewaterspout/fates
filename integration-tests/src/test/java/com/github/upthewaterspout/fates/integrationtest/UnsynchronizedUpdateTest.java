@@ -38,8 +38,8 @@ public class UnsynchronizedUpdateTest {
     new ThreadFates().run(() -> {
       UnsynchronizedUpdate updater = new UnsynchronizedUpdate();
       new ParallelExecutor<Integer>()
-          .inParallel(updater::update)
-          .inParallel(updater::update)
+          .inParallel("updater1", updater::update)
+          .inParallel("updater2", updater::update)
           .run();
 
       assertEquals(2, updater.getValue());

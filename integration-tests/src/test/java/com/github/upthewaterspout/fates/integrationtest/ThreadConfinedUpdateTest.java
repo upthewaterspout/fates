@@ -29,8 +29,8 @@ public class ThreadConfinedUpdateTest {
   public void shouldNotHangForThreadConfinedUpdates() throws Exception {
     new ThreadFates().run(() -> {
       new ParallelExecutor<Set<Integer>>()
-          .inParallel(() -> new ThreadConfinedChanges().update())
-          .inParallel(() -> new ThreadConfinedChanges().update())
+          .inParallel("updater1", () -> new ThreadConfinedChanges().update())
+          .inParallel("updater2", () -> new ThreadConfinedChanges().update())
           .run();
 
     });
