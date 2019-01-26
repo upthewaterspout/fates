@@ -27,7 +27,7 @@ import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplore
  * Users should construct a {@link RepeatedTest} and pass the test to this harness. The harness is
  * responsible for running the test repeatedly.
  * <p>
- * The algorithm for exploring possible decisions is passed in as the {@link StateExplorer}.
+ * The algorithm for exploring possible decisions can be set using {@link #setExplorer(Supplier)}
  * Algorithms may explore all possible decisions or some subset of decisions, it is up to the
  * algorithm. Currently the only implementation of {@link StateExplorer} is {@link
  * DepthFirstExplorer}, which explores all possible decisions.
@@ -41,7 +41,7 @@ import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplore
  * <pre>
  * {@code
  *   new Fates().explore(decider -> {
- *     int a = * decider.decide(1,3,5);
+ *     int a = decider.decide(1,3,5);
  *     int b = decider.decide(2,4);
  *     assertIsEven(a * b);
  *   });
@@ -59,6 +59,8 @@ public class Fates {
    *
    * @param explorerSupplier A supplier for the explorer to use. Each call to {@link #explore(RepeatedTest)}
    * will invoke this supplier to create a new instance of the potentially stateful explorer class.
+   *
+   * @return this
    */
   public Fates setExplorer(
       Supplier<StateExplorer> explorerSupplier) {
@@ -102,6 +104,7 @@ public class Fates {
    * the first pass through the test will be printed to standard out. This is useful for debugging
    * how many decision points exist within a test.
    * @param trace true if traces should be enabled
+   * @return this
    */
   public Fates setTrace(boolean trace) {
     this.trace = trace;

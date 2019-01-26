@@ -128,7 +128,7 @@ public interface ExecutionEventListener {
   /**
    * Called before a GETFIELD instruction
    * @param owner The object which owns the field
-   * @param fieldName
+   * @param fieldName The name of the field
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get
@@ -140,7 +140,7 @@ public interface ExecutionEventListener {
    * Called before a SETFIELD instruction
    * @param owner The object which owns the field
    * @param fieldValue the new value of the field, or null if the field is primitive
-   * @param fieldName
+   * @param fieldName The name of the field
    * @param className  The class the field is on
    * @param methodName The method the get is in
    * @param lineNumber The line number of the get

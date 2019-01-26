@@ -34,6 +34,7 @@ public class SingletonCall {
   /**
    * Add a call to {@link ExecutionEventSingleton in this method}. It is the responsibility
    * of the caller of this method to have already prepared the stack correctly!
+   * @param methodVisitor A methodvisitor to pass the method call to
    * @param methodName The name of the method
    * @param returnType The return type of the method
    * @param parameterTypes The parameter types of the method
