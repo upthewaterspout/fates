@@ -31,11 +31,10 @@ public void findRace() {
 }
 ```
 
-See the [javadocs](https://upthewaterspout.github.io/fates/javadoc/) for more
 information. The two useful classes from a user perspective are:
-* [ThreadFates](https://upthewaterspout.github.io/fates/javadoc/com/github/upthewaterspout/fates/core/threading/ThreadFates.html)
+* [ThreadFates](https://upthewaterspout.github.io/fates/javadoc/fates-threads/index.html?com/github/upthewaterspout/fates/core/threading/ThreadFates.html)
 The main harness for running multithreaded tests
-* [Fates](https://upthewaterspout.github.io/fates/javadoc/com/github/upthewaterspout/fates/core/states/Fates.html)
+* [Fates](https://upthewaterspout.github.io/fates/javadoc/fates-explore/index.html?com/github/upthewaterspout/fates/core/states/Fates.html)
 A harness for running any test that has decision points repeatedly until all
 possible decisions are exercised
 
