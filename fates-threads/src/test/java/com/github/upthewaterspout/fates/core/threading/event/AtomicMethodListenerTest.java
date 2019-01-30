@@ -30,7 +30,7 @@ public class AtomicMethodListenerTest {
   public static final String CLASS_NAME = AtomicMethodListenerTest.class.getCanonicalName();
   public ExecutionEventListener delegate = mock(ExecutionEventListener.class);
   public AtomicMethodListener scheduler = new AtomicMethodListener(delegate,
-      Arrays.asList(AtomicMethodListenerTest.class, AtomicMethodListenerTest.InnerClass.class));
+      Arrays.asList(AtomicMethodListenerTest.class.getName(), AtomicMethodListenerTest.InnerClass.class.getName()));
 
   @Test
   public void noAtomicControlShouldAllowBeforeGetFieldCall() {

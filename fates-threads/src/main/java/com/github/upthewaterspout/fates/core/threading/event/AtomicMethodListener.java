@@ -31,12 +31,10 @@ public class AtomicMethodListener extends DelegatingExecutionEventListener {
   private final Set<String> suppressedClasses;
   private ThreadLocal<EntryCount> atomicEntryCount = ThreadLocal.withInitial(EntryCount::new);
 
-  public AtomicMethodListener(final ExecutionEventListener delegate, Collection<Class<?>> suppressedClasses) {
+  public AtomicMethodListener(final ExecutionEventListener delegate, Collection<String> suppressedClasses) {
     super(delegate);
 
-    this.suppressedClasses = suppressedClasses.stream()
-      .map(Class::getName)
-        .collect(Collectors.toCollection(HashSet::new));
+    this.suppressedClasses = new HashSet(suppressedClasses);
   }
 
   @Override

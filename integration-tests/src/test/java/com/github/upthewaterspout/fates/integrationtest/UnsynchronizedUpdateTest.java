@@ -35,7 +35,7 @@ public class UnsynchronizedUpdateTest {
   @Test()
   public void shouldFailOnUnsynchronizedUpdate() throws Exception {
     expectedException.expect(AssertionError.class);
-    new ThreadFates().run(() -> {
+    new ThreadFates().setTrace(true).run(() -> {
       UnsynchronizedUpdate updater = new UnsynchronizedUpdate();
       new ParallelExecutor<Integer>()
           .inParallel("updater1", updater::update)

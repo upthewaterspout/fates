@@ -36,34 +36,34 @@ public class AtomicClassLoadingDecoratorTest {
 
   @Test
   public void beforeLoadClassShouldPreventBeforeGetFieldCall() {
-    scheduler.beforeMethod("class", "loadClass");
+    scheduler.beforeMethod("class", "<clinit>");
     scheduler.beforeGetField("owner", "any", "class", "method", 5);
     verify(delegate, times(0)).beforeGetField("owner", "any", "class", "method", 5);
   }
 
   @Test
   public void afterLoadClassShouldAllowBeforeGetFieldCall() {
-    scheduler.beforeMethod("class", "loadClass");
-    scheduler.afterMethod("class", "loadClass");
+    scheduler.beforeMethod("class", "<clinit>");
+    scheduler.afterMethod("class", "<clinit>");
     scheduler.beforeGetField("owner", "any", "class", "method", 5);
     verify(delegate).beforeGetField("owner", "any", "class", "method", 5);
   }
 
   @Test
   public void unbalancedBeginEndShouldPreventBeforeGetField() {
-    scheduler.beforeMethod("class", "loadClass");
-    scheduler.beforeMethod("class", "loadClass");
-    scheduler.afterMethod("class", "loadClass");
+    scheduler.beforeMethod("class", "<clinit>");
+    scheduler.beforeMethod("class", "<clinit>");
+    scheduler.afterMethod("class", "<clinit>");
     scheduler.beforeGetField("owner", "any", "class", "method", 5);
     verify(delegate, times(0)).beforeGetField("owner", "any", "class", "method", 5);
   }
 
   @Test
   public void balancedBeginEndShouldAllowBeforeGetField() {
-    scheduler.beforeMethod("class", "loadClass");
-    scheduler.beforeMethod("class", "loadClass");
-    scheduler.afterMethod("class", "loadClass");
-    scheduler.afterMethod("class", "loadClass");
+    scheduler.beforeMethod("class", "<clinit>");
+    scheduler.beforeMethod("class", "<clinit>");
+    scheduler.afterMethod("class", "<clinit>");
+    scheduler.afterMethod("class", "<clinit>");
     scheduler.beforeGetField("owner", "any", "class", "method", 5);
     verify(delegate).beforeGetField("owner", "any", "class", "method", 5);
   }

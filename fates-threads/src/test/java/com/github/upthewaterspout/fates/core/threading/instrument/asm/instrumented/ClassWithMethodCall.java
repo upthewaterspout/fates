@@ -19,6 +19,10 @@ package com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumen
 import java.util.concurrent.Callable;
 
 public class ClassWithMethodCall implements Callable<String> {
+  static int x;
+  static {
+    x = 5;
+  }
 
   @Override
   public String call() throws Exception {

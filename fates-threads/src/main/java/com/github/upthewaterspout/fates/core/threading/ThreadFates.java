@@ -21,20 +21,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.github.upthewaterspout.fates.core.states.Decider;
-import com.github.upthewaterspout.fates.core.states.RepeatedTest;
 import com.github.upthewaterspout.fates.core.states.Fates;
 import com.github.upthewaterspout.fates.core.states.StateExplorer;
-import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
-import com.github.upthewaterspout.fates.core.threading.event.IgnoreFinalFieldsListener;
-import com.github.upthewaterspout.fates.core.threading.event.confinement.ThreadConfinementListener;
-import com.github.upthewaterspout.fates.core.threading.event.AtomicClassLoadingDecorator;
-import com.github.upthewaterspout.fates.core.threading.event.AtomicMethodListener;
 import com.github.upthewaterspout.fates.core.threading.harness.ErrorCapturingExplorer;
-import com.github.upthewaterspout.fates.core.threading.event.ThreadLocalEventListener;
-import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
-import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulingListener;
+import com.github.upthewaterspout.fates.core.threading.harness.Harness;
 
 /**
  * A harness for running a callable that launches multiple threads with all possible
@@ -108,66 +98,8 @@ public class ThreadFates {
    * @throws Exception if the test fails.
    */
   public void run(MultiThreadedTest runnable) throws Exception {
+    Harness.runTest(atomicClasses, fates, runnable);
 
-    //Do a fews run without the harness to try to get classloading, etc out of the way
-    //This is run 20 times because that is how long it will take the JVM to decide to generate
-    //native methods for reflection calls
-    for(int i =0; i < 20; i++)
-      runnable.run();
-
-    //Use the state exploration harness to explore the possible thread orderings
-    fates.explore(instrumentTest(runnable));
-  }
-
-  /**
-   * Convert a {@link MultiThreadedTest}, which uses threads, into a {@link RepeatedTest},
-   * which which has a bunch of decision points, by enabling instrumentation and using
-   * the {@link Decider} to pick which thread ordering to use
-   */
-  private RepeatedTest instrumentTest(MultiThreadedTest runnable) {
-    return decider -> {
-
-      ExecutionEventListener listener = createExecutionEventPipeline(decider);
-
-      ExecutionEventSingleton.setListener(listener);
-      try {
-        runnable.run();
-      } finally {
-        ExecutionEventSingleton.setListener(null);
-      }
-    };
-  }
-
-  /**
-   * Create the pipeline of listeners for processing execution events during a single run
-   * of the test. This pipeline will control the order of threads in the test
-   *
-   * @param decider The decider used to choose which thread to allow to proceed for this test
-   */
-  private ExecutionEventListener createExecutionEventPipeline(Decider decider) {
-
-    //At the end of the pipeline is the actual thread scheduler
-    ThreadSchedulingListener scheduler = new ThreadSchedulingListener(decider);
-    scheduler.begin();
-
-    ExecutionEventListener listener = scheduler;
-    //In front of that is a listener that suppresses events on final fields
-    listener = new IgnoreFinalFieldsListener(listener);
-
-    //In front of that is a listener that suppresses events for calls with atomicClasses
-    listener = new AtomicMethodListener(listener, atomicClasses);
-
-    //In front of that is a listener that can skip events if we are doing class loading
-    listener = new AtomicClassLoadingDecorator( listener);
-
-    //In front of that is a listener that detects if objects are only used by a single thread
-    listener = new ThreadConfinementListener(listener);
-
-    //In front of that is a listener which restricts instrumentation to threads started by
-    //this test
-    listener = new ThreadLocalEventListener(listener);
-
-    return listener;
   }
 
 

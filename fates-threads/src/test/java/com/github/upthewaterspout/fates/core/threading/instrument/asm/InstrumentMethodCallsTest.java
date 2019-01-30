@@ -33,6 +33,9 @@ public class InstrumentMethodCallsTest extends InstrumentationTest {
     object.call();
     verify(hook, times(1)).beforeMethod(className, "doSomething");
     verify(hook, times(1)).afterMethod(className, "doSomething");
+
+    verify(hook, times(1)).beforeMethod(className, "<clinit>");
+    verify(hook, times(1)).afterMethod(className, "<clinit>");
   }
 
 }

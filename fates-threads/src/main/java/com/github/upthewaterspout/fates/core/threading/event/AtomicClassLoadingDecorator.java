@@ -16,9 +16,6 @@
 
 package com.github.upthewaterspout.fates.core.threading.event;
 
-import com.github.upthewaterspout.fates.core.threading.event.DelegatingExecutionEventListener;
-import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
-
 /**
  * A decorator for a {@link ExecutionEventListener} that allows disabling the {@link
  * ExecutionEventListener#beforeGetField(Object, String, String, String, int)}  and {@link
@@ -46,7 +43,7 @@ public class AtomicClassLoadingDecorator extends DelegatingExecutionEventListene
 
   @Override
   public void beforeMethod(String className, String methodName) {
-    if(methodName.equals("loadClass")) {
+    if(methodName.equals("<clinit>")) {
       beginAtomic();
     }
     super.beforeMethod(className, methodName);
@@ -55,7 +52,7 @@ public class AtomicClassLoadingDecorator extends DelegatingExecutionEventListene
   @Override
   public void afterMethod(String className, String methodName) {
     super.afterMethod(className, methodName);
-    if(methodName.equals("loadClass")) {
+    if(methodName.equals("<clinit>")) {
       endAtomic();
     }
   }
