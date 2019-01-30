@@ -17,7 +17,7 @@
 package com.github.upthewaterspout.fates.core.threading.scheduler;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
-import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
+import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

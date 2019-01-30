@@ -18,7 +18,7 @@ package com.github.upthewaterspout.fates.core.states;
 
 import java.util.function.Supplier;
 
-import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
+import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
 
 /**
  * A testing harness for running tests many times, exploring the affects of different decisions on

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.states.depthfirst;
+package com.github.upthewaterspout.fates.core.states.explorers.depthfirst;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;

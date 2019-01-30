@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.states.depthfirst;
+package com.github.upthewaterspout.fates.core.states.explorers.depthfirst;
 
 import java.util.Collections;
 import java.util.Optional;

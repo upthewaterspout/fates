@@ -19,11 +19,13 @@ package com.github.upthewaterspout.fates.core.threading;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.RepeatedTest;
 import com.github.upthewaterspout.fates.core.states.Fates;
-import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
+import com.github.upthewaterspout.fates.core.states.StateExplorer;
+import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
 import com.github.upthewaterspout.fates.core.threading.event.IgnoreFinalFieldsListener;
 import com.github.upthewaterspout.fates.core.threading.event.confinement.ThreadConfinementListener;
 import com.github.upthewaterspout.fates.core.threading.event.AtomicClassLoadingDecorator;
@@ -64,8 +66,8 @@ import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulin
  *
  */
 public class ThreadFates {
-  public boolean trace;
   private List<Class<?>> atomicClasses = new ArrayList<>();
+  public Fates fates = new Fates();
 
   /**
    * Enable execution traces. When this is turned on, a trace of all thread scheduling points from
@@ -75,7 +77,7 @@ public class ThreadFates {
    * @return this
    */
   public ThreadFates setTrace(boolean trace) {
-    this.trace = trace;
+    fates.setTrace(trace);
     return this;
   }
 
@@ -90,6 +92,11 @@ public class ThreadFates {
    */
   public ThreadFates addAtomicClasses(Class<?> ... atomicClasses) {
     this.atomicClasses.addAll(Arrays.asList(atomicClasses));
+    return this;
+  }
+
+  public ThreadFates setExplorer(Supplier<StateExplorer> explorer) {
+    fates.setExplorer(() -> new ErrorCapturingExplorer(explorer.get()));
     return this;
   }
 
@@ -109,10 +116,7 @@ public class ThreadFates {
       runnable.run();
 
     //Use the state exploration harness to explore the possible thread orderings
-    new Fates()
-        .setExplorer(() -> new ErrorCapturingExplorer(new DepthFirstExplorer()))
-        .setTrace(trace)
-        .explore(instrumentTest(runnable));
+    fates.explore(instrumentTest(runnable));
   }
 
   /**

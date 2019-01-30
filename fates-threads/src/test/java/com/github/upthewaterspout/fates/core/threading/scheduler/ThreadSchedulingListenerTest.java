@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
-import com.github.upthewaterspout.fates.core.states.depthfirst.DepthFirstExplorer;
+import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
 import org.junit.Test;
 
 
