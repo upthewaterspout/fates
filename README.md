@@ -31,7 +31,7 @@ public void findRace() {
 }
 ```
 
-information. The two useful classes from a user perspective are:
+The two useful classes from a user perspective are:
 * [ThreadFates](https://upthewaterspout.github.io/fates/javadoc/fates-threads/index.html?com/github/upthewaterspout/fates/core/threading/ThreadFates.html)
 The main harness for running multithreaded tests
 * [Fates](https://upthewaterspout.github.io/fates/javadoc/fates-explore/index.html?com/github/upthewaterspout/fates/core/states/Fates.html)
@@ -53,7 +53,7 @@ the scheduler.
 The test is run repeatedly until all possible schedules are exercised.
 
 ## Interesting classes
- * THe `fates-explore` module with the `Fates` class and the `states` package - this package contains 
+ * The `fates-explore` module with the `Fates` class and the `states` package - this package contains 
  all of the logic to execute a test multiple times and explore all of the possible
  choices a test might make. This module does not do any bytecode instrumentation 
  and isn't tied to multi-threaded testing.
