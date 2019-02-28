@@ -34,7 +34,8 @@ public class MinimumVersionVisitor extends ClassVisitor {
   @Override
   public void visit(int version, int access, String name, String signature, String superName,
                     String[] interfaces) {
-    if(version < Opcodes.V1_5) {
+    int majorVersion = version & 0xFF;
+    if(majorVersion < Opcodes.V1_5) {
       version = Opcodes.V1_5;
     }
 
