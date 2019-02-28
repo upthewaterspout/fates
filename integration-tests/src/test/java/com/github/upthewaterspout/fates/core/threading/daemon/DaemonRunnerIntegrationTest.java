@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.harness;
+package com.github.upthewaterspout.fates.core.threading.daemon;
 
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
-import com.github.upthewaterspout.fates.core.states.Fates;
-import com.github.upthewaterspout.fates.core.threading.ThreadFates;
+import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
+import org.junit.Test;
 
-public interface Harness {
-  void runTest(List<Class<?>> atomicClasses, Fates fates,
-               ThreadFates.MultiThreadedTest runnable) throws Exception, Throwable;
+public class DaemonRunnerIntegrationTest {
+
+  @Test
+  public void executeShouldHaveAgentEnabled() throws Throwable {
+    assertEquals(true, DaemonRunnerWithAgent.execute(ExecutionEventSingleton::isAvailable));
+  }
 }

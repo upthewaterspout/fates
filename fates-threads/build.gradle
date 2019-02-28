@@ -1,35 +1,4 @@
-plugins {
-    id 'com.github.johnrengelman.shadow' version '4.0.4'
-}
-
 dependencies {
-    compile 'org.ow2.asm:asm:7.0'
-    compile 'org.ow2.asm:asm-commons:7.0'
-    compile 'org.ow2.asm:asm-util:7.0'
-    compile project(':fates-explore')
-    testCompile 'commons-io:commons-io:2.4'
+    compile project(path: ':fates-instrumentation', configuration: 'shadow')
+    compile project(":fates-explore")
 }
-
-shadowJar {
-    manifest {
-        attributes (
-                'Premain-Class' : 'com.github.upthewaterspout.fates.core.threading.instrument.agent.FatesAgent',
-                'Agent-Class' : 'com.github.upthewaterspout.fates.core.threading.instrument.agent.FatesAgent',
-                'Boot-Class-Path' : archiveName,
-                'Can-Redefine-Classes' : 'true',
-                'Can-Retransform-Classes' : 'true'
-        )
-    }
-
-    relocate 'org.objectweb.asm.', 'fates.shadow.org.objectweb.asm'
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact shadowJar
-        }
-    }
-}
-
-assemble.dependsOn shadowJar

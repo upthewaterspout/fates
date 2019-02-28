@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.harness;
+package com.github.upthewaterspout.fates.core.threading.daemon;
 
-import java.util.List;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
-import com.github.upthewaterspout.fates.core.states.Fates;
-import com.github.upthewaterspout.fates.core.threading.ThreadFates;
+/**
+ * RMI interface for {@link Controller}
+ */
+interface ControllerRemote extends Remote {
+  void setDaemon(DaemonRemote daemon) throws RemoteException;
 
-public interface Harness {
-  void runTest(List<Class<?>> atomicClasses, Fates fates,
-               ThreadFates.MultiThreadedTest runnable) throws Exception, Throwable;
+  void ping() throws RemoteException;
 }

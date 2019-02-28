@@ -18,9 +18,3 @@ dependencies {
     compile project(':fates-threads')
 }
 
-test {
-    def parentJar = project(":fates-threads").shadowJar.archivePath;
-    jvmArgs "-javaagent:$parentJar"
-}
-
-test.dependsOn(":fates-threads:shadowJar")

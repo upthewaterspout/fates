@@ -16,6 +16,7 @@
 
 package com.github.upthewaterspout.fates.core.threading;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +26,9 @@ import com.github.upthewaterspout.fates.core.states.Fates;
 import com.github.upthewaterspout.fates.core.states.StateExplorer;
 import com.github.upthewaterspout.fates.core.threading.harness.ErrorCapturingExplorer;
 import com.github.upthewaterspout.fates.core.threading.harness.Harness;
+import com.github.upthewaterspout.fates.core.threading.harness.LocalHarness;
+import com.github.upthewaterspout.fates.core.threading.harness.RemoteHarness;
+import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 
 /**
  * A harness for running a callable that launches multiple threads with all possible
@@ -32,23 +36,26 @@ import com.github.upthewaterspout.fates.core.threading.harness.Harness;
  * <p>
  * This harness will take the callable and run it many times, controlling the ordering of threads
  * each time, until it has explored all possible orderings.
- * <p>
- * The harness requires that a -javaagent parameter is passed to the JVM that it is executing in.
- * For example
- * <pre>
- *   java -javaagent:/path/to/fates-all.jar ...
- * </pre>
- * <p>
+ * </p><p>
+ * This test harness relies on bytecode instrumentation to control the thread scheduling order. By
+ * default, the harness will take the provided {@link MultiThreadedTest} and execute it in *separate*
+ * JVM that is launched by the harness with the bytecode instrumentation agent registered.
+ * </p></p>
+ * Optionally, the java agent can enabled manually by launching your test JVM using <code>-javaagent:.../fates-intstrumentation-[version].jar</code>
+ * JVM. If {@link #run(MultiThreadedTest)} is invoked within a JVM that is already instrumented,
+ * the test will run within that JVM.
+ * </p><p>
+ *
  * The agent will extensively modify the bytecode being used. Although the modifications should have
  * no effect other than performance when a test is not running in this harness, it's still good
  * practice to only include it for tests that are using this harness.
- * <p>
+ * </p>  <p>
  * Example:
  *
  * <pre>
  *   {@code
  *     ThreadFates.run(() -> {
- *       //Do some multhreaded test
+ *       //Perform some multhreaded test
  *       //Make assertions about the outcome
  *     });
  *   }
@@ -56,8 +63,10 @@ import com.github.upthewaterspout.fates.core.threading.harness.Harness;
  *
  */
 public class ThreadFates {
-  private List<Class<?>> atomicClasses = new ArrayList<>();
-  public Fates fates = new Fates();
+  private final List<Class<?>> atomicClasses = new ArrayList<>();
+  public final Fates fates = new Fates();
+  public Harness harness = chooseHarness();
+
 
   /**
    * Enable execution traces. When this is turned on, a trace of all thread scheduling points from
@@ -97,8 +106,8 @@ public class ThreadFates {
    * @param runnable The test to run
    * @throws Exception if the test fails.
    */
-  public void run(MultiThreadedTest runnable) throws Exception {
-    Harness.runTest(atomicClasses, fates, runnable);
+  public void run(MultiThreadedTest runnable) throws Throwable {
+    harness.runTest(atomicClasses, fates, runnable);
 
   }
 
@@ -110,8 +119,16 @@ public class ThreadFates {
    * This is a separate interface and not {@link Runnable} just so that the test can throw
    * an exception without needed special handling.
    */
-  public interface MultiThreadedTest {
+  public interface MultiThreadedTest extends Serializable {
     void run() throws Exception;
+  }
+
+  private static Harness chooseHarness() {
+    if(ExecutionEventSingleton.isAvailable()) {
+      return new LocalHarness();
+    }
+
+    return new RemoteHarness();
   }
 
 }

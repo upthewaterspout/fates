@@ -16,17 +16,13 @@
 
 package com.github.upthewaterspout.fates.core.threading.event;
 
-import com.github.upthewaterspout.fates.core.threading.ThreadFates;
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
-import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulingListener;
 
 /**
  * Listener for receiving events from users instrumented bytecode. This listener is invoked
  * from {@link ExecutionEventSingleton}, which itself is invoked by directly from new bytecode
  * that is added to users classes.
  *
- * In practice, the {@link ThreadFates} uses a chain of {@link ExecutionEventListener}s that
- * start from the {@link ExecutionEventSingleton} and end with a {@link ThreadSchedulingListener}
  */
 public interface ExecutionEventListener {
   /**

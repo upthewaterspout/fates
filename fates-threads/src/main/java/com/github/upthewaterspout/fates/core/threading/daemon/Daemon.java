@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.harness;
+package com.github.upthewaterspout.fates.core.threading.daemon;
 
-import java.util.List;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
-import com.github.upthewaterspout.fates.core.states.Fates;
-import com.github.upthewaterspout.fates.core.threading.ThreadFates;
+/**
+ * RMI object that lives in the {@link FatesDaemon} JVM. The launching JVM can make calls into
+ * the daemon JVM through this object's {@link #execute(SerializableCallable)} method.
+ */
+class Daemon extends UnicastRemoteObject implements DaemonRemote {
 
-public interface Harness {
-  void runTest(List<Class<?>> atomicClasses, Fates fates,
-               ThreadFates.MultiThreadedTest runnable) throws Exception, Throwable;
+  public Daemon() throws RemoteException {
+    super();
+  }
+
+  @Override
+  public synchronized <V> V execute(SerializableCallable<V> callable) throws Exception {
+    return callable.call();
+  }
 }

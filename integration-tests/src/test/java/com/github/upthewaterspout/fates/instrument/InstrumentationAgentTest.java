@@ -16,19 +16,20 @@
 
 package com.github.upthewaterspout.fates.instrument;
 
-import com.github.upthewaterspout.fates.core.threading.event.AtomicClassLoadingDecorator;
-import com.github.upthewaterspout.fates.core.threading.event.ThreadLocalEventListener;
-import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
-import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
-import com.github.upthewaterspout.fates.instrument.instrumented.*;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
+import com.github.upthewaterspout.fates.core.threading.daemon.DaemonRunnerWithAgent;
+import com.github.upthewaterspout.fates.core.threading.event.AtomicClassLoadingDecorator;
+import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
+import com.github.upthewaterspout.fates.core.threading.event.ThreadLocalEventListener;
+import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
+import com.github.upthewaterspout.fates.instrument.instrumented.SampleThreadPark;
+import com.github.upthewaterspout.fates.instrument.instrumented.SampleThreadStart;
+import com.github.upthewaterspout.fates.instrument.instrumented.SampleWaitNotify;
+import org.junit.Test;
 
 /**
  * Tests that the installed java agent is appropriately modifying the bytecode of loaded classes.
@@ -36,7 +37,7 @@ import static org.junit.Assert.assertEquals;
  * This contains tests that would ideally be unit tests, but can't be because we can only
  * modify System classes like java.lang.Thread with a real java agent.
  */
-public class InstrumentationAgentTest {
+public class InstrumentationAgentTest implements Serializable {
 
   private ExecutionEventListener hook;
   private AtomicInteger fieldAccesses = new AtomicInteger();
@@ -51,7 +52,6 @@ public class InstrumentationAgentTest {
   private AtomicInteger replaceNotify = new AtomicInteger();
   private AtomicInteger replaceNotifyAll = new AtomicInteger();
 
-  @Before
   public void before() {
     hook = new ExecutionEventListener() {
       @Override
@@ -162,40 +162,63 @@ public class InstrumentationAgentTest {
     ExecutionEventSingleton.setListener(new ThreadLocalEventListener(new AtomicClassLoadingDecorator(hook)));
   }
 
-  @After
   public void after() {
     ExecutionEventSingleton.setListener(null);
   }
 
   @Test
-  public void invokingCallWithThreadStartCallsListener() throws Exception {
-    SampleThreadStart instance = new SampleThreadStart();
-    int initialBeforeCount = beforeThreadStarts.get();
-    int initialAfterCount = afterThreadStarts.get();
-    int initialBeforeExit = beforeThreadExit.get();
-    instance.call();
-    assertEquals(1, beforeThreadExit.get() - initialBeforeExit);
-    assertEquals(1, beforeThreadStarts.get() - initialBeforeCount);
-    assertEquals(1, afterThreadStarts.get() - initialAfterCount);
+  public void invokingCallWithThreadStartCallsListener() throws Throwable {
+    DaemonRunnerWithAgent.execute(() -> {
+      before();
+      try {
+        SampleThreadStart instance = new SampleThreadStart();
+        int initialBeforeCount = beforeThreadStarts.get();
+        int initialAfterCount = afterThreadStarts.get();
+        int initialBeforeExit = beforeThreadExit.get();
+        instance.call();
+        assertEquals(1, beforeThreadExit.get() - initialBeforeExit);
+        assertEquals(1, beforeThreadStarts.get() - initialBeforeCount);
+        assertEquals(1, afterThreadStarts.get() - initialAfterCount);
+      } finally {
+        after();
+      }
+      return null;
+    });
   }
 
   @Test
-  public void invokingCallWithThreadParkCallsListener() throws Exception {
-    SampleThreadPark instance = new SampleThreadPark();
-    int initialPark = replaceThreadPark.get();
-    int initialUnpark = replaceUnpark.get();
-    instance.call();
-    assertEquals(1, replaceThreadPark.get() - initialPark);
-    assertEquals(1, replaceUnpark.get() - initialUnpark);
+  public void invokingCallWithThreadParkCallsListener() throws Throwable {
+    DaemonRunnerWithAgent.execute(() -> {
+      before();
+      try {
+        SampleThreadPark instance = new SampleThreadPark();
+        int initialPark = replaceThreadPark.get();
+        int initialUnpark = replaceUnpark.get();
+        instance.call();
+        assertEquals(1, replaceThreadPark.get() - initialPark);
+        assertEquals(1, replaceUnpark.get() - initialUnpark);
+      } finally {
+        after();
+      }
+      return null;
+    });
   }
 
   @Test
-  public void invokingCallWithWaitNotifyCallsListener() throws Exception {
-    //Trigger classloading, etc. which do synchronization before the test
-    int initialWait = replaceWait.get();
-    int initialNotify = replaceNotify.get();
-    new SampleWaitNotify().call();
-    assertEquals(1, replaceWait.get() - initialWait);
-    assertEquals(1, replaceNotify.get() - initialNotify);
+  public void invokingCallWithWaitNotifyCallsListener() throws Throwable {
+    DaemonRunnerWithAgent.execute(() -> {
+      before();
+      try {
+        //Trigger classloading, etc. which do synchronization before the test
+        int initialWait = replaceWait.get();
+        int initialNotify = replaceNotify.get();
+        new SampleWaitNotify().call();
+        assertEquals(1, replaceWait.get() - initialWait);
+        assertEquals(1, replaceNotify.get() - initialNotify);
+        return null;
+      } finally {
+        after();
+      }
+    });
   }
 }

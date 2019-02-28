@@ -26,7 +26,7 @@ import org.junit.Test;
 public class ThreadConfinedUpdateTest {
 
   @Test(timeout =  300_000L)
-  public void shouldNotHangForThreadConfinedUpdates() throws Exception {
+  public void shouldNotHangForThreadConfinedUpdates() throws Throwable {
     new ThreadFates().run(() -> {
       new ParallelExecutor<Set<Integer>>()
           .inParallel("updater1", () -> new ThreadConfinedChanges().update())

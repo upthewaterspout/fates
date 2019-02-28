@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package com.github.upthewaterspout.fates.core.threading.harness;
+package com.github.upthewaterspout.fates.core.threading.instrument.monitor;
 
-import java.util.List;
-
-import com.github.upthewaterspout.fates.core.states.Fates;
-import com.github.upthewaterspout.fates.core.threading.ThreadFates;
-
-public interface Harness {
-  void runTest(List<Class<?>> atomicClasses, Fates fates,
-               ThreadFates.MultiThreadedTest runnable) throws Exception, Throwable;
+public interface MonitorControl {
+  void monitorEnter(Object sync);
+  void monitorExit(Object sync);
 }

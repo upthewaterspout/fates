@@ -22,7 +22,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
-import sun.misc.Unsafe;
+import com.github.upthewaterspout.fates.core.threading.instrument.monitor.DefaultMonitorControl;
+import com.github.upthewaterspout.fates.core.threading.instrument.monitor.MonitorControl;
 
 /**
  * An {@link ExecutionEventListener} that actually controls which threads are allowed
@@ -371,21 +372,4 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
     }
   }
 
-  public interface MonitorControl {
-    void monitorEnter(Object sync);
-    void monitorExit(Object sync);
-  }
-
-  public static class DefaultMonitorControl implements MonitorControl {
-
-    @Override
-    public void monitorEnter(Object sync) {
-      Unsafe.getUnsafe().monitorEnter(sync);
-    }
-
-    @Override
-    public void monitorExit(Object sync) {
-      Unsafe.getUnsafe().monitorExit(sync);
-    }
-  }
 }

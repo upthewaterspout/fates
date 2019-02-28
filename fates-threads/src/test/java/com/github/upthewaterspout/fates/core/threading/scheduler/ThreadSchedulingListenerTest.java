@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
+import com.github.upthewaterspout.fates.core.threading.instrument.monitor.MonitorControl;
 import org.junit.Test;
 
 
@@ -64,7 +65,7 @@ public class ThreadSchedulingListenerTest {
   public void notifyShouldWakeupThreadInWait() throws InterruptedException {
     Decider decider = new DepthFirstExplorer();
     ThreadSchedulingListener
-        scheduler = new ThreadSchedulingListener(decider, mock(ThreadSchedulingListener.MonitorControl.class));
+        scheduler = new ThreadSchedulingListener(decider, mock(MonitorControl.class));
     scheduler.begin();
 
     final Object sync = new Object();

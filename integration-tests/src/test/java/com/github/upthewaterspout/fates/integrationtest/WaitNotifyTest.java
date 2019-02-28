@@ -29,7 +29,7 @@ public class WaitNotifyTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test()
-  public void shouldPassWithCorrectWaitNotify() throws Exception {
+  public void shouldPassWithCorrectWaitNotify() throws Throwable {
     new ThreadFates().run(() -> {
 
       WaitNotify waitNotify = new WaitNotify();

@@ -16,14 +16,11 @@
 
 package com.github.upthewaterspout.fates.executor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 import com.github.upthewaterspout.fates.core.threading.ThreadFates;
-import jdk.nashorn.internal.codegen.CompilerConstants;
 
 /**
  * A simple parallel executor for use with {@link ThreadFates.MultiThreadedTest}s run

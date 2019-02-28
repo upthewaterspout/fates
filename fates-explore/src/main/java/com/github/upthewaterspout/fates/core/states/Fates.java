@@ -16,6 +16,7 @@
 
 package com.github.upthewaterspout.fates.core.states;
 
+import java.io.Serializable;
 import java.util.function.Supplier;
 
 import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
@@ -48,10 +49,10 @@ import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFi
  * }
  * </pre>
  */
-public class Fates {
+public class Fates implements Serializable {
 
 
-  private Supplier<StateExplorer> explorerSupplier = () -> new DepthFirstExplorer();
+  private ExplorerSupplier explorerSupplier = () -> new DepthFirstExplorer();
   private boolean trace;
 
   /**
@@ -63,7 +64,7 @@ public class Fates {
    * @return this
    */
   public Fates setExplorer(
-      Supplier<StateExplorer> explorerSupplier) {
+      ExplorerSupplier explorerSupplier) {
     this.explorerSupplier = explorerSupplier;
     return this;
   }

@@ -48,6 +48,10 @@ public class ExecutionEventSingleton {
     return oldValue;
   }
 
+  public static boolean isAvailable() {
+    return available;
+  }
+
   public static void setListener(ExecutionEventListener hook) {
     if(!available) {
       throw new IllegalStateException("No instrumentation agent registered");

@@ -20,8 +20,14 @@ import java.util.List;
 
 import com.github.upthewaterspout.fates.core.states.Fates;
 import com.github.upthewaterspout.fates.core.threading.ThreadFates;
+import com.github.upthewaterspout.fates.core.threading.daemon.DaemonRunnerWithAgent;
 
-public interface Harness {
-  void runTest(List<Class<?>> atomicClasses, Fates fates,
-               ThreadFates.MultiThreadedTest runnable) throws Exception, Throwable;
+public class RemoteHarness implements  Harness {
+  public void runTest(List<Class<?>> atomicClasses, Fates fates,
+                             ThreadFates.MultiThreadedTest runnable) throws Throwable {
+    DaemonRunnerWithAgent.execute(() -> {
+      new LocalHarness().runTest(atomicClasses, fates, runnable);
+      return null;
+    });
+  }
 }

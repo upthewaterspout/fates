@@ -33,7 +33,7 @@ public class UnsynchronizedUpdateTest {
   public ExpectedException expectedException = ExpectedException.none();
 
   @Test()
-  public void shouldFailOnUnsynchronizedUpdate() throws Exception {
+  public void shouldFailOnUnsynchronizedUpdate() throws Throwable {
     expectedException.expect(AssertionError.class);
     new ThreadFates().setTrace(true).run(() -> {
       UnsynchronizedUpdate updater = new UnsynchronizedUpdate();
