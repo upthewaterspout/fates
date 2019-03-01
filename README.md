@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/upthewaterspout/fates.svg?branch=master)](https://travis-ci.org/upthewaterspout/fates)
+
 FATES stands for Find All Thread Execution Schedules. It is a framework for
 testing multi-threaded Java applications. 
 
