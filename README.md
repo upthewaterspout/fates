@@ -18,13 +18,38 @@ successfully run for anything but very trivial cases.
 
 ## Multithreaded tests
 
-In your test code, run your multithreaded test using the Fates class. For example, using junit:
+In your test code, run your multithreaded test using the ThreadFates class. For example, using junit, here is a simple test of whether it is safe for two threads to call ++ on an integer concurrently (spoiler - it's not). Fates will run this test in all possible ways the two threads can be interleaved. Some of these orderings result in an assertion error, showing us that this code is not threadsafe!
+
 ```java
-@Test
-public void findRace() {
-  ThreadFates.run(() -> {
-    //Your mutlithreaded test
-  });
+public class UnsynchronizedUpdateTest {
+
+  @Test()
+  public void incrementShouldBeThreadSafe() throws Throwable {
+    new ThreadFates().run(() -> {
+      UnsafeInteger integer = new UnsafeInteger();
+      Thread thread1 = new Thread(integer::increment, "thread1");
+      Thread thread2 = new Thread(integer::increment, "thread2");
+      thread1.start();
+      thread2.start();
+      thread1.join();
+      thread2.join();
+
+      assertEquals(2, integer.getValue());
+    });
+  }
+
+  private static class UnsafeInteger {
+    int value = 0;
+
+    public void increment() {
+      value++;
+    }
+
+    public int getValue() {
+      return value;
+    }
+  }
+
 }
 ```
 
@@ -90,4 +115,4 @@ operations will currently just cause the test to hang.
 ## Timed waits
 
 Timed wait calls are currently no ops, because it's possible the thread in a timed
-wait could pick up and continue without other threads running. 
+wait could pick up and continue without other threads running.
