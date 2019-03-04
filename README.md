@@ -17,11 +17,6 @@ successfully run for anything but very trivial cases.
 # How to use
 
 ## Multithreaded tests
-Add fates-threads-0.1-SNAPSHOT.jar as a javaagent to the command line when you run your tests.
-
-```
-java -javaagent:fates-threads-0.1-SNAPSHOT.jar ...
-```
 
 In your test code, run your multithreaded test using the Fates class. For example, using junit:
 ```java
