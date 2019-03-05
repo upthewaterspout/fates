@@ -18,6 +18,8 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '4.0.4'
 }
 
+apply from: "../gradle/publish.gradle"
+
 dependencies {
     compile 'org.ow2.asm:asm:7.0'
     compile 'org.ow2.asm:asm-commons:7.0'
@@ -42,7 +44,7 @@ shadowJar {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact shadowJar
+            artifacts = [shadowJar, sourcesJar, javadocJar]
         }
     }
 }

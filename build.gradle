@@ -16,10 +16,9 @@
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven-publish'
 
     group = 'com.github.upthewaterspout.fates'
-    version = '0.1-SNAPSHOT'
+    version = '0.1.0-SNAPSHOT'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
@@ -32,49 +31,6 @@ subprojects {
         testCompile 'junit:junit:4.12'
         testCompile 'org.mockito:mockito-all:1.10.19'
         testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
-    }
-
-    task sourcesJar(type: Jar) {
-        from sourceSets.main.allJava
-        archiveClassifier = 'sources'
-    }
-
-    task javadocJar(type: Jar) {
-        from javadoc
-        archiveClassifier = 'javadoc'
-    }
-
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                artifact jar
-                artifact sourcesJar
-                artifact javadocJar
-                pom {
-                    name = 'Fates'
-                    description = 'A library for testing multithreaded applications'
-                    url = 'https://github.com/upthewaterspout/fates'
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-                    developers {
-                        developer {
-                            id = 'upthewaterspout'
-                            name = 'Dan Smith'
-                            email = 'none'
-                        }
-                    }
-                    scm {
-                        connection = 'scm:git:git://github.com/upthewaterspout/fates.git'
-                        developerConnection = 'scm:git:ssh://github.com/upthewaterspout/fates.git'
-                        url = 'https://github.com/upthewaterspout/fates'
-                    }
-                }
-            }
-        }
     }
 }
 

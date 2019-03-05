@@ -91,6 +91,8 @@ public class LocalHarness implements Harness {
    * Create the pipeline of listeners for processing execution events during a single run
    * of the test. This pipeline will control the order of threads in the test
    * @param decider The decider used to choose which thread to allow to proceed for this test
+   * @param atomicClasses The classes to consider atomic. See {@link AtomicMethodListener}
+   * @return the execution pipeline
    */
   public ExecutionEventListener createExecutionEventPipeline(List<String> atomicClasses,
                                                                     Decider decider) {

@@ -40,7 +40,7 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
  * This test harness relies on bytecode instrumentation to control the thread scheduling order. By
  * default, the harness will take the provided {@link MultiThreadedTest} and execute it in *separate*
  * JVM that is launched by the harness with the bytecode instrumentation agent registered.
- * </p></p>
+ * </p><p>
  * Optionally, the java agent can enabled manually by launching your test JVM using <code>-javaagent:.../fates-intstrumentation-[version].jar</code>
  * JVM. If {@link #run(MultiThreadedTest)} is invoked within a JVM that is already instrumented,
  * the test will run within that JVM.

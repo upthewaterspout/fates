@@ -28,7 +28,7 @@ import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFi
  * Users should construct a {@link RepeatedTest} and pass the test to this harness. The harness is
  * responsible for running the test repeatedly.
  * <p>
- * The algorithm for exploring possible decisions can be set using {@link #setExplorer(Supplier)}
+ * The algorithm for exploring possible decisions can be set using {@link #setExplorer(ExplorerSupplier)}
  * Algorithms may explore all possible decisions or some subset of decisions, it is up to the
  * algorithm. Currently the only implementation of {@link StateExplorer} is {@link
  * DepthFirstExplorer}, which explores all possible decisions.
