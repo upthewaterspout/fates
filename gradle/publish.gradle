@@ -18,8 +18,6 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
             pom {
-                name = 'Fates'
-                description = 'A library for testing multithreaded applications'
                 url = 'https://github.com/upthewaterspout/fates'
                 licenses {
                     license {
@@ -32,12 +30,13 @@ publishing {
                         id = 'upthewaterspout'
                         name = 'Dan Smith'
                         email = 'none'
+                        url = 'https://github.com/upthewaterspout/'
                     }
                 }
                 scm {
                     connection = 'scm:git:git://github.com/upthewaterspout/fates.git'
                     developerConnection = 'scm:git:ssh://github.com/upthewaterspout/fates.git'
-                    url = 'https://github.com/upthewaterspout/fates'
+                    url = 'https://github.com/upthewaterspout/fates/tree/master'
                 }
             }
         }

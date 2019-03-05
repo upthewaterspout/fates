@@ -19,6 +19,17 @@ plugins {
 }
 
 apply from: "../gradle/publish.gradle"
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'Fates Instrumentation'
+                description = 'A javaagent for Fates that uses bytecode ' +
+                        'instrumentation to observe events in the JVM.'
+            }
+        }
+    }
+}
 
 dependencies {
     compile 'org.ow2.asm:asm:7.0'
@@ -38,18 +49,21 @@ shadowJar {
         )
     }
 
-    relocate 'org.objectweb.asm.', 'fates.shadow.org.objectweb.asm'
+    relocate 'org.objectweb.asm.', 'com.github.upthewaterspout.fates.core.threading.instrument.shadow.org.objectweb.asm'
     classifier = null
 }
 
 
 publishing {
     publications {
-        shadow(MavenPublication) { publication ->
-            project.shadow.component(publication)
-        }
         mavenJava(MavenPublication) {
             artifacts = [shadowJar, sourcesJar, javadocJar]
+
+            pom.withXml {
+                asNode().dependencies.dependency.each { dep ->
+                    assert dep.parent().remove(dep)
+                }
+            }
         }
     }
 }

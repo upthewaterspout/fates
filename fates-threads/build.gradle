@@ -1,5 +1,17 @@
 apply from: "../gradle/publish.gradle"
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            pom {
+                name = 'Fates Threads'
+                description = 'A harness for running a multi-threaded test many times ' +
+                        'with unique and deterministic thread scheduling orders.'
+            }
+        }
+    }
+}
+
 dependencies {
     compile project(path: ':fates-instrumentation', configuration: 'shadow')
     compile project(":fates-explore")
