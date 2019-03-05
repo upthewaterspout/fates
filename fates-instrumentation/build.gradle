@@ -39,10 +39,15 @@ shadowJar {
     }
 
     relocate 'org.objectweb.asm.', 'fates.shadow.org.objectweb.asm'
+    classifier = null
 }
+
 
 publishing {
     publications {
+        shadow(MavenPublication) { publication ->
+            project.shadow.component(publication)
+        }
         mavenJava(MavenPublication) {
             artifacts = [shadowJar, sourcesJar, javadocJar]
         }
