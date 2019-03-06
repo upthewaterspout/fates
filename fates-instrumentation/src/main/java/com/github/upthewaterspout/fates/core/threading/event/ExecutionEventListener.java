@@ -165,4 +165,9 @@ public interface ExecutionEventListener {
    * @param object - the object being created
    */
   void afterNew(Object object);
+
+  /**
+   * Do any post test validation of listener state.
+   */
+  void postValidation();
 }

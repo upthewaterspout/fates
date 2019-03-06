@@ -85,6 +85,11 @@ public class InstrumentationAgentTest implements Serializable {
       }
 
       @Override
+      public void postValidation() {
+        //do nothing
+      }
+
+      @Override
       public void beforeThreadStart(Thread thread) {
         beforeThreadStarts.incrementAndGet();
 

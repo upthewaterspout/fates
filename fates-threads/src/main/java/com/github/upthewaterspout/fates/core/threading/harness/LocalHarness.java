@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
+import com.github.upthewaterspout.fates.core.states.ExplorerSupplier;
 import com.github.upthewaterspout.fates.core.states.Fates;
 import com.github.upthewaterspout.fates.core.states.RepeatedTest;
 import com.github.upthewaterspout.fates.core.threading.ThreadFates;
@@ -84,6 +85,7 @@ public class LocalHarness implements Harness {
       } finally {
         ExecutionEventSingleton.setListener(null);
       }
+      listener.postValidation();
     };
   }
 

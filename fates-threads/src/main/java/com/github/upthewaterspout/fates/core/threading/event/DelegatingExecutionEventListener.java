@@ -186,4 +186,9 @@ public abstract class DelegatingExecutionEventListener implements ExecutionEvent
       delegate.beforeThreadStart(thread);
     }
   }
+
+  @Override
+  public void postValidation() {
+    delegate.postValidation();
+  }
 }

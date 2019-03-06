@@ -130,4 +130,9 @@ public class NoopExecutionEventListener implements ExecutionEventListener {
   public void afterNew(Object object) {
 
   }
+
+  @Override
+  public void postValidation() {
+
+  }
 }

@@ -35,8 +35,12 @@ class DaemonRunner {
     process = launchProcess(extraJVMArgs);
     ObjectOutputStream out = new ObjectOutputStream(process.getOutputStream());
     controller = new Controller();
-    out.writeObject(UnicastRemoteObject.toStub(controller));
-    out.flush();
+    try {
+      out.writeObject(UnicastRemoteObject.toStub(controller));
+      out.flush();
+    } catch(IOException e) {
+      throw new IllegalStateException("Error launching test process. Please check the process output for errors", e);
+    }
 
     this.daemon = controller.waitForDaemon(5, TimeUnit.MINUTES);
   }

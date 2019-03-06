@@ -20,9 +20,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.upthewaterspout.fates.core.threading.event.DelegatingExecutionEventListener;
-import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
-
 /**
  * A decorator for a {@link ExecutionEventListener} that is only enabled for the current thread
  * and any thread spawned by the current thread.
@@ -70,10 +67,24 @@ public class ThreadLocalEventListener extends DelegatingExecutionEventListener {
     }
   }
 
-  @Override public void beforeThreadExit() {
+  @Override
+  public void beforeThreadExit() {
+    beforeThreadExit(Thread.currentThread());
+  }
+
+  public void beforeThreadExit(Thread thread) {
     if(enabled()) {
-      enabledThreads.remove(Thread.currentThread());
+      enabledThreads.remove(thread);
       delegate.beforeThreadExit();
+    }
+  }
+
+  @Override
+  public void postValidation() {
+    if(!enabledThreads.equals(Collections.singleton(Thread.currentThread()))) {
+      Set<Thread> remainingThreads = new HashSet<>(enabledThreads);
+      remainingThreads.remove(Thread.currentThread());
+      throw new IllegalStateException("Some threads started during test are still running " + remainingThreads);
     }
   }
 }

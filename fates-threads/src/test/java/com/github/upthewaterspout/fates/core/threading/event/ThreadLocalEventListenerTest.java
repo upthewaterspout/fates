@@ -18,8 +18,11 @@ package com.github.upthewaterspout.fates.core.threading.event;
 
 import static org.mockito.Mockito.*;
 
+import java.util.concurrent.CountDownLatch;
+
 import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
 import com.github.upthewaterspout.fates.core.threading.event.ThreadLocalEventListener;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -66,6 +69,24 @@ public class ThreadLocalEventListenerTest {
     listener.afterThreadStart(thread);
     listener.beforeGetField("owner", "any", "class", "method", 1);
     verify(delegate, times(1)).beforeGetField(any(), any(), any(), any(), anyInt());
+  }
+
+  @Test
+  public void postValidationFailsForDanglingThreads() {
+    Thread thread = new Thread();
+    listener.beforeThreadStart(thread);
+    listener.afterThreadStart(thread);
+
+    Assertions.assertThatThrownBy(() -> listener.postValidation()).isInstanceOf(IllegalStateException.class);
+  }
+
+  @Test
+  public void postValidationSucceedsWithNoDanglingThreads() {
+    Thread thread = new Thread();
+    listener.beforeThreadStart(thread);
+    listener.afterThreadStart(thread);
+    listener.beforeThreadExit(thread);
+    listener.postValidation();
   }
 
 }
