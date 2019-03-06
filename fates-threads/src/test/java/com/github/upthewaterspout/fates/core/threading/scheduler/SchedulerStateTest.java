@@ -18,6 +18,7 @@ package com.github.upthewaterspout.fates.core.threading.scheduler;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -110,6 +111,16 @@ public class SchedulerStateTest {
     assertEquals(thread1, state.threadTerminated(thread2));
     assertTrue(state.running(thread1));
     assertFalse(state.running(thread2));
+  }
+
+  @Test
+  public void eventsForUntrackedThreadsDoNotCorruptState() {
+    Decider decider = mock(Decider.class);
+    SchedulerState state = new SchedulerState(decider);
+
+    Thread thread1 = new Thread();
+
+    Assertions.assertThatThrownBy(() -> state.unschedule(thread1)).isInstanceOf(IllegalStateException.class);
   }
 
 

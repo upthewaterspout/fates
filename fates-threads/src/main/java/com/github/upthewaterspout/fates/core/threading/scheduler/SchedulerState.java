@@ -73,10 +73,18 @@ class SchedulerState {
   }
 
   void unschedule(Thread thread) {
-    ThreadID myThreadId = threadtoID.get(thread);
+    ThreadID myThreadId = getThreadID(thread);
     unscheduledThreads.add(myThreadId);
     blockedThreads.remove(thread);
     runningThreads.remove(thread);
+  }
+
+  private ThreadID getThreadID(Thread thread) {
+    ThreadID threadID = threadtoID.get(thread);
+    if(threadID == null) {
+      throw new IllegalStateException("Unable to find thread id for untracked thread " + thread);
+    }
+    return threadID;
   }
 
   public void newThread(Thread thread, Thread parent) {
@@ -105,7 +113,7 @@ class SchedulerState {
   }
 
   private void threadBlocked(final Thread thread) {
-    ThreadID threadId = threadtoID.get(thread);
+    ThreadID threadId = getThreadID(thread);
     runningThreads.remove(thread);
     unscheduledThreads.remove(threadId);
     blockedThreads.add(thread);
@@ -118,7 +126,7 @@ class SchedulerState {
   }
 
   private void threadUnblocked(final Thread thread) {
-    ThreadID threadId = threadtoID.get(thread);
+    ThreadID threadId = getThreadID(thread);
     blockedThreads.remove(thread);
     runningThreads.remove(thread);
     unscheduledThreads.add(threadId);
