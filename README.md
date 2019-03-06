@@ -14,11 +14,21 @@ test repeatedly until all possible scheduling orders are tested.
 This framework is in very early stages of development, and will not
 successfully run for anything but very trivial cases.
 
+# Installation
+
+Fates is distributed through maven central. For multithreaded tests, just add the 
+[fates-threads](https://search.maven.org/artifact/com.github.upthewaterspout.fates/fates-threads/) 
+jar as a test dependency.
+
 # How to use
 
 ## Multithreaded tests
 
-In your test code, run your multithreaded test using the ThreadFates class. For example, using junit, here is a simple test of whether it is safe for two threads to call ++ on an integer concurrently (spoiler - it's not). Fates will run this test in all possible ways the two threads can be interleaved. Some of these orderings result in an assertion error, showing us that this code is not threadsafe!
+In your test code, run your multithreaded test using the ThreadFates class. For example, using 
+junit, here is a simple test of whether it is safe for two threads to call ++ on an integer 
+concurrently (spoiler - it's not). Fates will run this test in all possible ways the two threads 
+can be interleaved. Some of these orderings result in an assertion error, showing us that this code 
+is not threadsafe!
 
 ```java
 public class UnsynchronizedUpdateTest {
@@ -53,6 +63,26 @@ public class UnsynchronizedUpdateTest {
 }
 ```
 
+Fates also includes a simple ParallelExecutor class that simplifies launching parallel threads
+and joing them in your test. It's designed to work well with the testing harness. The above test 
+can be simplified using this parallel executor like so.
+
+```java
+  @Test()
+  public void incrementShouldBeThreadSafe() throws Throwable {
+    new ThreadFates().run(() -> {
+      UnsafeInteger integer = new UnsafeInteger();
+      new ParallelExecutor()
+              .inParallel("updater1", updater::update)
+              .inParallel("updater2", updater::update)
+              .run();
+
+      assertEquals(2, integer.getValue());
+    });
+  }
+
+``` 
+
 The two useful classes from a user perspective are:
 * [ThreadFates](https://upthewaterspout.github.io/fates/javadoc/fates-threads/index.html?com/github/upthewaterspout/fates/core/threading/ThreadFates.html)
 The main harness for running multithreaded tests
@@ -62,10 +92,12 @@ possible decisions are exercised
 
 # How it works
 
-This harness creates a scheduler which takes control of the order in which your
-threads read or modify any field.  This agent works modifying the bytecode of
-all classes in the test (including JDK classes) to instrument all field access.
-Each field access is then used as a point where the scheduler can choose to let
+The harness launches your test in a separate JVM that has a custom javaagent registered. This agent 
+modifies the bytecode of all classes in the test (including JDK classes) take control of where
+threads are launched and where state is accessed or modified. Using this instrumentation, the 
+harness creates a scheduler that only allows one thread to be running at a time. 
+
+Each field access is used as a point where the scheduler can choose to let
 that thread continue, or schedule a different thread.
 
 Operations which might require a thread to block are also instrumented -
