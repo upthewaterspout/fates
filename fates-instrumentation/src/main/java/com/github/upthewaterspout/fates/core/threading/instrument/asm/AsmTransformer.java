@@ -53,6 +53,7 @@ public class AsmTransformer implements ClassFileTransformer {
       transformingVisitor = new InstrumentLockSupport(transformingVisitor);
       transformingVisitor = new InstrumentThreadExit(transformingVisitor);
       transformingVisitor = new InstrumentJoin(transformingVisitor);
+      transformingVisitor = new InstrumentThreadInterrupt(transformingVisitor);
       transformingVisitor = new InstrumentFieldAccess(transformingVisitor);
       transformingVisitor = new InstrumentMethodCalls(transformingVisitor);
       transformingVisitor = new InstrumentNewObject(transformingVisitor);

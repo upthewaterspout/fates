@@ -90,6 +90,18 @@ public class InstrumentationAgentTest implements Serializable {
       }
 
       @Override
+      public void replaceInterrupt(ExecutionEventListener noopHook, Thread thread) {
+        //do nothing
+      }
+
+      @Override
+      public boolean replaceIsInterrupted(ExecutionEventListener noopHook, Thread thread,
+                                          boolean clearInterrupt) {
+        //do nothing
+        return false;
+      }
+
+      @Override
       public void beforeThreadStart(Thread thread) {
         beforeThreadStarts.incrementAndGet();
 

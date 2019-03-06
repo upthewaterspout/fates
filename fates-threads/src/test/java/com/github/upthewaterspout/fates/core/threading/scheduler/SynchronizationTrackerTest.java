@@ -17,6 +17,8 @@
 package com.github.upthewaterspout.fates.core.threading.scheduler;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -25,7 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 public class SynchronizationTrackerTest {
-  private SynchronizationTracker tracker = new SynchronizationTracker();
+  private SynchronizationTracker<Thread> tracker = new SynchronizationTracker<Thread>();
   private Thread thread1 = new Thread();
   private Thread thread2 = new Thread();
   private Thread thread3 = new Thread();
@@ -133,6 +135,54 @@ public class SynchronizationTrackerTest {
     tracker.notify(thread2, sync1);
     assertEquals(Collections.singleton(thread1), tracker.monitorExit(thread2, sync1));
     assertEquals(Collections.emptySet(), tracker.threadResumed(thread1));
+    assertEquals(Collections.emptySet(), tracker.monitorExit(thread1, sync1));
+    assertEquals(Collections.emptySet(), tracker.monitorExit(thread1, sync1));
+    assertEquals(Collections.emptyMap(), tracker.getMonitors());
+  }
+
+  @Test
+  public void interruptWakesUpThreadIfMonitorIsNotHeldByOtherThread() {
+    assertEquals(Collections.emptySet(), tracker.monitorEnter(thread1, sync1));
+    assertEquals(Collections.emptySet(), tracker.monitorEnter(thread1, sync1));
+    assertEquals(Collections.emptySet(), tracker.wait(thread1, sync1));
+
+    assertTrue(tracker.isWaitingForNotify(thread1, sync1));
+    assertFalse(tracker.isBlockedOnMonitor(thread1, sync1));
+
+    assertFalse(tracker.interrupt(thread1));
+
+    assertFalse(tracker.isWaitingForNotify(thread1, sync1));
+    assertFalse(tracker.isBlockedOnMonitor(thread1, sync1));
+
+    tracker.threadResumed(thread1);
+
+    assertEquals(Collections.emptySet(), tracker.monitorExit(thread1, sync1));
+    assertEquals(Collections.emptySet(), tracker.monitorExit(thread1, sync1));
+    assertEquals(Collections.emptyMap(), tracker.getMonitors());
+  }
+
+  @Test
+  public void interruptWakesUpThreadAfterMonitorIsReleasedByOtherThread() {
+    assertEquals(Collections.emptySet(), tracker.monitorEnter(thread1, sync1));
+    assertEquals(Collections.emptySet(), tracker.monitorEnter(thread1, sync1));
+    assertEquals(Collections.emptySet(), tracker.wait(thread1, sync1));
+    assertEquals(Collections.emptySet(), tracker.monitorEnter(thread2, sync1));
+
+    //Before the interrupt, the thread should be waiting for a notify
+    assertTrue(tracker.isWaitingForNotify(thread1, sync1));
+    assertFalse(tracker.isBlockedOnMonitor(thread1, sync1));
+
+    assertTrue(tracker.interrupt(thread1));
+
+    //After the interrupt, the thread should be blocked on the monitor (waiting for a release)
+    assertFalse(tracker.isWaitingForNotify(thread1, sync1));
+    assertTrue(tracker.isBlockedOnMonitor(thread1, sync1));
+
+    assertEquals(Collections.singleton(thread1), tracker.monitorExit(thread2, sync1));
+
+    assertFalse(tracker.isBlockedOnMonitor(thread1, sync1));
+    tracker.threadResumed(thread1);
+
     assertEquals(Collections.emptySet(), tracker.monitorExit(thread1, sync1));
     assertEquals(Collections.emptySet(), tracker.monitorExit(thread1, sync1));
     assertEquals(Collections.emptyMap(), tracker.getMonitors());

@@ -19,6 +19,7 @@ package com.github.upthewaterspout.fates.core.threading.scheduler;
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
 import org.assertj.core.api.Assertions;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -110,7 +111,6 @@ public class SchedulerStateTest {
     assertEquals(null, state.chooseNextThread(thread1));
     assertEquals(thread1, state.threadTerminated(thread2));
     assertTrue(state.running(thread1));
-    assertFalse(state.running(thread2));
   }
 
   @Test
@@ -120,8 +120,52 @@ public class SchedulerStateTest {
 
     Thread thread1 = new Thread();
 
-    Assertions.assertThatThrownBy(() -> state.unschedule(thread1)).isInstanceOf(IllegalStateException.class);
+    Assertions.assertThatThrownBy(() -> state.unpark(thread1)).isInstanceOf(IllegalStateException.class);
   }
 
+  @Test
+  public void interruptingAThreadMarksThreadAsInterrupted() {
+    Decider decider = mock(Decider.class);
+    SchedulerState state = new SchedulerState(decider);
+    Thread thread1 = new Thread();
+    state.newThread(thread1, null);
+
+    assertFalse(state.isInterrupted(thread1, false));
+    state.interrupt(thread1);
+    assertTrue(state.isInterrupted(thread1, false));
+  }
+
+  @Test
+  public void clearingTheInterruptStatusClearsTheInterrupt() {
+    Decider decider = mock(Decider.class);
+    SchedulerState state = new SchedulerState(decider);
+    Thread thread1 = new Thread();
+    state.newThread(thread1, null);
+
+    state.interrupt(thread1);
+    assertTrue(state.isInterrupted(thread1, true));
+    assertFalse(state.isInterrupted(thread1, true));
+  }
+
+  @Test
+  public void interruptingAParkedThreadUnParksTheThread() {
+    Decider decider = mock(Decider.class);
+    SchedulerState state = new SchedulerState(decider);
+    Thread thread1 = new Thread();
+    state.newThread(thread1, null);
+
+    Thread thread2 = new Thread();
+    state.newThread(thread2, thread1);
+    state.park(thread1);
+
+    assertTrue(state.isBlocked(thread1));
+    assertFalse(state.running(thread1));
+    assertFalse(state.isUnscheduled(thread1));
+
+    state.interrupt(thread1);
+    assertFalse(state.isBlocked(thread1));
+    assertTrue(state.isUnscheduled(thread1));
+    assertFalse(state.running(thread1));
+  }
 
 }

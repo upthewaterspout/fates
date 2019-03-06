@@ -170,4 +170,17 @@ public interface ExecutionEventListener {
    * Do any post test validation of listener state.
    */
   void postValidation();
+
+  /**
+   * Interrupt the given thread.
+   */
+  void replaceInterrupt(ExecutionEventListener noopHook, Thread thread);
+
+  /**
+   * Check to see if a thread is interrupted
+   * @param noopHook The default behavior
+   * @param thread The thread that we are checking
+   * @param clearInterrupt true to clear the interrupt bit
+   */
+  boolean replaceIsInterrupted(ExecutionEventListener noopHook, Thread thread, boolean clearInterrupt);
 }

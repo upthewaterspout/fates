@@ -17,8 +17,6 @@
 package com.github.upthewaterspout.fates.core.threading.event;
 
 
-import com.github.upthewaterspout.fates.core.threading.event.ExecutionEventListener;
-
 /**
  * A decorator for {@link ExecutionEventListener} that prevents instrumentation
  * of code that is itself running inside this {@link ExecutionEventListener}
@@ -372,6 +370,41 @@ public class NonReentrantExecutionEventListener implements ExecutionEventListene
     } catch(RuntimeException t) {
       t.printStackTrace();
       lastError = t;
+    } finally {
+      enable();
+    }
+  }
+
+  @Override
+  public void replaceInterrupt(ExecutionEventListener noopHook, Thread thread) {
+    if(disabled()) {
+      noopHook.replaceInterrupt(noopHook, thread);
+    }
+    disable();
+    try {
+      delegate.replaceInterrupt(noopHook, thread);
+    } catch(RuntimeException t) {
+      t.printStackTrace();
+      lastError = t;
+    } finally {
+      enable();
+    }
+
+  }
+
+  @Override
+  public boolean replaceIsInterrupted(ExecutionEventListener noopHook, Thread thread,
+                                      boolean clearInterrupt) {
+    if(disabled()) {
+      return noopHook.replaceIsInterrupted(noopHook, thread, clearInterrupt);
+    }
+    disable();
+    try {
+      return delegate.replaceIsInterrupted(noopHook, thread, clearInterrupt);
+    } catch(RuntimeException t) {
+      t.printStackTrace();
+      lastError = t;
+      return false;
     } finally {
       enable();
     }

@@ -18,13 +18,10 @@ package com.github.upthewaterspout.fates.core.threading.scheduler;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Keeps track of all of the state related to thread scheduling - which threads
@@ -35,33 +32,19 @@ import java.util.Set;
  * {@link ThreadSchedulingListener}
  */
 class SchedulerState {
-  private Decider decider;
-  /**
-   * All threads in this run
-   */
-  private final Map<Thread, ThreadID> threadtoID = new HashMap<>();
 
-  /**
-   * All threads in this run
-   */
-  private final Map<ThreadID, Thread> idToThread = new HashMap<>();
-  /**
-   * The set of threads that are currently parked in a yield operation
-   */
-  private final Set<ThreadID> unscheduledThreads = new HashSet<>();
-  /**
-   * The currently running thread
-   */
-  private final Set<Thread> runningThreads = new HashSet<>();
+  private final Decider decider;
+  final ThreadMapping threadMapping = new ThreadMapping();
+  private final ThreadState threadState = new ThreadState();
+  private final SynchronizationTracker<Thread> synchronizationTracker = new SynchronizationTracker<>();
+  private final JoinTracker<Thread> joinTracker = new JoinTracker<>();
+  private final Set<Thread> interruptedThreads = new HashSet<>();
 
-  /**
-   * Threads that currently blocked waiting for a monitor, lock, or notification
-   */
-  private final Set<Thread> blockedThreads = new HashSet<>();
 
-  private SynchronizationTracker synchronizationTracker = new SynchronizationTracker();
-
-  private JoinTracker joinTracker = new JoinTracker();
+  public void newThread(Thread thread, Thread parent) {
+    threadMapping.newThread(thread, parent);
+    threadState.newThread(thread);
+  }
 
   /**
    * Last visited line number
@@ -72,127 +55,98 @@ class SchedulerState {
     this.decider = decider;
   }
 
-  void unschedule(Thread thread) {
-    ThreadID myThreadId = getThreadID(thread);
-    unscheduledThreads.add(myThreadId);
-    blockedThreads.remove(thread);
-    runningThreads.remove(thread);
-  }
-
-  private ThreadID getThreadID(Thread thread) {
-    ThreadID threadID = threadtoID.get(thread);
-    if(threadID == null) {
-      throw new IllegalStateException("Unable to find thread id for untracked thread " + thread);
-    }
-    return threadID;
-  }
-
-  public void newThread(Thread thread, Thread parent) {
-    ThreadID threadID = ThreadID.create(thread, threadtoID.get(parent));
-    threadtoID.put(thread, threadID);
-    idToThread.put(threadID, thread);
-    runningThreads.add(thread);
-  }
-
   /**
    * Ask the state space to choose the next thread to run
    */
   public Thread chooseNextThread(Thread currentThread) {
-    unschedule(currentThread);
+    threadState.unblock(currentThread);
 
     return getNextThread();
   }
 
   public boolean running(Thread thread) {
-    return runningThreads.contains(thread);
+    return threadState.running(thread);
+  }
+
+
+  public boolean isBlocked(Thread thread) {
+    return threadState.getBlockedThreads().contains(thread);
+  }
+
+  public boolean isUnscheduled(Thread thread) {
+    return threadState.getUnscheduledThreads().contains(thread);
   }
 
   public Thread park(final Thread thread) {
-    threadBlocked(thread);
+    threadState.block(thread);
     return getNextThread();
-  }
-
-  private void threadBlocked(final Thread thread) {
-    ThreadID threadId = getThreadID(thread);
-    runningThreads.remove(thread);
-    unscheduledThreads.remove(threadId);
-    blockedThreads.add(thread);
   }
 
   public Thread unpark(final Thread thread) {
-    threadUnblocked(thread);
+    threadState.unblock(thread);
     return getNextThread();
-
   }
 
-  private void threadUnblocked(final Thread thread) {
-    ThreadID threadId = getThreadID(thread);
-    blockedThreads.remove(thread);
-    runningThreads.remove(thread);
-    unscheduledThreads.add(threadId);
+  public Thread interrupt(final Thread thread) {
+    threadInterrupted(thread);
+    return getNextThread();
+  }
+
+  private void threadInterrupted(Thread thread) {
+    interruptedThreads.add(thread);
+    joinTracker.interrupt(thread);
+    if(!synchronizationTracker.interrupt(thread)) {
+      threadState.unblock(thread);
+    }
   }
 
   public Thread threadTerminated(Thread thread) {
-    ThreadID threadId = threadtoID.remove(thread);
-    idToThread.remove(threadId);
-    unscheduledThreads.remove(threadId);
-    blockedThreads.remove(thread);
-    runningThreads.remove(thread);
     Collection<Thread> unblockedThreads = joinTracker.threadTerminated(thread);
-
-    unblockedThreads.stream().forEach(this::threadUnblocked);
+    threadState.unblock(unblockedThreads);
+    threadState.threadTerminated(thread);
+    threadMapping.threadTerminated(thread);
+    interruptedThreads.remove(thread);
     return getNextThread();
   }
 
   private Thread getNextThread() {
-    if(!runningThreads.isEmpty()) {
+    if(threadState.hasRunningThread()) {
       //If there is already a thread running, let it continue
       //without scheduling a new thread
       return null;
     }
 
-    if(unscheduledThreads.isEmpty()) {
-      blockedThreads.stream().forEach(thread -> {
-        System.out.println(thread.getName());
-        Arrays.stream(thread.getStackTrace()).forEach(element ->
-        System.out.println("  at " + element));
-      });
-      throw new IllegalStateException("Unscheduled threads is empty. blockedThreads="
-        + blockedThreads +", runningThreads="
-        + runningThreads + ", currentThread="
-        + Thread.currentThread().getName());
-    }
+    threadState.checkForUnscheduledThread();
 
-    ThreadID scheduledThreadID = decider.decide(lastLineNumber, unscheduledThreads);
-    Thread scheduledThread = idToThread.get(scheduledThreadID);
-    runningThreads.add(scheduledThread);
-    unscheduledThreads.remove(scheduledThreadID);
+    ThreadID scheduledThreadID = decider.decide(lastLineNumber, threadState.getUnscheduledThreads().stream().map(threadMapping::getThreadID).collect(
+        Collectors.toSet()));
+    Thread scheduledThread = threadMapping.getThread(scheduledThreadID);
+    threadState.threadResumed(scheduledThread);
     Collection<Thread> blockedThreads = synchronizationTracker.threadResumed(scheduledThread);
-    markBlocked(blockedThreads);
+    threadState.block(blockedThreads);
 
     return scheduledThread;
   }
 
-  private void markBlocked(final Collection<Thread> blockedThreads) {
-    blockedThreads.stream().forEach(this::threadBlocked);
-  }
-
   public Thread monitorEnter(Thread thread, final Object sync) {
     Collection<Thread> threadsToBlock = synchronizationTracker.monitorEnter(thread, sync);
-    markBlocked(threadsToBlock);
+    threadState.block(threadsToBlock);
     return getNextThread();
   }
 
   public Thread monitorExit(Thread thread, final Object sync) {
     Collection<Thread> unblockedThreads = synchronizationTracker.monitorExit(thread, sync);
-    unblockedThreads.stream().forEach(this::threadUnblocked);
+    threadState.unblock(unblockedThreads);
     return chooseNextThread(thread);
   }
 
   public Thread wait(Thread thread, final Object sync) {
+    if(isInterrupted(thread, false)) {
+      return thread;
+    }
     Collection<Thread> unblockedThreads = synchronizationTracker.wait(thread, sync);
-    threadBlocked(thread);
-    unblockedThreads.stream().forEach(this::threadUnblocked);
+    threadState.block(thread);
+    threadState.unblock(unblockedThreads);
     return getNextThread();
   }
 
@@ -206,11 +160,14 @@ class SchedulerState {
   }
 
   public Thread join(Thread joiner, Thread joinee) {
-    if(!threadtoID.containsKey(joinee)) {
+    if(!threadMapping.hasThread(joinee)) {
+      return joiner;
+    }
+    if(isInterrupted(joiner, false)) {
       return joiner;
     }
 
-    threadBlocked(joiner);
+    threadState.block(joiner);
     joinTracker.join(joiner, joinee);
     return getNextThread();
   }
@@ -220,51 +177,11 @@ class SchedulerState {
     this.lastLineNumber = new LineNumber(currentThread.getName(), className, methodName, lineNumber);
   }
 
-  private static class LineNumber {
-    private final String currentThread;
-    private final String className;
-    private final String methodName;
-    private final int lineNumber;
-
-    public LineNumber(String currentThread, String className, String methodName,
-                      int lineNumber) {
-      this.currentThread = currentThread;
-      this.className = className;
-      this.methodName = methodName;
-      this.lineNumber = lineNumber;
-    }
-
-    @Override
-    public String toString() {
-      return  className + "." + methodName + "(" + getShortClassName()
-          + ".java:" + lineNumber + ")(" + currentThread + ")";
-    }
-
-    private String getShortClassName() {
-      if (className.lastIndexOf(".") == -1) {
-        return className;
-      } else {
-        return className.substring(className.lastIndexOf(".") + 1, className.length());
-      }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-        return false;
-      }
-      LineNumber that = (LineNumber) o;
-      return lineNumber == that.lineNumber &&
-          Objects.equals(className, that.className);
-    }
-
-    @Override
-    public int hashCode() {
-
-      return Objects.hash(className, lineNumber);
+  public boolean isInterrupted(Thread thread, boolean clearInterrupt) {
+    if(clearInterrupt) {
+      return interruptedThreads.remove(thread);
+    } else {
+      return interruptedThreads.contains(thread);
     }
   }
 }

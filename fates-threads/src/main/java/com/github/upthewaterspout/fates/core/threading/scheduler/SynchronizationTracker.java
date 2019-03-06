@@ -30,9 +30,9 @@ import java.util.Map.Entry;
  * park and unpark.
  *
  */
-public class SynchronizationTracker {
-  private final Map<Object, MonitorInfo> monitors = new IdentityHashMap<>();
-  private final Map<Thread, Object> waitingToResume = new HashMap<>();
+public class SynchronizationTracker<THREAD> {
+  private final Map<Object, MonitorInfo<THREAD>> monitors = new IdentityHashMap<>();
+  private final Map<THREAD, Object> waitingToResume = new HashMap<>();
 
   /**
    * Indicate that a thread is trying to get a monitor.
@@ -41,7 +41,7 @@ public class SynchronizationTracker {
    * @return a list of threads that are blocked now that this
    * monitor is held
    */
-  public Collection<Thread> monitorEnter(Thread currentThread, final Object sync) {
+  public Collection<THREAD> monitorEnter(THREAD currentThread, final Object sync) {
     final MonitorInfo currentHolder = monitors.get(sync);
     if(currentHolder == null) {
       monitors.put(sync, new MonitorInfo(currentThread));
@@ -70,8 +70,8 @@ public class SynchronizationTracker {
    * @param currentThread the current thread
    * @return the list of members that can now be unblocked
    */
-  public Collection<Thread> monitorExit(Thread currentThread, final Object sync) {
-    final MonitorInfo monitorInfo = getMonitorInfo(currentThread, sync);
+  public Collection<THREAD> monitorExit(THREAD currentThread, final Object sync) {
+    final MonitorInfo<THREAD> monitorInfo = getMonitorInfo(currentThread, sync);
 
     if(--monitorInfo.depth > 0) {
       return Collections.emptySet();
@@ -89,8 +89,8 @@ public class SynchronizationTracker {
     return monitorInfo.waitingForMonitor.keySet();
   }
 
-  public Collection<Thread> wait(Thread currentThread, final Object sync) {
-    final MonitorInfo monitorInfo = getMonitorInfo(currentThread, sync);
+  public Collection<THREAD> wait(THREAD currentThread, final Object sync) {
+    final MonitorInfo<THREAD> monitorInfo = getMonitorInfo(currentThread, sync);
 
     monitorInfo.drainPendingNotifies();
     monitorInfo.waitingForNotify.put(currentThread, monitorInfo.depth);
@@ -100,7 +100,7 @@ public class SynchronizationTracker {
     return monitorInfo.waitingForMonitor.keySet();
   }
 
-  private MonitorInfo getMonitorInfo(final Thread currentThread, final Object sync) {
+  private MonitorInfo getMonitorInfo(final THREAD currentThread, final Object sync) {
     final MonitorInfo monitorInfo = monitors.get(sync);
     if(monitorInfo == null || monitorInfo.owner == null || !monitorInfo.owner.equals(currentThread)) {
       throw new IllegalMonitorStateException("Monitor not held " + sync);
@@ -108,22 +108,22 @@ public class SynchronizationTracker {
     return monitorInfo;
   }
 
-  public void notify(Thread currentThread, final Object sync) {
+  public void notify(THREAD currentThread, final Object sync) {
     final MonitorInfo monitorInfo = getMonitorInfo(currentThread, sync);
 
     monitorInfo.pendingNotifies++;
   }
 
-  public void notifyAll(Thread currentThread, final Object sync) {
+  public void notifyAll(THREAD currentThread, final Object sync) {
     final MonitorInfo monitorInfo = getMonitorInfo(currentThread, sync);
 
-    monitorInfo.pendingNotifies = Integer.MAX_VALUE / 2;
+    monitorInfo.pendingNotifies = monitorInfo.waitingForNotify.size();
   }
 
   /**
    * For Testing only, return the set of monitors.
    */
-  Map<Object, MonitorInfo> getMonitors() {
+  Map<Object, MonitorInfo<THREAD>> getMonitors() {
     return monitors;
   }
 
@@ -133,7 +133,7 @@ public class SynchronizationTracker {
    * thread will acquire the monitor
    * @param scheduledThread The thread that is resumed
    */
-  public Collection<Thread> threadResumed(final Thread scheduledThread) {
+  public Collection<THREAD> threadResumed(final THREAD scheduledThread) {
     Object monitor = waitingToResume.remove(scheduledThread);
     if(monitor != null) {
       return monitorEnter(scheduledThread, monitor);
@@ -142,30 +142,77 @@ public class SynchronizationTracker {
     }
   }
 
-  private static class MonitorInfo {
-    private Thread owner;
+  /**
+   * Mark a thread as interrupted
+   * @return true if the thread is still blocked (due to other threads owning the monitor)
+   */
+  public boolean interrupt(THREAD threadID) {
+    for(Entry<Object, MonitorInfo<THREAD>> entry : monitors.entrySet()) {
+      Object object = entry.getKey();
+      MonitorInfo<THREAD> monitor = entry.getValue();
+
+      Integer depth = monitor.waitingForNotify.remove(threadID);
+      if(depth != null) {
+        monitor.waitingForMonitor.put(threadID, depth);
+        if (monitor.owner == null) {
+          waitingToResume.put(threadID, object);
+        } else {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  public boolean isWaitingForNotify(THREAD thread, Object sync) {
+    MonitorInfo info = monitors.get(sync);
+    if(info == null) {
+      return false;
+    }
+    return info.waitingForNotify.containsKey(thread);
+  }
+
+  public boolean isBlockedOnMonitor(THREAD thread, Object sync) {
+    MonitorInfo info = monitors.get(sync);
+    if(info == null) {
+      return false;
+    }
+    return info.waitingForMonitor.containsKey(thread) && info.owner != null;
+  }
+
+  static class MonitorInfo<T> {
+    private T owner;
     private int depth = 1;
-    private final Map<Thread, Integer> waitingForMonitor = new LinkedHashMap<Thread, Integer>(2);
-    private final Map<Thread, Integer> waitingForNotify = new LinkedHashMap<Thread, Integer>(2);
+    /**
+     * A map of threads that are waiting to get the monitor again (after a notify) and their
+     * monitor depth when they resume.
+     */
+    private final Map<T, Integer> waitingForMonitor = new LinkedHashMap<T, Integer>(2);
+    /**
+     * A map of threads that are waiting for a notify, and the monitor depth they had when they
+     * called wait.
+     */
+    private final Map<T, Integer> waitingForNotify = new LinkedHashMap<T, Integer>(2);
     public int pendingNotifies;
 
-    public MonitorInfo(final Thread thread) {
+    public MonitorInfo(final T thread) {
       this.owner = thread;
     }
 
     private void drainPendingNotifies() {
-      Iterator<Map.Entry<Thread, Integer>> iterator = waitingForNotify.entrySet().iterator();
+      Iterator<Map.Entry<T, Integer>> iterator = waitingForNotify.entrySet().iterator();
       while(pendingNotifies > 0 && iterator.hasNext()) {
         pendingNotifies--;
-        final Entry<Thread, Integer> entry = iterator.next();
+        final Entry<T, Integer> entry = iterator.next();
         waitingForMonitor.put(entry.getKey(), entry.getValue());
-        iterator.remove();;
+        iterator.remove();
       }
 
       pendingNotifies = 0;
     }
 
-    private void setOwner(final Thread currentThread) {
+    private void setOwner(final T currentThread) {
       owner = currentThread;
       if(waitingForMonitor.containsKey(currentThread)) {
         depth = waitingForMonitor.remove(currentThread);

@@ -167,4 +167,16 @@ public class ExecutionEventSingleton {
   public static void afterNew(Object object) {
     instance.afterNew(object);
   }
+
+  public static void replaceInterrupt(Thread thread) {
+    instance.replaceInterrupt(NOOP_HOOK, thread);
+  }
+
+  public static boolean replaceIsInterrupted(Thread thread) {
+    return instance.replaceIsInterrupted(NOOP_HOOK, thread, false);
+  }
+
+  public static boolean replaceInterrupted() {
+    return instance.replaceIsInterrupted(NOOP_HOOK, Thread.currentThread(), true);
+  }
 }

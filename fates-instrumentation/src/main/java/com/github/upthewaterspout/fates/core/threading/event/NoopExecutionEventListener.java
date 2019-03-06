@@ -135,4 +135,19 @@ public class NoopExecutionEventListener implements ExecutionEventListener {
   public void postValidation() {
 
   }
+
+  @Override
+  public void replaceInterrupt(ExecutionEventListener noopHook, Thread thread) {
+    thread.interrupt();
+  }
+
+  @Override
+  public boolean replaceIsInterrupted(ExecutionEventListener noopHook, Thread thread,
+                                      boolean clearInterrupt) {
+    if(clearInterrupt) {
+      return Thread.interrupted();
+    } else {
+      return thread.isInterrupted();
+    }
+  }
 }

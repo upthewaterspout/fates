@@ -22,11 +22,14 @@ import java.util.*;
  * Keeps track of what threads are calling join on other threads. Used to
  * know what threads can be unblocked when a thread exits.
  */
-public class JoinTracker {
-  Map<Thread, List<Thread>> joins = new HashMap<>();
+public class JoinTracker<T> {
+  /**
+   * Map from the thread being joined on to threads joining on it.
+   */
+  Map<T, List<T>> joins = new HashMap<>();
 
-  public void join(Thread joiner, Thread joinee) {
-    List<Thread> joiners = joins.get(joinee);
+  public void join(T joiner, T joinee) {
+    List<T> joiners = joins.get(joinee);
     if(joiners == null) {
       joiners = new ArrayList<>();
       joins.put(joinee, joiners);
@@ -35,10 +38,15 @@ public class JoinTracker {
     joiners.add(joiner);
   }
 
-  public Collection<Thread> threadTerminated(Thread thread) {
-    List<Thread> result = joins.remove(thread);
+  public Collection<T> threadTerminated(T thread) {
+    List<T> result = joins.remove(thread);
 
     return result == null ? Collections.emptyList() : result;
   }
 
+  public void interrupt(T threadID) {
+    for(List<T> joiners : joins.values()) {
+      joiners.remove(threadID);
+    }
+  }
 }

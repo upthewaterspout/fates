@@ -17,6 +17,7 @@
 package com.github.upthewaterspout.fates.core.threading.scheduler;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -26,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
+import com.github.upthewaterspout.fates.core.states.StateExplorer;
 import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
 import com.github.upthewaterspout.fates.core.threading.instrument.monitor.MonitorControl;
 import org.junit.Test;
@@ -75,7 +77,11 @@ public class ThreadSchedulingListenerTest {
       public void run() {
         Threads.waitUntilState(parentThread, EnumSet.of(State.WAITING));
         scheduler.beforeSynchronization(sync);
-        scheduler.replaceWait(null, sync, 0, 0);
+        try {
+          scheduler.replaceWait(null, sync, 0, 0);
+        } catch (InterruptedException e) {
+          //ignore
+        }
         scheduler.afterSynchronization(sync);
         scheduler.beforeThreadExit();
       }
@@ -147,7 +153,11 @@ public class ThreadSchedulingListenerTest {
     final Thread mainThread = Thread.currentThread();
 
     Thread t1 = startThread(scheduler, "T1", () -> {
-      scheduler.replaceJoin(null, mainThread, 0, 0);
+      try {
+        scheduler.replaceJoin(null, mainThread, 0, 0);
+      } catch (InterruptedException e) {
+        //ignore
+      }
     });
 
     Threads.waitUntilState(t1, EnumSet.of(State.WAITING));
@@ -168,6 +178,81 @@ public class ThreadSchedulingListenerTest {
 
     t1.join();
     scheduler.replaceJoin(null, t1, 0, 0);
+  }
+
+  @Test(timeout=30000)
+  public void interruptShouldBreakOutOfJoin() throws InterruptedException {
+    Decider decider = new DepthFirstExplorer();
+
+    ThreadSchedulingListener scheduler = new ThreadSchedulingListener(decider);
+    scheduler.begin();
+
+    AtomicBoolean interrupted = new AtomicBoolean();
+    Thread t1 = startThread(scheduler, "T1", () -> {
+      try {
+        scheduler.replaceJoin(null, Thread.currentThread(), 0, 0);
+      } catch (InterruptedException e) {
+        interrupted.set(true);
+      }
+      scheduler.beforeThreadExit();
+    });
+    Threads.waitUntilState(t1, EnumSet.of(State.WAITING));
+    scheduler.replaceInterrupt(null, t1);
+    scheduler.replaceJoin(null, t1, 0, 0);
+    assertFalse(scheduler.replaceIsInterrupted(null, t1, false));
+    t1.join();
+    assertTrue(interrupted.get());
+  }
+
+  @Test(timeout=30000)
+  public void interruptShouldBreakOutOfPark() throws InterruptedException {
+    StateExplorer decider = new DepthFirstExplorer();
+
+    ThreadSchedulingListener scheduler = new ThreadSchedulingListener(decider);
+    scheduler.begin();
+    AtomicBoolean wasInterrupted = new AtomicBoolean();
+    do {
+      Thread parker = startThread(scheduler, "T1", () -> {
+        scheduler.replacePark(null, null);
+        wasInterrupted.set(scheduler.replaceIsInterrupted(null, Thread.currentThread(), false));
+        scheduler.beforeThreadExit();
+      });
+      Thread interrupter = startThread(scheduler, "T1", () -> {
+        scheduler.replaceInterrupt(null, parker);
+        scheduler.beforeThreadExit();
+      });
+      scheduler.replaceJoin(null, parker, 0, 0);
+      scheduler.replaceJoin(null, interrupter, 0, 0);
+      assertTrue(wasInterrupted.get());
+      decider.done();
+    } while(!decider.isCompletelyTested());
+  }
+
+  @Test(timeout=30000)
+  public void interruptShouldBreakOutOfWait() throws InterruptedException {
+    Decider decider = new DepthFirstExplorer();
+
+    ThreadSchedulingListener scheduler = new ThreadSchedulingListener(decider, mock(MonitorControl.class));
+    scheduler.begin();
+
+    AtomicBoolean interrupted = new AtomicBoolean();
+    Thread t1 = startThread(scheduler, "T1", () -> {
+      scheduler.beforeSynchronization(this);
+      try {
+        scheduler.replaceWait(null, this, 0, 0);
+      } catch (InterruptedException e) {
+        interrupted.set(true);
+      } finally {
+        scheduler.afterSynchronization(this);
+      }
+      scheduler.beforeThreadExit();
+    });
+    Threads.waitUntilState(t1, EnumSet.of(State.WAITING));
+    scheduler.replaceInterrupt(null, t1);
+    scheduler.replaceJoin(null, t1, 0, 0);
+    assertFalse(scheduler.replaceIsInterrupted(null, t1, false));
+    t1.join();
+    assertTrue(interrupted.get());
   }
 
   @Test(timeout=30000)

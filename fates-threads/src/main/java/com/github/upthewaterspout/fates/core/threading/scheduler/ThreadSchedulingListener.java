@@ -272,7 +272,7 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
   @Override
   public void replaceWait(
       ExecutionEventListener defaultAction,
-      final Object sync, final long timeout, int nanos) {
+      final Object sync, final long timeout, int nanos) throws InterruptedException {
     monitorControl.monitorExit(sync);
     try {
       if (timeout > 0) {
@@ -285,6 +285,7 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
         Thread nextThread = schedulerState.wait(Thread.currentThread(), sync);
         notify(nextThread);
         waitToBeScheduled();
+        checkInterrupt(Thread.currentThread());
       } finally {
         lock.unlock();
       }
@@ -304,7 +305,7 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
 
   @Override
   public void replaceJoin(ExecutionEventListener defaultAction, final Thread thread,
-                          final long timeout, int nanos) {
+                          final long timeout, int nanos) throws InterruptedException {
     if(timeout > 0) {
       //TODO This should consume a notify, if there is one present
       waitForTimeout(timeout);
@@ -315,8 +316,15 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
       Thread nextThread = schedulerState.join(Thread.currentThread(), thread);
       notify(nextThread);
       waitToBeScheduled();
+      checkInterrupt(Thread.currentThread());
     } finally {
       lock.unlock();
+    }
+  }
+
+  private void checkInterrupt(Thread currentThread) throws InterruptedException {
+    if(schedulerState.isInterrupted(currentThread, true)) {
+      throw new InterruptedException();
     }
   }
 
@@ -378,4 +386,27 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
     }
   }
 
+  public void replaceInterrupt(ExecutionEventListener defaultAction, Thread thread) {
+    yield();
+    lock.lock();
+    try {
+      Thread nextThread = schedulerState.interrupt(thread);
+      notify(nextThread);
+      waitToBeScheduled();
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  @Override
+  public boolean replaceIsInterrupted(ExecutionEventListener noopHook, Thread thread,
+                                      boolean clearInterrupt) {
+    yield();
+    lock.lock();
+    try {
+      return schedulerState.isInterrupted(thread, clearInterrupt);
+    } finally {
+      lock.unlock();
+    }
+  }
 }
