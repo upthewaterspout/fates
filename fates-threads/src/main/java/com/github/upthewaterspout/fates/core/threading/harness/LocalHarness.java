@@ -82,10 +82,10 @@ public class LocalHarness implements Harness {
       ExecutionEventSingleton.setListener(listener);
       try {
         runnable.run();
+        ExecutionEventSingleton.postValidation();
       } finally {
         ExecutionEventSingleton.setListener(null);
       }
-      listener.postValidation();
     };
   }
 

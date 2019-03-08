@@ -72,12 +72,13 @@ public class ThreadLocalEventListenerTest {
   }
 
   @Test
-  public void postValidationFailsForDanglingThreads() {
+  public void postValidationWaitsForDanglingThreads() throws InterruptedException {
     Thread thread = new Thread();
     listener.beforeThreadStart(thread);
     listener.afterThreadStart(thread);
 
-    Assertions.assertThatThrownBy(() -> listener.postValidation()).isInstanceOf(IllegalStateException.class);
+    listener.postValidation();
+    verify(delegate).replaceJoin(any(), eq(thread), eq(0L), eq(0));
   }
 
   @Test

@@ -145,6 +145,7 @@ public class SynchronizationTracker<THREAD> {
 
   /**
    * Mark a thread as interrupted
+   * @param threadID The thread being interrupted
    * @return true if the thread is still blocked (due to other threads owning the monitor)
    */
   public boolean interrupt(THREAD threadID) {

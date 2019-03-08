@@ -16,7 +16,6 @@
 
 package com.github.upthewaterspout.fates.core.threading.scheduler;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,13 +82,7 @@ class ThreadState {
 
       StringBuilder builder = new StringBuilder();
       builder.append("Deadlock detected, all threads are blocked. Thread dumps: \n");
-      builder.append("------------------------------------------------------------\n");
-      getThreadsInState(State.BLOCKED).forEach(thread -> {
-        builder.append(thread.getName()).append("\n");
-        Arrays.stream(thread.getStackTrace()).forEach(element ->
-            builder.append("  at " + element + "\n"));
-        builder.append("------------------------------------------------------------\n");
-      });
+      builder.append(ThreadUtils.getStackTraces(getThreadsInState(State.BLOCKED)));
       throw new IllegalStateException(builder.toString());
     }
   }

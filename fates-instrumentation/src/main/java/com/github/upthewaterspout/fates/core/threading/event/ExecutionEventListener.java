@@ -173,6 +173,8 @@ public interface ExecutionEventListener {
 
   /**
    * Interrupt the given thread.
+   * @param noopHook default interrupt behavior
+   * @param thread The thread being interrupted
    */
   void replaceInterrupt(ExecutionEventListener noopHook, Thread thread);
 
@@ -181,6 +183,7 @@ public interface ExecutionEventListener {
    * @param noopHook The default behavior
    * @param thread The thread that we are checking
    * @param clearInterrupt true to clear the interrupt bit
+   * @return true of the thread is interrupted
    */
   boolean replaceIsInterrupted(ExecutionEventListener noopHook, Thread thread, boolean clearInterrupt);
 }

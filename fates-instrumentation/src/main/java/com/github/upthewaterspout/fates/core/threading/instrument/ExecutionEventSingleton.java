@@ -179,4 +179,8 @@ public class ExecutionEventSingleton {
   public static boolean replaceInterrupted() {
     return instance.replaceIsInterrupted(NOOP_HOOK, Thread.currentThread(), true);
   }
+
+  public static void postValidation() {
+    instance.postValidation();
+  }
 }

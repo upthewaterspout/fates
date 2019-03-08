@@ -16,6 +16,8 @@
 
 package com.github.upthewaterspout.fates.integrationtest;
 
+import java.util.concurrent.locks.LockSupport;
+
 import com.github.upthewaterspout.fates.core.threading.ThreadFates;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -28,7 +30,7 @@ public class DanglingThreadTest {
 
 
   @Test()
-  public void shouldDetectDanglingThread() throws Throwable {
+  public void shouldDetectDanglingBlockedThread() throws Throwable {
 
     Assertions.assertThatThrownBy(() -> {
       new ThreadFates().run(() -> {
@@ -38,9 +40,20 @@ public class DanglingThreadTest {
     }).isInstanceOf(IllegalStateException.class);
   }
 
+  @Test()
+  public void shouldWaitForAnyUnfinishedThreadsToComplete() throws Throwable {
+
+    new ThreadFates().run(() -> {
+      Thread thread = new Thread(() -> {
+        LockSupport.parkNanos(10);
+      });
+      thread.start();
+    });
+  }
+
   private static void joinCurrentThread() {
     try {
-      Thread.currentThread().join(30_000_000);
+      Thread.currentThread().join();
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
