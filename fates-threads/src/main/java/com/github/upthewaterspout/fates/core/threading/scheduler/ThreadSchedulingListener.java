@@ -214,6 +214,9 @@ public class ThreadSchedulingListener implements ExecutionEventListener {
    */
   @Override
   public void replaceUnpark(ExecutionEventListener defaultAction, final Thread thread) {
+    if(thread == null) {
+      return;
+    }
     lock.lock();
     try {
       Thread nextThread = schedulerState.unpark(thread);
