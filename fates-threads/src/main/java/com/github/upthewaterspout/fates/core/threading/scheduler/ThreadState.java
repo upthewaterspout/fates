@@ -18,9 +18,9 @@ package com.github.upthewaterspout.fates.core.threading.scheduler;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Manages of the state of threads for the {@link SchedulerState} class. This class implements
@@ -32,63 +32,46 @@ import java.util.Set;
  */
 class ThreadState {
 
-  /**
-   * The set of threads that are currently parked in a yield operation
-   */
-  private final Set<Thread> unscheduledThreads = new HashSet<>();
-  /**
-   * The currently running thread
-   */
-  private final Set<Thread> runningThreads = new HashSet<>();
-  /**
-   * Threads that currently blocked waiting for a monitor, lock, or notification
-   */
-  private final Set<Thread> blockedThreads = new HashSet<>();
 
-  ThreadState() {
-  }
-
+  private final Map<Thread,State> threadStates = new HashMap<>();
 
   void newThread(Thread thread) {
-    runningThreads.add(thread);
-  }
-
-  boolean running(Thread thread) {
-    return runningThreads.contains(thread);
+    threadStates.put(thread, State.RUNNING);
   }
 
   void block(final Thread thread) {
-    runningThreads.remove(thread);
-    unscheduledThreads.remove(thread);
-    blockedThreads.add(thread);
+    threadStates.put(thread, State.BLOCKED);
   }
 
   void unblock(final Thread thread) {
-    blockedThreads.remove(thread);
-    runningThreads.remove(thread);
-    unscheduledThreads.add(thread);
+    threadStates.put(thread, State.UNSCHEDULED);
   }
 
   void block(final Collection<Thread> blockedThreads) {
     blockedThreads.stream().forEach(this::block);
   }
 
-  Set<Thread> getUnscheduledThreads() {
-    return Collections.unmodifiableSet(unscheduledThreads);
+  void resume(Thread thread) {
+    threadStates.put(thread, State.RUNNING);
   }
 
-  Set<Thread> getBlockedThreads() {
-    return Collections.unmodifiableSet(blockedThreads);
+  void terminate(Thread thread) {
+    threadStates.remove(thread);
   }
 
-  void threadTerminated(Thread thread) {
-    unscheduledThreads.remove(thread);
-    blockedThreads.remove(thread);
-    runningThreads.remove(thread);
+  Stream<Thread> getUnscheduledThreads() {
+    return getThreadsInState(State.UNSCHEDULED);
   }
+
+  private Stream<Thread> getThreadsInState(State state) {
+    return threadStates.entrySet().stream()
+        .filter(entry -> entry.getValue().equals(state))
+        .map(Map.Entry::getKey);
+  }
+
 
   boolean hasRunningThread() {
-    return !runningThreads.isEmpty();
+    return getThreadsInState(State.RUNNING).findAny().isPresent();
   }
 
   /**
@@ -96,25 +79,42 @@ class ThreadState {
    * @throws IllegalStateException if there are no unscheduled theads.
    */
   void checkForUnscheduledThread() {
-    if(unscheduledThreads.isEmpty()) {
-      blockedThreads.stream().forEach(thread -> {
-        System.out.println(thread.getName());
+    if(!getUnscheduledThreads().findAny().isPresent()) {
+
+      StringBuilder builder = new StringBuilder();
+      builder.append("Deadlock detected, all threads are blocked. Thread dumps: ");
+      builder.append("------------------------------------------------------------");
+      getThreadsInState(State.BLOCKED).forEach(thread -> {
+        builder.append(thread.getName());
         Arrays.stream(thread.getStackTrace()).forEach(element ->
-            System.out.println("  at " + element));
+            builder.append("  at " + element));
+        builder.append("------------------------------------------------------------");
       });
-      throw new IllegalStateException("Deadlock detected, all threads are are blocked. blockedThreads="
-        + blockedThreads +", runningThreads="
-        + runningThreads + ", currentThread="
-        + Thread.currentThread().getName());
+      throw new IllegalStateException(builder.toString());
     }
   }
 
-  void threadResumed(Thread scheduledThread) {
-    runningThreads.add(scheduledThread);
-    unscheduledThreads.remove(scheduledThread);
-  }
 
   void unblock(Collection<Thread> unblockedThreads) {
     unblockedThreads.stream().forEach(this::unblock);
+  }
+
+  boolean isRunning(Thread thread) {
+    return State.RUNNING.equals(threadStates.get(thread));
+  }
+
+  public boolean isBlocked(Thread thread) {
+    return State.BLOCKED.equals(threadStates.get(thread));
+  }
+
+  public boolean isUnscheduled(Thread thread) {
+    return State.UNSCHEDULED.equals(threadStates.get(thread));
+  }
+
+  public static enum State {
+    RUNNING, //Thread that is currently actively running
+    BLOCKED, //Thread that is currently blocked
+    UNSCHEDULED //Thread that is not blocked, but not currently running
+
   }
 }

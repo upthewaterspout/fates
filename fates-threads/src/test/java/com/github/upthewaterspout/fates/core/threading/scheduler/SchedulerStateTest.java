@@ -19,7 +19,6 @@ package com.github.upthewaterspout.fates.core.threading.scheduler;
 import com.github.upthewaterspout.fates.core.states.Decider;
 import com.github.upthewaterspout.fates.core.states.explorers.depthfirst.DepthFirstExplorer;
 import org.assertj.core.api.Assertions;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -158,13 +157,13 @@ public class SchedulerStateTest {
     state.newThread(thread2, thread1);
     state.park(thread1);
 
-    assertTrue(state.isBlocked(thread1));
+    assertTrue(state.threadState.isBlocked(thread1));
     assertFalse(state.running(thread1));
-    assertFalse(state.isUnscheduled(thread1));
+    assertFalse(state.threadState.isUnscheduled(thread1));
 
     state.interrupt(thread1);
-    assertFalse(state.isBlocked(thread1));
-    assertTrue(state.isUnscheduled(thread1));
+    assertFalse(state.threadState.isBlocked(thread1));
+    assertTrue(state.threadState.isUnscheduled(thread1));
     assertFalse(state.running(thread1));
   }
 

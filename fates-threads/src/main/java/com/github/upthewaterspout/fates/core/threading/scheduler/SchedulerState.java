@@ -35,7 +35,7 @@ class SchedulerState {
 
   private final Decider decider;
   final ThreadMapping threadMapping = new ThreadMapping();
-  private final ThreadState threadState = new ThreadState();
+  final ThreadState threadState = new ThreadState();
   private final SynchronizationTracker<Thread> synchronizationTracker = new SynchronizationTracker<>();
   private final JoinTracker<Thread> joinTracker = new JoinTracker<>();
   private final Set<Thread> interruptedThreads = new HashSet<>();
@@ -65,17 +65,9 @@ class SchedulerState {
   }
 
   public boolean running(Thread thread) {
-    return threadState.running(thread);
+    return threadState.isRunning(thread);
   }
 
-
-  public boolean isBlocked(Thread thread) {
-    return threadState.getBlockedThreads().contains(thread);
-  }
-
-  public boolean isUnscheduled(Thread thread) {
-    return threadState.getUnscheduledThreads().contains(thread);
-  }
 
   public Thread park(final Thread thread) {
     threadState.block(thread);
@@ -103,7 +95,7 @@ class SchedulerState {
   public Thread threadTerminated(Thread thread) {
     Collection<Thread> unblockedThreads = joinTracker.threadTerminated(thread);
     threadState.unblock(unblockedThreads);
-    threadState.threadTerminated(thread);
+    threadState.terminate(thread);
     threadMapping.threadTerminated(thread);
     interruptedThreads.remove(thread);
     return getNextThread();
@@ -118,10 +110,10 @@ class SchedulerState {
 
     threadState.checkForUnscheduledThread();
 
-    ThreadID scheduledThreadID = decider.decide(lastLineNumber, threadState.getUnscheduledThreads().stream().map(threadMapping::getThreadID).collect(
+    ThreadID scheduledThreadID = decider.decide(lastLineNumber, threadState.getUnscheduledThreads().map(threadMapping::getThreadID).collect(
         Collectors.toSet()));
     Thread scheduledThread = threadMapping.getThread(scheduledThreadID);
-    threadState.threadResumed(scheduledThread);
+    threadState.resume(scheduledThread);
     Collection<Thread> blockedThreads = synchronizationTracker.threadResumed(scheduledThread);
     threadState.block(blockedThreads);
 
