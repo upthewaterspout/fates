@@ -32,7 +32,6 @@ import java.util.Map.Entry;
  */
 public class SynchronizationTracker<THREAD> {
   private final Map<Object, MonitorInfo<THREAD>> monitors = new IdentityHashMap<>();
-  private final Map<THREAD, Object> waitingToResume = new HashMap<>();
 
   /**
    * Indicate that a thread is trying to get a monitor.
@@ -42,7 +41,7 @@ public class SynchronizationTracker<THREAD> {
    * monitor is held
    */
   public Collection<THREAD> monitorEnter(THREAD currentThread, final Object sync) {
-    final MonitorInfo currentHolder = monitors.get(sync);
+    final MonitorInfo<THREAD> currentHolder = monitors.get(sync);
     if(currentHolder == null) {
       monitors.put(sync, new MonitorInfo(currentThread));
       return Collections.emptySet();
@@ -50,8 +49,10 @@ public class SynchronizationTracker<THREAD> {
 
     if(currentHolder.owner == null) {
       currentHolder.setOwner(currentThread);
-      waitingToResume.remove(currentThread);
-      currentHolder.waitingForMonitor.remove(currentThread);
+      Integer depth = currentHolder.waitingForMonitor.remove(currentThread);
+      if(depth != null) {
+        currentHolder.depth = depth;
+      }
       return currentHolder.waitingForMonitor.keySet();
     }
 
@@ -85,7 +86,6 @@ public class SynchronizationTracker<THREAD> {
 
     monitorInfo.owner = null;
 
-    monitorInfo.waitingForMonitor.keySet().forEach(thread -> waitingToResume.put(thread, sync));
     return monitorInfo.waitingForMonitor.keySet();
   }
 
@@ -94,7 +94,6 @@ public class SynchronizationTracker<THREAD> {
 
     monitorInfo.drainPendingNotifies();
     monitorInfo.waitingForNotify.put(currentThread, monitorInfo.depth);
-    monitorInfo.waitingForMonitor.keySet().forEach(thread -> waitingToResume.put(thread, sync));
     monitorInfo.depth = 0;
     monitorInfo.owner = null;
     return monitorInfo.waitingForMonitor.keySet();
@@ -134,12 +133,14 @@ public class SynchronizationTracker<THREAD> {
    * @param scheduledThread The thread that is resumed
    */
   public Collection<THREAD> threadResumed(final THREAD scheduledThread) {
-    Object monitor = waitingToResume.remove(scheduledThread);
-    if(monitor != null) {
-      return monitorEnter(scheduledThread, monitor);
-    } else {
-      return Collections.emptySet();
+    for(Entry<Object, MonitorInfo<THREAD>> entry : monitors.entrySet()) {
+      MonitorInfo<THREAD> monitor = entry.getValue();
+      Object object = entry.getKey();
+      if (monitor.waitingForMonitor.containsKey(scheduledThread)) {
+        return monitorEnter(scheduledThread, object);
+      }
     }
+    return Collections.emptySet();
   }
 
   /**
@@ -155,7 +156,7 @@ public class SynchronizationTracker<THREAD> {
       if(depth != null) {
         monitor.waitingForMonitor.put(threadID, depth);
         if (monitor.owner == null) {
-          waitingToResume.put(threadID, object);
+          return false;
         } else {
           return true;
         }

@@ -31,8 +31,6 @@ import java.util.stream.Stream;
  * classes such as {@link SynchronizationTracker} as another layer built on top of this.
  */
 class ThreadState {
-
-
   private final Map<Thread,State> threadStates = new HashMap<>();
 
   void newThread(Thread thread) {
