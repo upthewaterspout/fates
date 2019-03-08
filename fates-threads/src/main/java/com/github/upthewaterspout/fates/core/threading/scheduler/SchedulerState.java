@@ -58,11 +58,13 @@ class SchedulerState {
   /**
    * Ask the state space to choose the next thread to run
    */
-  public Thread chooseNextThread(Thread currentThread) {
-    threadState.unblock(currentThread);
+  public Thread chooseNextThread(Thread thread) {
+    verifyThread(thread);
+    threadState.unblock(thread);
 
     return getNextThread();
   }
+
 
   public boolean running(Thread thread) {
     return threadState.isRunning(thread);
@@ -70,21 +72,25 @@ class SchedulerState {
 
 
   public Thread park(final Thread thread) {
+    verifyThread(thread);
     threadState.block(thread);
     return getNextThread();
   }
 
   public Thread unpark(final Thread thread) {
+    verifyThread(thread);
     threadState.unblock(thread);
     return getNextThread();
   }
 
   public Thread interrupt(final Thread thread) {
+    verifyThread(thread);
     threadInterrupted(thread);
     return getNextThread();
   }
 
   private void threadInterrupted(Thread thread) {
+    verifyThread(thread);
     interruptedThreads.add(thread);
     joinTracker.interrupt(thread);
     if(!synchronizationTracker.interrupt(thread)) {
@@ -93,10 +99,10 @@ class SchedulerState {
   }
 
   public Thread threadTerminated(Thread thread) {
+    verifyThread(thread);
     Collection<Thread> unblockedThreads = joinTracker.threadTerminated(thread);
     threadState.unblock(unblockedThreads);
     threadState.terminate(thread);
-    threadMapping.threadTerminated(thread);
     interruptedThreads.remove(thread);
     return getNextThread();
   }
@@ -121,18 +127,21 @@ class SchedulerState {
   }
 
   public Thread monitorEnter(Thread thread, final Object sync) {
+    verifyThread(thread);
     Collection<Thread> threadsToBlock = synchronizationTracker.monitorEnter(thread, sync);
     threadState.block(threadsToBlock);
     return getNextThread();
   }
 
   public Thread monitorExit(Thread thread, final Object sync) {
+    verifyThread(thread);
     Collection<Thread> unblockedThreads = synchronizationTracker.monitorExit(thread, sync);
     threadState.unblock(unblockedThreads);
     return chooseNextThread(thread);
   }
 
   public Thread wait(Thread thread, final Object sync) {
+    verifyThread(thread);
     if(isInterrupted(thread, false)) {
       return thread;
     }
@@ -143,16 +152,20 @@ class SchedulerState {
   }
 
   public void notify(Thread thread, final Object sync) {
+    verifyThread(thread);
     synchronizationTracker.notify(thread, sync);
 
   }
 
   public void notifyAll(Thread thread, final Object sync) {
+    verifyThread(thread);
     synchronizationTracker.notifyAll(thread, sync);
   }
 
   public Thread join(Thread joiner, Thread joinee) {
-    if(!threadMapping.hasThread(joinee)) {
+    verifyThread(joiner);
+    verifyThread(joinee);
+    if(!threadState.hasThread(joinee)) {
       return joiner;
     }
     if(isInterrupted(joiner, false)) {
@@ -170,10 +183,18 @@ class SchedulerState {
   }
 
   public boolean isInterrupted(Thread thread, boolean clearInterrupt) {
+    verifyThread(thread);
     if(clearInterrupt) {
       return interruptedThreads.remove(thread);
     } else {
       return interruptedThreads.contains(thread);
     }
+  }
+
+  private void verifyThread(Thread thread) {
+    if(!threadMapping.hasThread(thread)) {
+      throw new IllegalStateException("Scheduler was asked to handle untracked thread " + thread);
+    }
+
   }
 }

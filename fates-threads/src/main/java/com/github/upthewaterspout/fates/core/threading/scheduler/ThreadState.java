@@ -38,19 +38,21 @@ class ThreadState {
   }
 
   void block(final Thread thread) {
-    threadStates.put(thread, State.BLOCKED);
+    setState(thread, State.BLOCKED);
   }
 
   void unblock(final Thread thread) {
-    threadStates.put(thread, State.UNSCHEDULED);
-  }
-
-  void block(final Collection<Thread> blockedThreads) {
-    blockedThreads.stream().forEach(this::block);
+    setState(thread, State.UNSCHEDULED);
   }
 
   void resume(Thread thread) {
-    threadStates.put(thread, State.RUNNING);
+    setState(thread, State.RUNNING);
+  }
+
+  private void setState(Thread thread, State state) {
+    if(threadStates.containsKey(thread)) {
+      threadStates.put(thread, state);
+    }
   }
 
   void terminate(Thread thread) {
@@ -80,18 +82,21 @@ class ThreadState {
     if(!getUnscheduledThreads().findAny().isPresent()) {
 
       StringBuilder builder = new StringBuilder();
-      builder.append("Deadlock detected, all threads are blocked. Thread dumps: ");
-      builder.append("------------------------------------------------------------");
+      builder.append("Deadlock detected, all threads are blocked. Thread dumps: \n");
+      builder.append("------------------------------------------------------------\n");
       getThreadsInState(State.BLOCKED).forEach(thread -> {
-        builder.append(thread.getName());
+        builder.append(thread.getName()).append("\n");
         Arrays.stream(thread.getStackTrace()).forEach(element ->
-            builder.append("  at " + element));
-        builder.append("------------------------------------------------------------");
+            builder.append("  at " + element + "\n"));
+        builder.append("------------------------------------------------------------\n");
       });
       throw new IllegalStateException(builder.toString());
     }
   }
 
+  void block(final Collection<Thread> blockedThreads) {
+    blockedThreads.stream().forEach(this::block);
+  }
 
   void unblock(Collection<Thread> unblockedThreads) {
     unblockedThreads.stream().forEach(this::unblock);
@@ -107,6 +112,10 @@ class ThreadState {
 
   public boolean isUnscheduled(Thread thread) {
     return State.UNSCHEDULED.equals(threadStates.get(thread));
+  }
+
+  public boolean hasThread(Thread thread) {
+    return threadStates.containsKey(thread);
   }
 
   public static enum State {

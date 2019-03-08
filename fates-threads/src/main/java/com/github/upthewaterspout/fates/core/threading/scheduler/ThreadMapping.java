@@ -50,12 +50,6 @@ class ThreadMapping {
     return idToThread.get(scheduledThreadID);
   }
 
-  ThreadID threadTerminated(Thread thread) {
-    ThreadID threadId = threadtoID.remove(thread);
-    idToThread.remove(threadId);
-    return threadId;
-  }
-
   boolean hasThread(Thread thread) {
     return threadtoID.containsKey(thread);
   }

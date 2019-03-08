@@ -176,8 +176,8 @@ public class ThreadSchedulingListenerTest {
       scheduler.beforeThreadExit();
     });
 
-    t1.join();
     scheduler.replaceJoin(null, t1, 0, 0);
+    t1.join();
   }
 
   @Test(timeout=30000)
