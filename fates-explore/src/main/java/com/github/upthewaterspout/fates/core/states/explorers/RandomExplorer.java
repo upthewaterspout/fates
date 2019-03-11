@@ -17,10 +17,12 @@
 package com.github.upthewaterspout.fates.core.states.explorers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.github.upthewaterspout.fates.core.states.StateExplorer;
 
@@ -59,7 +61,7 @@ public class RandomExplorer implements StateExplorer {
    * A history of decisions made by the current iteration, used for
    * the debugging trace
    */
-  private final List<Object> history = new ArrayList<>();
+  private final Collection<Object> history = new ConcurrentLinkedQueue<>();
 
   public RandomExplorer(int iterations, long seed) {
     this.maxIterations = iterations;
