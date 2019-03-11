@@ -56,15 +56,18 @@ public class ExecutionEventSingleton {
     if(!available) {
       throw new IllegalStateException("No instrumentation agent registered");
     }
-    if(instance instanceof NonReentrantExecutionEventListener) {
-      ((NonReentrantExecutionEventListener) instance).checkForError();
-    }
+    ExecutionEventListener oldInstance = instance;
 
     if(hook == null) {
       instance = NOOP_HOOK;
     } else {
       instance = new NonReentrantExecutionEventListener(hook);
     }
+
+    if(oldInstance instanceof NonReentrantExecutionEventListener) {
+      ((NonReentrantExecutionEventListener) oldInstance).checkForError();
+    }
+
   }
 
   public static void beforeGetField(Object owner, String fieldName, String className, String methodName, int lineNumber) {

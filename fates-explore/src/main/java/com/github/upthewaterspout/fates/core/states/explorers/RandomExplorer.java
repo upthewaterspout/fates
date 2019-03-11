@@ -61,7 +61,7 @@ public class RandomExplorer implements StateExplorer {
    * A history of decisions made by the current iteration, used for
    * the debugging trace
    */
-  private final Collection<Object> history = new ConcurrentLinkedQueue<>();
+  private final Collection<Object> history = new ArrayList<>();
 
   public RandomExplorer(int iterations, long seed) {
     this.maxIterations = iterations;
@@ -91,7 +91,9 @@ public class RandomExplorer implements StateExplorer {
   @Override
   public String getTrace() {
     StringBuilder trace = new StringBuilder("Random Seed: " + seed + "\n");
-    history.stream().forEach(line -> trace.append(line).append("\n"));
+    if(history.size() < 100) {
+      history.stream().forEach(line -> trace.append(line).append("\n"));
+    }
 
     return trace.toString();
   }
