@@ -16,11 +16,12 @@
 
 package com.github.upthewaterspout.fates.core.threading.event;
 
+import static java.lang.Boolean.FALSE;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadUtils;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * A decorator for a {@link ExecutionEventListener} that is only enabled for the current thread
@@ -30,17 +31,15 @@ import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadUtils;
  * scheduler.
  */
 public class ThreadLocalEventListener extends DelegatingExecutionEventListener {
-  private Set<Thread> enabledThreads = Collections.synchronizedSet(new HashSet<Thread>());
-  private ThreadLocal<Boolean> inThreadStart = new ThreadLocal<Boolean> () {
-    @Override protected Boolean initialValue() {
-      return Boolean.FALSE;
-    }
-  };
+  private Set<Thread> enabledThreads = new CopyOnWriteArraySet<>();
+  private ThreadLocal<Boolean> currentThreadEnabled =
+      ThreadLocal.withInitial(() -> enabledThreads.contains(Thread.currentThread()));
 
 
   public ThreadLocalEventListener(ExecutionEventListener delegate) {
     super(delegate);
     enabledThreads.add(Thread.currentThread());
+    currentThreadEnabled.set(Boolean.TRUE);
   }
 
   @Override
@@ -49,13 +48,16 @@ public class ThreadLocalEventListener extends DelegatingExecutionEventListener {
   }
 
   public boolean enabled() {
-    return enabledThreads.contains(Thread.currentThread()) && !inThreadStart.get();
+    return currentThreadEnabled.get();
   }
 
   @Override
   public void beforeThreadStart(Thread thread) {
     if(beforeEvent()) {
-      inThreadStart.set(Boolean.TRUE);
+      //Make the rest of thread creation atomic until after the thread start
+      currentThreadEnabled.set(FALSE);
+
+      //Mark the new thread as enabled
       enabledThreads.add(thread);
       delegate.beforeThreadStart(thread);
     }
@@ -63,7 +65,7 @@ public class ThreadLocalEventListener extends DelegatingExecutionEventListener {
 
   @Override
   public void afterThreadStart(Thread thread) {
-    inThreadStart.set(Boolean.FALSE);
+    currentThreadEnabled.set(enabledThreads.contains(Thread.currentThread()));
     if(enabled()) {
       delegate.afterThreadStart(thread);
     }
@@ -76,6 +78,7 @@ public class ThreadLocalEventListener extends DelegatingExecutionEventListener {
 
   public void beforeThreadExit(Thread thread) {
     if(enabled()) {
+      currentThreadEnabled.set(FALSE);
       enabledThreads.remove(thread);
       delegate.beforeThreadExit();
     }
