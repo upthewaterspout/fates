@@ -85,11 +85,15 @@ public class DepthFirstExplorerJUnitTest {
     explorer.decide("label4", Sets.newLinkedHashSet(1, 2));
     explorer.decide("label5", Sets.newLinkedHashSet(1, 2));
     String trace = explorer.getTrace();
-    String expected =  "\n========================================" +
-        "\nTest History:" +
-        "\n========================================" +
-        "\n" + "label1\nlabel2\nlabel3\nlabel4\nlabel5" +
-        "\n========================================";
+    String expected = "\n========================================\n" +
+        "Test Choices:\n" +
+        "========================================\n" +
+        "label1: 1\n" +
+        "label2: 1\n" +
+        "label3: 1\n" +
+        "label4: 1\n" +
+        "label5: 1\n" +
+        "========================================";
     assertEquals(expected, trace);
   }
 

@@ -16,13 +16,20 @@
 
 package com.github.upthewaterspout.fates.core.states;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class FatesTest {
@@ -36,6 +43,16 @@ public class FatesTest {
         .explore(test);
 
     verify(test, times(3)).doOnce(eq(explorer));
+  }
+
+  @Test(expected = AssertionError.class)
+  public  void exploresUntilFailureIsFound() throws Exception {
+    new Fates()
+      .explore(decider -> {
+        int a = decider.decide("a", new HashSet<>(Arrays.asList(1,2,3,4,5)));
+        int b = decider.decide("b", new HashSet<>(Arrays.asList(5,4,3,2,1)));
+        assertNotEquals(a, b);
+      });
   }
 
 

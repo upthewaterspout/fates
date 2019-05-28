@@ -56,16 +56,16 @@ public class Trees {
 
     LinkedList<String> decisionChanges = new LinkedList<>();
 
-    while(tree != null) {
-      if(tree.getSubTrees().size() > 1) {
-        decisionChanges.addFirst(tree.getLabel().toString());
+    while(tree.getParent() != null) {
+      if(tree.getParent().getSubTrees().size() > 1) {
+        decisionChanges.addFirst(tree.getParent().getLabel().toString() + ": " + tree.getDecision());
       }
       tree = tree.getParent();
     }
 
 
     return "\n========================================" +
-        "\nTest History:" +
+        "\nTest Choices:" +
         "\n========================================" +
         "\n" + String.join("\n", decisionChanges) +
         "\n========================================";
