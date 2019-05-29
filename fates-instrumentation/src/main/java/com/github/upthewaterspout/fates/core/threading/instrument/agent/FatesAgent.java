@@ -23,14 +23,19 @@ import java.util.ArrayList;
 
 import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEventSingleton;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.AsmTransformer;
+import com.github.upthewaterspout.fates.core.threading.instrument.asm.MethodEntryExitFilter;
 
 /**
  * Java agent class to initialize our bytecode manipulating agent.
  */
 public class FatesAgent {
   public static void premain(String agentArgs, Instrumentation inst) {
+
+    String[] methodEntryExitEnabledClasses = agentArgs.split(",");
+
+    MethodEntryExitFilter filter = new FatesMethodEntryExitFilter(methodEntryExitEnabledClasses);
     FilterTransformer transformer = new FilterTransformer(
-        new AsmTransformer(), "com/github/upthewaterspout/fates/core", "com/intellij", "java/lang/ThreadLocal", "java/lang/ref/WeakReference", "java/lang/ref/Reference", "java/lang/VerifyError", "java/lang/LinkageError");
+        new AsmTransformer(filter), "com/github/upthewaterspout/fates/core", "com/intellij", "java/lang/ThreadLocal", "java/lang/ref/WeakReference", "java/lang/ref/Reference", "java/lang/VerifyError", "java/lang/LinkageError");
     inst.addTransformer(transformer, true);
 
     ArrayList<Class<?>> toTransform = new ArrayList<>();

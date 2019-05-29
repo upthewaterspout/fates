@@ -17,6 +17,8 @@
 package com.github.upthewaterspout.fates.core.threading.daemon;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -25,26 +27,27 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
 /**
  * Utility for running a Callable in a separate JVM that has the fates java agent installed.
  *
- * The first call to {@link #execute(SerializableCallable)} will launch a separate JVM. Future
- * calls will reuse the same JVM. Concurrent {@link #execute(SerializableCallable)} calls are
+ * The first call to {@link #execute(SerializableCallable, String)} will launch a separate JVM. Future
+ * calls will reuse the same JVM. Concurrent {@link #execute(SerializableCallable, String)} calls are
  * not currently supported, they will be run serially.
  */
 public class DaemonRunnerWithAgent {
-  private static volatile DaemonRunner daemonRunner;
+  private static HashMap<String, DaemonRunner> daemonRunners = new HashMap<>();
 
-  public static <V> V execute(SerializableCallable<V> callable) throws Throwable {
-    DaemonRunner runner = launchRunner();
+  public static <V> V execute(SerializableCallable<V> callable, String agentArgs) throws Throwable {
+    DaemonRunner runner = launchRunner(agentArgs);
 
     return runner.execute(callable);
   }
 
-  private static synchronized DaemonRunner launchRunner()
+  private static synchronized DaemonRunner launchRunner(String agentArgs)
       throws InterruptedException, ExecutionException, IOException, TimeoutException {
-    if(daemonRunner == null) {
-      daemonRunner = new DaemonRunner("-javaagent:" + findInstrumentationJar());
+    DaemonRunner runner = daemonRunners.get(agentArgs);
+    if(runner == null) {
+      runner = new DaemonRunner("-javaagent:" + findInstrumentationJar() + "=" + agentArgs);
+      daemonRunners.put(agentArgs, runner);
     }
-
-    return daemonRunner;
+    return runner;
   }
 
   private static String findInstrumentationJar() {

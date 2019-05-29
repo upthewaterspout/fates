@@ -28,8 +28,11 @@ import org.objectweb.asm.commons.AdviceAdapter;
  */
 public class InstrumentMethodCalls extends AbstractClassVisitor {
 
-  public InstrumentMethodCalls(ClassVisitor cv) {
+  private final MethodEntryExitFilter filter;
+
+  public InstrumentMethodCalls(ClassVisitor cv, MethodEntryExitFilter filter) {
     super(cv);
+    this.filter = filter;
   }
 
   @Override
@@ -45,8 +48,11 @@ public class InstrumentMethodCalls extends AbstractClassVisitor {
 
     @Override
     protected void onMethodEnter() {
-      pushClassAndMethod();
-      SingletonCall.add(this, "beforeMethod", Type.VOID_TYPE, SingletonCall.STRING, SingletonCall.STRING);
+      if(filter.test(getBinaryClassName(), getMethodName())) {
+        pushClassAndMethod();
+        SingletonCall
+            .add(this, "beforeMethod", Type.VOID_TYPE, SingletonCall.STRING, SingletonCall.STRING);
+      }
       super.onMethodEnter();
     }
 
@@ -60,11 +66,19 @@ public class InstrumentMethodCalls extends AbstractClassVisitor {
 
     @Override
     protected void onMethodExit(int opcode) {
-      pushClassAndMethod();
-      SingletonCall.add(this, "afterMethod", Type.VOID_TYPE, SingletonCall.STRING, SingletonCall.STRING);
+      if(filter.test(getBinaryClassName(), getMethodName())) {
+        pushClassAndMethod();
+        SingletonCall
+            .add(this, "afterMethod", Type.VOID_TYPE, SingletonCall.STRING, SingletonCall.STRING);
+      }
 
       super.onMethodExit(opcode);
     }
   }
+
+  private String getBinaryClassName() {
+    return Type.getObjectType(getClassName()).getClassName();
+  }
+
 }
 

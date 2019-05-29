@@ -118,8 +118,6 @@ public class InstrumentFieldAccessTest extends InstrumentationTest {
     Callable object = transformAndCreate(className);
     Object innerClass = object.call();
     verify(hook, times(2)).afterNew(any());
-    verify(hook, atLeast(1)).beforeMethod(anyString(), anyString());
-    verify(hook, atLeast(1)).afterMethod(anyString(), anyString());
     verifyNoMoreInteractions(hook);
   }
 

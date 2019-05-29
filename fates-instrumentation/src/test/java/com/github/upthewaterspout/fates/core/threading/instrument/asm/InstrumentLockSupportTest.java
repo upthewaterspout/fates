@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.Callable;
 
+import com.github.upthewaterspout.fates.core.threading.instrument.agent.FatesMethodEntryExitFilter;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithPark;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithParkNanos;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithParkUntil;
@@ -37,7 +38,7 @@ public class InstrumentLockSupportTest extends InstrumentationTest {
   @Test
   public void callsToParkAreReplaced() throws Exception {
     doNothing().when(hook).replacePark(any(), any());
-    AsmTransformer transformer = new AsmTransformer();
+    AsmTransformer transformer = new AsmTransformer(new FatesMethodEntryExitFilter());
     String className = ClassWithPark.class.getCanonicalName();
     TransformingClassLoader loader = new TransformingClassLoader(transformer, className);
     Class<?> clazz = loader.loadClass(className);

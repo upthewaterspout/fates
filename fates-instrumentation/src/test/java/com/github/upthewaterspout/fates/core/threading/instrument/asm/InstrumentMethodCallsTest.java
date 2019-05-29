@@ -21,10 +21,16 @@ import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.Callable;
 
+import com.github.upthewaterspout.fates.core.threading.instrument.agent.FatesMethodEntryExitFilter;
 import com.github.upthewaterspout.fates.core.threading.instrument.asm.instrumented.ClassWithMethodCall;
 import org.junit.Test;
 
 public class InstrumentMethodCallsTest extends InstrumentationTest {
+
+  @Override
+  protected MethodEntryExitFilter getMethodEntryExitFilter() {
+    return new FatesMethodEntryExitFilter(ClassWithMethodCall.class.getName());
+  }
 
   @Test
   public void methodCallsAreInstrumented() throws Exception {

@@ -25,6 +25,6 @@ public class DaemonRunnerIntegrationTest {
 
   @Test
   public void executeShouldHaveAgentEnabled() throws Throwable {
-    assertEquals(true, DaemonRunnerWithAgent.execute(ExecutionEventSingleton::isAvailable));
+    assertEquals(true, DaemonRunnerWithAgent.execute(ExecutionEventSingleton::isAvailable, ""));
   }
 }

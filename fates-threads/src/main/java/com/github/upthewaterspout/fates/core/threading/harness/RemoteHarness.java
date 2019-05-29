@@ -17,6 +17,7 @@
 package com.github.upthewaterspout.fates.core.threading.harness;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.github.upthewaterspout.fates.core.states.Fates;
 import com.github.upthewaterspout.fates.core.threading.ThreadFates;
@@ -25,9 +26,10 @@ import com.github.upthewaterspout.fates.core.threading.daemon.DaemonRunnerWithAg
 public class RemoteHarness implements  Harness {
   public void runTest(List<Class<?>> atomicClasses, Fates fates,
                              ThreadFates.MultiThreadedTest runnable) throws Throwable {
+    String agentArgs = atomicClasses.stream().map(Class::getName).collect(Collectors.joining(","));
     DaemonRunnerWithAgent.execute(() -> {
       new LocalHarness().runTest(atomicClasses, fates, runnable);
       return null;
-    });
+    }, agentArgs);
   }
 }

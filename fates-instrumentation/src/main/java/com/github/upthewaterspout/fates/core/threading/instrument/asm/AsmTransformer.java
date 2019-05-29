@@ -31,8 +31,10 @@ import org.objectweb.asm.util.CheckClassAdapter;
  */
 public class AsmTransformer implements ClassFileTransformer {
 
+  private final MethodEntryExitFilter methodFilter;
 
-  public AsmTransformer() {
+  public AsmTransformer(MethodEntryExitFilter methodFilter) {
+    this.methodFilter = methodFilter;
   }
 
   @Override
@@ -55,7 +57,7 @@ public class AsmTransformer implements ClassFileTransformer {
       transformingVisitor = new InstrumentJoin(transformingVisitor);
       transformingVisitor = new InstrumentThreadInterrupt(transformingVisitor);
       transformingVisitor = new InstrumentFieldAccess(transformingVisitor);
-      transformingVisitor = new InstrumentMethodCalls(transformingVisitor);
+      transformingVisitor = new InstrumentMethodCalls(transformingVisitor, methodFilter);
       transformingVisitor = new InstrumentNewObject(transformingVisitor);
       reader.accept(transformingVisitor, ClassReader.EXPAND_FRAMES);
       byte[] result =  outputWriter.toByteArray();

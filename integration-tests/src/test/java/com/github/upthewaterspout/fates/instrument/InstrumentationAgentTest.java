@@ -200,7 +200,7 @@ public class InstrumentationAgentTest implements Serializable {
         after();
       }
       return null;
-    });
+    }, "");
   }
 
   @Test
@@ -218,7 +218,7 @@ public class InstrumentationAgentTest implements Serializable {
         after();
       }
       return null;
-    });
+    }, "");
   }
 
   @Test
@@ -236,6 +236,6 @@ public class InstrumentationAgentTest implements Serializable {
       } finally {
         after();
       }
-    });
+    },"");
   }
 }

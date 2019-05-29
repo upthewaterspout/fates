@@ -16,18 +16,13 @@
 
 package com.github.upthewaterspout.fates.core.threading.harness;
 
-import java.lang.reflect.Field;
-import java.net.InetAddress;
-import java.net.URLClassLoader;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.util.Arrays;
+import static com.github.upthewaterspout.fates.core.threading.instrument.agent.FatesMethodEntryExitFilter.DEFAULT_ATOMIC_CLASS_NAMES;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.upthewaterspout.fates.core.states.Decider;
-import com.github.upthewaterspout.fates.core.states.ExplorerSupplier;
 import com.github.upthewaterspout.fates.core.states.Fates;
 import com.github.upthewaterspout.fates.core.states.RepeatedTest;
 import com.github.upthewaterspout.fates.core.threading.ThreadFates;
@@ -41,28 +36,18 @@ import com.github.upthewaterspout.fates.core.threading.instrument.ExecutionEvent
 import com.github.upthewaterspout.fates.core.threading.scheduler.ThreadSchedulingListener;
 
 public class LocalHarness implements Harness {
-  private static final List<Class<?>> DEFAULT_PUBLIC_ATOMIC_CLASSES = Arrays.asList(
-      SecurityManager.class, System.class, AccessControlContext.class, AccessController.class,
-      Class.class, ClassLoader.class, URLClassLoader.class, Field.class,
-      Integer.class, Long.class, Character.class, Short.class, Byte.class, Boolean.class, Float.class, Double.class, String.class,
-      InetAddress.class, ThreadGroup.class);
-
-  private static final List<String> DEFAULT_INTERNAL_ATOMIC_CLASSES = Arrays.asList("java.lang.invoke.MethodHandleNatives", "sun.instrument.InstrumentationImpl");
-
-  public static final List<String> DEFAULT_ATOMIC_CLASS_NAMES = Stream.concat(DEFAULT_INTERNAL_ATOMIC_CLASSES.stream(), DEFAULT_PUBLIC_ATOMIC_CLASSES.stream().map(Class::getName)).collect(
-      Collectors.toList());
-
 
 
   @Override
   public void runTest(List<Class<?>> atomicClasses, Fates fates,
                       ThreadFates.MultiThreadedTest runnable) throws Exception {
 
-    for(int i =0; i < 20; i++) {
-      runnable.run();
-    }
+//    for(int i =0; i < 20; i++) {
+//      runnable.run();
+//    }
 
-    List<String> atomicClassNames = Stream.concat(DEFAULT_ATOMIC_CLASS_NAMES.stream(), atomicClasses.stream().map(Class::getName)).collect(
+    List<String> atomicClassNames = Stream.concat(
+        DEFAULT_ATOMIC_CLASS_NAMES.stream(), atomicClasses.stream().map(Class::getName)).collect(
         Collectors.toList());
     //Use the state exploration harness to explore the possible thread orderings
     fates.explore(instrumentTest(atomicClassNames, runnable));
